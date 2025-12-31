@@ -1,5 +1,5 @@
 import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
-import { CreditCard as Edit3, Save, Grid3x3 as Grid3X3, ZoomIn, ZoomOut, RotateCcw, X, Users, Move} from 'lucide-react';
+import { CreditCard as Edit3, Save, Grid3x3 as Grid3X3, ZoomIn, ZoomOut, RotateCcw, X, Users, Move } from 'lucide-react';
 import { cn, formatInvoiceTime } from '../lib/utils';
 import { Table, updateTableLayout } from '../lib/table-api';
 import { getTableOrder, POSInvoice } from '../lib/order-api';
@@ -48,6 +48,7 @@ const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid, onRef
         y,
         table_shape: local.table_shape ?? table.table_shape,
         no_of_seats: local.no_of_seats ?? table.no_of_seats,
+        angle: local.angle ?? table.angle ?? 0,
       };
     });
   }, [tables, localLayouts]);
@@ -189,6 +190,7 @@ const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid, onRef
       layout_y: changes.layout_y ?? table.y,
       table_shape: changes.table_shape ?? table.table_shape,
       no_of_seats: changes.no_of_seats ?? table.no_of_seats,
+      angle: changes.angle ?? table.angle ?? 0,
       minimum_seating: table.minimum_seating // preserve existing if not changing
     };
     return updateTableLayout(tableName, payload);
@@ -282,6 +284,7 @@ const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid, onRef
       top: table.y,
       width: dimensions.width,
       height: dimensions.height,
+      transform: `rotate(${table.angle || 0}deg)`,
     };
 
     const shapeLower = table.table_shape?.toLowerCase();
@@ -397,6 +400,23 @@ const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid, onRef
     }));
 
     updateTableLayout(selectedTable, { table_shape: shape as any })
+      .catch(console.error);
+  }
+
+  const handleAngleChange = (angleStr: string) => {
+    if (!selectedTable) return;
+    const angle = parseFloat(angleStr);
+    if (isNaN(angle)) return;
+
+    setLocalLayouts(prev => ({
+      ...prev,
+      [selectedTable]: {
+        ...(prev[selectedTable] || {}),
+        angle: angle % 360
+      }
+    }));
+
+    updateTableLayout(selectedTable, { angle: angle % 360 })
       .catch(console.error);
   }
 
@@ -597,6 +617,25 @@ const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid, onRef
             </div>
 
             {/* Position Information */}
+            <div className="pt-3 border-t border-gray-200">
+              <label className="block text-sm font-medium mb-2">Rotation (Degrees)</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  value={Math.round(selectedTableData.angle || 0)}
+                  onChange={(e) => handleAngleChange(e.target.value)}
+                  disabled={!isEditMode}
+                  className={cn(
+                    "w-full px-3 py-2 border rounded-md text-sm",
+                    isEditMode
+                      ? "border-gray-300 bg-white"
+                      : "border-gray-200 bg-gray-50 cursor-not-allowed"
+                  )}
+                />
+                <div className="text-xs text-gray-500 w-8 text-right">deg</div>
+              </div>
+            </div>
+
             <div className="pt-3 border-t border-gray-200">
               <label className="block text-sm font-medium mb-2">Position</label>
               <div className="grid grid-cols-2 gap-2 text-sm">

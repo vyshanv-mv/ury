@@ -17,6 +17,7 @@ export interface Table {
   layout_x?: number;
   layout_y?: number;
   minimum_seating?: number;
+  angle?: number;
 }
 
 export async function getRestaurantMenu(posProfile: string, room?: string | null) {
@@ -45,7 +46,7 @@ export async function getTables(room: string): Promise<Table[]> {
   const [apiRes, dbRes] = await Promise.all([
     call.get('ury.ury_pos.api.getTable', { room }),
     db.getDocList(DOCTYPES.URY_TABLE, {
-      fields: ['name', 'layout_x', 'layout_y', 'minimum_seating', 'table_shape', 'no_of_seats'],
+      fields: ['name', 'layout_x', 'layout_y', 'minimum_seating', 'table_shape', 'no_of_seats', 'angle'],
       filters: [['restaurant_room', '=', room]],
       limit: 1000,
       asDict: true
@@ -66,7 +67,8 @@ export async function getTables(room: string): Promise<Table[]> {
       minimum_seating: dbT?.minimum_seating,
       // Ensure we have the latest shape/seats from DB as well
       table_shape: dbT?.table_shape || t.table_shape,
-      no_of_seats: dbT?.no_of_seats || t.no_of_seats
+      no_of_seats: dbT?.no_of_seats || t.no_of_seats,
+      angle: dbT?.angle ?? 0
     };
   });
 }
