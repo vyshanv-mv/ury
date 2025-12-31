@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, Eye, Layout, Loader2, Printer, Square, Users } from 'lucide-react';
-import { cn } from '../lib/utils';
+import { cn, formatInvoiceTime } from '../lib/utils';
 import { usePOSStore } from '../store/pos-store';
 import { getRooms, getTables, getTableCount, type Room, type Table } from '../lib/table-api';
 import { Spinner } from '../components/ui/spinner';
@@ -204,33 +204,6 @@ const TableView = () => {
     }
   };
 
-  const formatInvoiceTime = (timestamp: string | null) => {
-    if (!timestamp) return 'No bill activity yet';
-
-    const parsedDate = new Date(timestamp);
-    if (!Number.isNaN(parsedDate.getTime())) {
-      return parsedDate.toLocaleTimeString(undefined, { hour: 'numeric', minute: 'numeric' });
-    }
-
-    const timeOnlyMatch = timestamp.match(/^(\d{1,2}):(\d{2}):(\d{2})(?:\.(\d+))?$/);
-    if (timeOnlyMatch) {
-      const [, hours, minutes, seconds] = timeOnlyMatch;
-      const date = new Date();
-      date.setHours(Number(hours), Number(minutes), Number(seconds), 0);
-      const formatted = date.toLocaleTimeString(undefined, {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false,
-      });
-      if (/^\d{1,2}:\d{2}$/.test(formatted)) {
-        return formatted;
-      }
-      return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
-    }
-
-    return timestamp;
-  };
-
   const tablesToDisplay = useMemo(() => sortTables(tables), [tables]);
 
   const hasRooms = rooms.length > 0;
@@ -256,6 +229,9 @@ const TableView = () => {
   const [isLayoutView, setIsLayoutView] = useState(false);
 
   const handleLayoutView = () => {
+    if (selectedRoom) {
+      loadTables(selectedRoom, { useCache: false });
+    }
     setIsLayoutView(true);
   };
 

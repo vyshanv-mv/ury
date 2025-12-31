@@ -1,91 +1,57 @@
-import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { CreditCard as Edit3, Save, Grid3x3 as Grid3X3, ZoomIn, ZoomOut, RotateCcw, X, Users, Move } from 'lucide-react';
-import { cn } from '../lib/utils';
-import { Table } from '../lib/table-api';
+import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
+import { CreditCard as Edit3, Save, Grid3x3 as Grid3X3, ZoomIn, ZoomOut, RotateCcw, X, Users, Move, Plus, Trash2 } from 'lucide-react';
+import { cn, formatInvoiceTime } from '../lib/utils';
+import { Table, updateTableLayout, createTable, deleteTable } from '../lib/table-api';
+import { getTableOrder, POSInvoice } from '../lib/order-api';
 import { Button } from './ui';
+import { showToast } from './ui/toast';
 
-interface SavedTablePosition {
-  x: number;
-  y: number;
-  shape?: 'Circle' | 'Square' | 'Rectangle';
-  capacity?: number;
-}
 
-interface SavedRoomLayout {
-  [tableName: string]: SavedTablePosition;
-}
-
-interface SavedLayouts {
-  [roomName: string]: SavedRoomLayout;
-}
 
 interface Props {
   selectedRoom: string;
   tables: Table[];
   onBackToGrid: () => void;
+  onRefresh?: () => void; // Add refresh callback
 }
 
-const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid }) => {
+const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid, onRefresh }) => {
   const [isEditMode, setIsEditMode] = useState(false);
 
-  // Store positions in localStorage
-  const [savedLayouts, setSavedLayouts] = useState<SavedLayouts>(() => {
-    try {
-      async function saveLayout(table) {
-        await fetch(`/api/resource/URY Table/${table.name}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Frappe-CSRF-Token": frappe.csrf_token
-          },
-          body: JSON.stringify({
-            layout_x: table.x,
-            layout_y: table.y,
-            table_shape: table.shape,
-            no_of_seats: table.capacity,
-            minimum_seating: table.minimumSeating
-          })
-        });
-      }
-
-    } catch {
-      return {};
-    }
-  });
-
+  // Local state for optimistic updates
+  const [localLayouts, setLocalLayouts] = useState<Record<string, Partial<Table>>>({});
   const [draggedTable, setDraggedTable] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
+  const [selectedTableOrder, setSelectedTableOrder] = useState<POSInvoice | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(1);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
 
-  // Save to local storage whenever layouts change
-  useEffect(() => {
-    localStorage.setItem('ury-table-layouts', JSON.stringify(savedLayouts));
-  }, [savedLayouts]);
+  // Save to local storage effect removed
+
 
   // Merge props.tables with saved positions
+  // Merge props.tables with local optimistic positions
   const tablesWithPosition = useMemo(() => {
-    const roomLayout = savedLayouts[selectedRoom] || {};
-
     return tables.map((table, index) => {
-      const savedPos = roomLayout[table.name];
-      // If no saved pos, default to a grid layout
-      const x = savedPos?.x ?? (100 + (index % 5) * 150);
-      const y = savedPos?.y ?? (100 + Math.floor(index / 5) * 150);
+      const local = localLayouts[table.name] || {};
+
+      // Use local overrides, then backend fields, then grid defaults
+      const x = local.custom_layout_x ?? table.custom_layout_x ?? (100 + (index % 5) * 150);
+      const y = local.custom_layout_y ?? table.custom_layout_y ?? (100 + Math.floor(index / 5) * 150);
 
       return {
         ...table,
         x,
         y,
-        table_shape: savedPos?.shape || table.table_shape,
-        no_of_seats: savedPos?.capacity || table.no_of_seats,
+        table_shape: local.table_shape ?? table.table_shape,
+        no_of_seats: local.no_of_seats ?? table.no_of_seats,
       };
     });
-  }, [tables, savedLayouts, selectedRoom]);
+  }, [tables, localLayouts]);
 
   // Calculate table dimensions based on capacity and shape
   const getTableDimensions = (shape: string, capacity: number = 4) => {
@@ -105,30 +71,81 @@ const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid }) => 
     }
   };
 
-  // Zoom functionality
-  const handleZoomIn = () => setZoom(prev => Math.min(3, prev + 0.2));
-  const handleZoomOut = () => setZoom(prev => Math.max(0.3, prev - 0.2));
+  // Helper to zoom around a specific point (screen coordinates)
+  const zoomToPoint = useCallback((newZoom: number, pivotX: number, pivotY: number) => {
+    // 1. Calculate the point in World coordinates before zoom
+    // worldX = (screenX - panX) / oldZoom
+    const worldPointX = (pivotX - panOffset.x) / zoom;
+    const worldPointY = (pivotY - panOffset.y) / zoom;
+
+    // 2. Update Zoom
+    const clampedZoom = Math.max(0.3, Math.min(3, newZoom));
+    setZoom(clampedZoom);
+
+    // 3. Calculate new Pan to keep the World point at the same Screen position
+    // screenX = newPanX + worldX * newZoom
+    // => newPanX = screenX - worldX * newZoom
+    setPanOffset({
+      x: pivotX - worldPointX * clampedZoom,
+      y: pivotY - worldPointY * clampedZoom
+    });
+  }, [zoom, panOffset]);
+
+  // Zoom functionality (buttons zoom to center)
+  const handleZoomIn = () => {
+    if (!canvasRef.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    zoomToPoint(zoom + 0.2, centerX, centerY);
+  };
+
+  const handleZoomOut = () => {
+    if (!canvasRef.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    zoomToPoint(zoom - 0.2, centerX, centerY);
+  };
+
   const handleResetZoom = () => {
     setZoom(1);
     setPanOffset({ x: 0, y: 0 });
   };
 
-  // Mouse wheel zoom
-  const handleWheel = (e: React.WheelEvent) => {
-    if (e.ctrlKey || e.metaKey) {
-      e.preventDefault();
-      const delta = e.deltaY > 0 ? -0.1 : 0.1;
-      setZoom(prev => Math.max(0.3, Math.min(3, prev + delta)));
+  // Mouse wheel zoom (zooms to cursor)
+  const handleWheel = useCallback((e: WheelEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!canvasRef.current) return;
+    const rect = canvasRef.current.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    zoomToPoint(zoom + delta, mouseX, mouseY);
+  }, [zoom, zoomToPoint]);
+
+  // Use ref to attach non-passive listener for proper preventDefault
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      canvas.addEventListener('wheel', handleWheel, { passive: false });
     }
-  };
+    return () => {
+      if (canvas) {
+        canvas.removeEventListener('wheel', handleWheel);
+      }
+    };
+  }, [handleWheel]);
 
   // Pan functionality
   const handleCanvasMouseDown = (e: React.MouseEvent) => {
-    // Only pan if clicking continuously on background or if not clicking a table
-    if (e.target === canvasRef.current) {
-      setIsPanning(true);
-      setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
-    }
+    // Start panning if we clicked on the background (wrapper or outer container)
+    // Tables stop propagation, so if we get here, it's safe to pan
+    setIsPanning(true);
+    setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
   };
 
   const handleCanvasMouseMove = (e: React.MouseEvent) => {
@@ -154,21 +171,44 @@ const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid }) => 
     const newY = mouseY - dragOffset.y;
 
     // Update local state for immediate feedback
-    setSavedLayouts(prev => ({
+    setLocalLayouts(prev => ({
       ...prev,
-      [selectedRoom]: {
-        ...(prev[selectedRoom] || {}),
-        [draggedTable]: {
-          x: newX,
-          y: newY,
-          shape: prev[selectedRoom]?.[draggedTable]?.shape,
-          capacity: prev[selectedRoom]?.[draggedTable]?.capacity,
-        }
+      [draggedTable]: {
+        ...(prev[draggedTable] || {}),
+        custom_layout_x: newX,
+        custom_layout_y: newY,
       }
     }));
   };
 
+  const persistTableUpdate = (tableName: string, changes: Partial<Table>) => {
+    const table = tablesWithPosition.find(t => t.name === tableName);
+    if (!table) return Promise.reject("Table not found");
+
+    // AND ensure we fallback to backend values for undefined fields.
+    const payload = {
+      custom_layout_x: changes.custom_layout_x ?? table.x,
+      custom_layout_y: changes.custom_layout_y ?? table.y,
+      table_shape: changes.table_shape ?? table.table_shape,
+      no_of_seats: changes.no_of_seats ?? table.no_of_seats,
+      minimum_seating: table.minimum_seating // preserve existing if not changing
+    };
+    return updateTableLayout(tableName, payload);
+  };
+
   const handleCanvasMouseUp = () => {
+    if (draggedTable && isEditMode) {
+      const table = tablesWithPosition.find(t => t.name === draggedTable);
+      if (table) {
+        // We only persist if there was a change, but here we just persist on drop
+        // table.x and table.y are already updated via local state during drag
+        persistTableUpdate(table.name, {
+          custom_layout_x: table.x,
+          custom_layout_y: table.y
+        }).catch(err => console.error("Failed to save layout", err));
+      }
+    }
+
     setIsPanning(false);
     setDraggedTable(null);
     setDragOffset({ x: 0, y: 0 });
@@ -184,6 +224,14 @@ const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid }) => 
     e.stopPropagation();
 
     setSelectedTable(table.name);
+
+    if (table.occupied) {
+      getTableOrder(table.name).then(res => {
+        setSelectedTableOrder(res.message);
+      }).catch(console.error);
+    } else {
+      setSelectedTableOrder(null);
+    }
 
     if (!isEditMode) return;
 
@@ -208,21 +256,16 @@ const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid }) => 
     const currentIndex = shapes.findIndex(s => s.toLowerCase() === currentShape.toLowerCase());
     const nextShape = shapes[(currentIndex + 1) % shapes.length];
 
-    setSavedLayouts(prev => {
-      const currentTableSettings = prev[selectedRoom]?.[table.name] || {};
-      return {
-        ...prev,
-        [selectedRoom]: {
-          ...(prev[selectedRoom] || {}),
-          [table.name]: {
-            x: table.x,
-            y: table.y,
-            shape: nextShape,
-            capacity: currentTableSettings.capacity,
-          }
-        }
+    setLocalLayouts(prev => ({
+      ...prev,
+      [table.name]: {
+        ...(prev[table.name] || {}),
+        table_shape: nextShape
       }
-    });
+    }));
+
+    updateTableLayout(table.name, { table_shape: nextShape })
+      .catch(console.error);
   };
 
 
@@ -284,6 +327,7 @@ const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid }) => 
     );
   };
 
+  // Helper to format invoice time (consistent with Table.tsx) removed - imported from utils
   const handleCapacityChange = (capacityStr: string) => {
     if (!selectedTable) return;
     const capacity = parseInt(capacityStr);
@@ -292,43 +336,71 @@ const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid }) => 
     const currentTable = tablesWithPosition.find(t => t.name === selectedTable);
     if (!currentTable) return;
 
-    setSavedLayouts(prev => {
-      const currentTableSettings = prev[selectedRoom]?.[selectedTable] || {};
-      return {
-        ...prev,
-        [selectedRoom]: {
-          ...(prev[selectedRoom] || {}),
-          [selectedTable]: {
-            x: currentTable.x,
-            y: currentTable.y,
-            shape: currentTableSettings.shape, // preserve existing shape setting
-            capacity: capacity
-          }
-        }
+    setLocalLayouts(prev => ({
+      ...prev,
+      [selectedTable]: {
+        ...(prev[selectedTable] || {}),
+        no_of_seats: capacity
       }
-    });
+    }));
+
+    updateTableLayout(selectedTable, { no_of_seats: capacity })
+      .catch(console.error);
   }
+
+  const handleAddTable = async () => {
+    const tableName = prompt("Enter table name:");
+    if (!tableName) return;
+
+    try {
+      await createTable({
+        restaurant_room: selectedRoom,
+        table_shape: 'Rectangle',
+        no_of_seats: 4,
+        custom_layout_x: 100 + Math.abs(panOffset.x), // Place near current view
+        custom_layout_y: 100 + Math.abs(panOffset.y),
+        is_take_away: 0,
+        occupied: 0,
+        name: tableName
+      });
+      showToast.success('Table created');
+      onRefresh?.();
+    } catch (error) {
+      console.error(error);
+      showToast.error('Failed to create table');
+    }
+  };
+
+  const handleDeleteTable = async () => {
+    if (!selectedTable) return;
+    if (!confirm(`Are you sure you want to delete ${selectedTable}?`)) return;
+
+    try {
+      await deleteTable(selectedTable);
+      showToast.success('Table deleted');
+      setSelectedTable(null);
+      onRefresh?.();
+    } catch (error) {
+      console.error(error);
+      showToast.error('Failed to delete table');
+    }
+  };
 
   const handleDropdownShapeChange = (shape: string) => {
     if (!selectedTable) return;
     const currentTable = tablesWithPosition.find(t => t.name === selectedTable);
     if (!currentTable) return;
 
-    setSavedLayouts(prev => {
-      const currentTableSettings = prev[selectedRoom]?.[selectedTable] || {};
-      return {
-        ...prev,
-        [selectedRoom]: {
-          ...(prev[selectedRoom] || {}),
-          [selectedTable]: {
-            x: currentTable.x,
-            y: currentTable.y,
-            shape: shape as any,
-            capacity: currentTableSettings.capacity
-          }
-        }
+    setLocalLayouts(prev => ({
+      ...prev,
+      [selectedTable]: {
+        ...(prev[selectedTable] || {}),
+        table_shape: shape as any
       }
-    });
+    }));
+
+    updateTableLayout(selectedTable, { table_shape: shape as any })
+      .catch(console.error);
   }
 
   const selectedTableData = tablesWithPosition.find(t => t.name === selectedTable);
@@ -349,7 +421,12 @@ const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid }) => 
             </Button>
             <h2 className="text-lg font-semibold">{selectedRoom} <span className="text-gray-400 mx-2">|</span> Layout</h2>
           </div>
-          {/* Add Table button removed as unsupported by backend */}
+          {/* {isEditMode && (
+            <Button onClick={handleAddTable} className="flex items-center gap-2">
+              <Plus className="w-4 h-4" />
+              Add Table
+            </Button>
+          )} */}
         </div>
       </div>
 
@@ -409,35 +486,38 @@ const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid }) => 
             </div>
           ) : (
             <div className="bg-white/80 backdrop-blur border border-gray-200 rounded-lg p-2 text-xs text-gray-500 shadow-sm">
-              Use Ctrl+Scroll to zoom • Drag background to pan
+              Use Scroll to zoom • Drag background to pan
             </div>
           )}
         </div>
 
         <div
           ref={canvasRef}
-          className="w-full h-full relative bg-white overflow-hidden"
-          style={{
-            cursor: isPanning ? 'grabbing' : isEditMode ? 'default' : 'grab',
-            backgroundImage: `
-              linear-gradient(to right, #e5e7eb 1px, transparent 1px),
-              linear-gradient(to bottom, #e5e7eb 1px, transparent 1px)
-            `,
-            backgroundSize: `${20 * zoom}px ${20 * zoom}px`,
-            backgroundPosition: `${panOffset.x}px ${panOffset.y}px`,
-          }}
-          onWheel={handleWheel}
+          className="w-full h-full relative bg-gray-100 overflow-hidden"
+          // Wheel listener attached via ref in useEffect for passive: false support
           onMouseDown={handleCanvasMouseDown}
           onMouseMove={handleCanvasMouseMove}
           onMouseUp={handleCanvasMouseUp}
           onMouseLeave={handleCanvasMouseUp}
+          style={{
+            cursor: isPanning ? 'grabbing' : isEditMode ? 'default' : 'grab'
+          }}
         >
-          {/* Tables Container with Transform */}
+          {/* World Container - applies Zoom and Pan to everything inside */}
           <div
             style={{
-              transform: `translate(${panOffset.x}px, ${panOffset.y}px)`,
-              transformOrigin: 'top left'
+              transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoom})`,
+              transformOrigin: '0 0',
+              width: '100%',
+              height: '100%',
+              backgroundImage: `
+                linear-gradient(to right, #e5e7eb 1px, transparent 1px),
+                linear-gradient(to bottom, #e5e7eb 1px, transparent 1px)
+              `,
+              backgroundSize: '20px 20px', // Fixed size, scale transform handles the zooming
+              backgroundPosition: '0 0'
             }}
+            className="w-full h-full"
           >
             {tablesWithPosition.map(table => (
               <TableShape key={table.name} table={table} />
@@ -555,14 +635,33 @@ const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid }) => 
                 <label className="block text-sm font-medium mb-2">Current Bill</label>
                 <div className="bg-blue-50 p-3 rounded-md text-sm">
                   <div className="flex justify-between mb-1">
-                    <span>Active since:</span>
-                    <span className="font-semibold">
-                      {new Date(selectedTableData.latest_invoice_time).toLocaleTimeString()}
-                    </span>
+                    <span>Started at:</span>
+                    <span>{formatInvoiceTime(selectedTableData.latest_invoice_time)}</span>
                   </div>
+                  {selectedTableOrder && (
+                    <div className="flex justify-between items-center pt-2 mt-2 border-t border-blue-200">
+                      <span>Total Amount:</span>
+                      <span className="font-bold text-lg text-blue-800">
+                        {selectedTableOrder.grand_total.toFixed(2)}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
+
+            {/* {isEditMode && (
+              <div className="pt-4 mt-2 border-t border-gray-200">
+                <Button
+                  onClick={handleDeleteTable}
+                  variant="destructive"
+                  className="w-full flex items-center justify-center gap-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete Table
+                </Button>
+              </div>
+            )} */}
           </div>
         </div>
       )}
