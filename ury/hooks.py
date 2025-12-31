@@ -250,6 +250,12 @@ fixtures = [
                 "name",
                 "in",
                 {
+                    "URY Table-custom_layout_position",
+                    "URY Table-custom_layout_x",
+                    "URY Table-custom_layout_width",
+                    "URY Table-custom_column_break_0l7kg",
+                    "URY Table-custom_layout_y",
+                    "URY Table-custom_layout_height",
                     "Customer-mobile_number",
                     "POS Invoice-mobile_number",
                     "POS Invoice-order_info",
