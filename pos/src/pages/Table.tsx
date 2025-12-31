@@ -250,42 +250,44 @@ const TableView = () => {
       <div className="p-4 bg-white border-b border-gray-200">
         <div className="max-w-screen-xl mx-auto">
           <div className="flex flex-col gap-3">
-            <div className="flex flex-wrap gap-2">
-              {loadingRooms && (
-                <div className="flex-1 min-w-[160px]">
-                  <Spinner message="Loading rooms..." />
-                </div>
-              )}
+            <div className="flex justify-between items-start gap-4">
+              <div className="flex flex-wrap gap-2">
+                {loadingRooms && (
+                  <div className="flex-1 min-w-[160px]">
+                    <Spinner message="Loading rooms..." />
+                  </div>
+                )}
 
-              {!loadingRooms && !hasRooms && (
-                <div className="flex items-center gap-2 text-gray-500 text-sm">
-                  <AlertTriangle className="w-4 h-4" />
-                  No rooms found for this branch
-                </div>
-              )}
+                {!loadingRooms && !hasRooms && (
+                  <div className="flex items-center gap-2 text-gray-500 text-sm">
+                    <AlertTriangle className="w-4 h-4" />
+                    No rooms found for this branch
+                  </div>
+                )}
 
-              {rooms.map(room => (
-                <Button
-                  key={room.name}
-                  variant="tab"
-                  data-selected={selectedRoom === room.name}
-                  onClick={() => handleRoomChange(room.name)}
-                  className="h-fit"
-                >
-                  {room.name}
-                  {typeof roomCounts[room.name] === 'number' ? (
-                    <Badge variant="outline" className="ml-2 bg-white/60">
-                      {roomCounts[room.name]}
-                    </Badge>
-                  ) : loadingRoomCounts ? (
-                    <Badge variant="outline" className="ml-2 bg-white/60">
-                      --
-                    </Badge>
-                  ) : null}
-                </Button>
-              ))}
+                {rooms.map(room => (
+                  <Button
+                    key={room.name}
+                    variant="tab"
+                    data-selected={selectedRoom === room.name}
+                    onClick={() => handleRoomChange(room.name)}
+                    className="h-fit"
+                  >
+                    {room.name}
+                    {typeof roomCounts[room.name] === 'number' ? (
+                      <Badge variant="outline" className="ml-2 bg-white/60">
+                        {roomCounts[room.name]}
+                      </Badge>
+                    ) : loadingRoomCounts ? (
+                      <Badge variant="outline" className="ml-2 bg-white/60">
+                        --
+                      </Badge>
+                    ) : null}
+                  </Button>
+                ))}
+              </div>
 
-              <div className="flex justify-end">
+              <div className="flex-shrink-0">
                 <Button
                   variant="tab"
                   className="flex items-center gap-2 text-sm"
