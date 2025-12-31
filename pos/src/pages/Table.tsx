@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type MouseEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertTriangle, Eye, Loader2, Printer, Square, Users } from 'lucide-react';
+import { AlertTriangle, Eye, Layout, Loader2, Printer, Square, Users } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { usePOSStore } from '../store/pos-store';
 import { getRooms, getTables, getTableCount, type Room, type Table } from '../lib/table-api';
@@ -12,6 +12,8 @@ import { TableShapeIcon } from '../components/TableShapeIcon';
 import { getTableOrder } from '../lib/order-api';
 import { printOrder } from '../lib/print';
 import { showToast } from '../components/ui/toast';
+
+import LayoutView from '../components/LayoutView';
 
 const sortTables = (tables: Table[]) => [...tables].sort((a, b) => a.name.localeCompare(b.name));
 
@@ -251,6 +253,22 @@ const TableView = () => {
     }
   };
 
+  const [isLayoutView, setIsLayoutView] = useState(false);
+
+  const handleLayoutView = () => {
+    setIsLayoutView(true);
+  };
+
+  if (isLayoutView && selectedRoom) {
+    return (
+      <LayoutView
+        selectedRoom={selectedRoom}
+        tables={tablesToDisplay}
+        onBackToGrid={() => setIsLayoutView(false)}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col h-full">
       <div className="p-4 bg-white border-b border-gray-200">
@@ -290,18 +308,18 @@ const TableView = () => {
                   ) : null}
                 </Button>
               ))}
-            </div>
 
-            {/* <div className="flex justify-end">
-              <Button
-                variant="ghost"
-                className="flex items-center gap-2 text-sm"
-                onClick={() => console.log('Layout view coming soon')}
-              >
-                <Layout className="w-4 h-4" />
-                Layout view
-              </Button>
-            </div> */}
+              <div className="flex justify-end">
+                <Button
+                  variant="tab"
+                  className="flex items-center gap-2 text-sm"
+                  onClick={() => handleLayoutView()}
+                >
+                  <Layout className="w-4 h-4" />
+                  Layout view
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -343,42 +361,42 @@ const TableView = () => {
                     )}
                   >
                     <div>
-                        <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
-                            <TableShapeIcon shape={table.table_shape || 'Rectangle'} />
-                            <span className="font-semibold text-lg text-gray-900">{table.name}</span>
+                          <TableShapeIcon shape={table.table_shape || 'Rectangle'} />
+                          <span className="font-semibold text-lg text-gray-900">{table.name}</span>
                         </div>
                         <Badge variant={isOccupied ? 'warning' : 'success'}>
-                            {isOccupied ? 'Occupied' : 'Available'}
+                          {isOccupied ? 'Occupied' : 'Available'}
                         </Badge>
-                        </div>
+                      </div>
 
-                        <div className="space-y-2 text-sm text-gray-700">
+                      <div className="space-y-2 text-sm text-gray-700">
                         <div className="flex items-center justify-between">
-                            <span className="font-medium">Room</span>
-                            <span>{table.restaurant_room}</span>
+                          <span className="font-medium">Room</span>
+                          <span>{table.restaurant_room}</span>
                         </div>
                         {isOccupied && (
-                            <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between">
                             <span className="font-medium">Started at</span>
                             <span>{formatInvoiceTime(table.latest_invoice_time)}</span>
-                            </div>
+                          </div>
                         )}
                         {typeof table.no_of_seats === 'number' && (
-                            <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between">
                             <span className="font-medium">Seats</span>
                             <span className="flex items-center gap-1">
-                                <Users className="w-3 h-3" />
-                                {table.no_of_seats}
+                              <Users className="w-3 h-3" />
+                              {table.no_of_seats}
                             </span>
-                            </div>
+                          </div>
                         )}
                         {table.is_take_away === 1 && (
-                            <Badge variant="pending" className="mt-2">
+                          <Badge variant="pending" className="mt-2">
                             Take away
-                            </Badge>
+                          </Badge>
                         )}
-                        </div>
+                      </div>
                     </div>
 
                     {isOccupied ? (
