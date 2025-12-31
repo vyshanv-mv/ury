@@ -34,7 +34,6 @@ const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid, onRef
 
 
   // Merge props.tables with saved positions
-  // Merge props.tables with local optimistic positions
   const tablesWithPosition = useMemo(() => {
     return tables.map((table, index) => {
       const local = localLayouts[table.name] || {};
@@ -162,7 +161,6 @@ const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid, onRef
 
     const canvasRect = canvasRef.current.getBoundingClientRect();
 
-    // Calculate new position in canvas coordinates
     // We subtract panOffset and divide by zoom to get back to "world" coordinates
     const mouseX = (e.clientX - canvasRect.left - panOffset.x) / zoom;
     const mouseY = (e.clientY - canvasRect.top - panOffset.y) / zoom;
@@ -200,7 +198,6 @@ const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid, onRef
     if (draggedTable && isEditMode) {
       const table = tablesWithPosition.find(t => t.name === draggedTable);
       if (table) {
-        // We only persist if there was a change, but here we just persist on drop
         // table.x and table.y are already updated via local state during drag
         persistTableUpdate(table.name, {
           custom_layout_x: table.x,
@@ -348,43 +345,43 @@ const LayoutView: React.FC<Props> = ({ selectedRoom, tables, onBackToGrid, onRef
       .catch(console.error);
   }
 
-  const handleAddTable = async () => {
-    const tableName = prompt("Enter table name:");
-    if (!tableName) return;
+  // const handleAddTable = async () => {
+  //   const tableName = prompt("Enter table name:");
+  //   if (!tableName) return;
 
-    try {
-      await createTable({
-        restaurant_room: selectedRoom,
-        table_shape: 'Rectangle',
-        no_of_seats: 4,
-        custom_layout_x: 100 + Math.abs(panOffset.x), // Place near current view
-        custom_layout_y: 100 + Math.abs(panOffset.y),
-        is_take_away: 0,
-        occupied: 0,
-        name: tableName
-      });
-      showToast.success('Table created');
-      onRefresh?.();
-    } catch (error) {
-      console.error(error);
-      showToast.error('Failed to create table');
-    }
-  };
+  //   try {
+  //     await createTable({
+  //       restaurant_room: selectedRoom,
+  //       table_shape: 'Rectangle',
+  //       no_of_seats: 4,
+  //       custom_layout_x: 100 + Math.abs(panOffset.x), // Place near current view
+  //       custom_layout_y: 100 + Math.abs(panOffset.y),
+  //       is_take_away: 0,
+  //       occupied: 0,
+  //       name: tableName
+  //     });
+  //     showToast.success('Table created');
+  //     onRefresh?.();
+  //   } catch (error) {
+  //     console.error(error);
+  //     showToast.error('Failed to create table');
+  //   }
+  // };
 
-  const handleDeleteTable = async () => {
-    if (!selectedTable) return;
-    if (!confirm(`Are you sure you want to delete ${selectedTable}?`)) return;
+  // const handleDeleteTable = async () => {
+  //   if (!selectedTable) return;
+  //   if (!confirm(`Are you sure you want to delete ${selectedTable}?`)) return;
 
-    try {
-      await deleteTable(selectedTable);
-      showToast.success('Table deleted');
-      setSelectedTable(null);
-      onRefresh?.();
-    } catch (error) {
-      console.error(error);
-      showToast.error('Failed to delete table');
-    }
-  };
+  //   try {
+  //     await deleteTable(selectedTable);
+  //     showToast.success('Table deleted');
+  //     setSelectedTable(null);
+  //     onRefresh?.();
+  //   } catch (error) {
+  //     console.error(error);
+  //     showToast.error('Failed to delete table');
+  //   }
+  // };
 
   const handleDropdownShapeChange = (shape: string) => {
     if (!selectedTable) return;
