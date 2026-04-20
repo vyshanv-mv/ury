@@ -8,11 +8,11 @@ import { getCustomerGroups, getCustomerTerritories } from '../lib/customer-api';
 import { DEFAULT_ORDER_TYPE, OrderType } from '../data/order-types';
 import { getTableOrder, TableOrder } from '../lib/order-api';
 import { getPaymentModes } from '../lib/payment-api';
+import { call } from '../lib/frappe-sdk';
 
 // Constants
 const MAX_QUANTITY = 99;
 const MIN_QUANTITY = 0;
-const ITEMS_PER_PAGE = 10;
 
 // Custom error class for cart operations
 class CartError extends Error {
@@ -119,8 +119,10 @@ interface POSState {
   territories: string[];
   tableOrder: TableOrder | null;
   isInitializing: boolean;
+  needsOnboarding: boolean | null;
   orderComment: string;
 }
+
 
 interface POSStore extends POSState {
   fetchMenuItems: () => Promise<void>;
@@ -159,6 +161,7 @@ interface POSStore extends POSState {
   resetOrderState: () => void;
   setSelectedAggregator: (aggregator: Aggregator | null) => void;
   setOrderComment: (comment: string) => void;
+  setNeedsOnboarding: (val: boolean | null) => void;
 }
 
 const generateUniqueId = (item: OrderItem): string => {
@@ -201,25 +204,40 @@ export const usePOSStore = create<POSStore>((set, get) => ({
   currencySymbol: storage.getItem('currencySymbol') || null,
   tableOrder: null,
   isInitializing: true,
+  needsOnboarding: null,
   isUpdatingOrder: false,
   orderId: null,
   orderComment: '',
+
 
   initializeApp: async () => {
     try {
       set({ isInitializing: true, error: null });
       
+      // 1. First, check if setup is complete
+      const res = await call.get('ury.setup.api.check_setup_status');
+      const isComplete = !!res.message?.is_setup_complete;
+      
+      set({ needsOnboarding: !isComplete });
+
+      if (!isComplete) {
+        set({ isInitializing: false });
+        return;
+      }
+
+      // 2. If setup is complete, fetch the rest of the app data
       const [profileResult, menuResult, categoriesResult, paymentModesResult] = await Promise.allSettled([
         get().fetchPosProfile(),
         get().fetchMenuItems(),
         get().fetchCategories(),
-        get().fetchPaymentModes()
+        get().fetchPaymentModes(),
       ]);
 
       if (profileResult.status === 'rejected' || 
           menuResult.status === 'rejected' || 
           categoriesResult.status === 'rejected' ||
           paymentModesResult.status === 'rejected') {
+        
         set({ 
           error: 'Failed to initialize app. Please refresh the page.',
           isInitializing: false 
@@ -228,13 +246,17 @@ export const usePOSStore = create<POSStore>((set, get) => ({
       }
 
       set({ isInitializing: false });
+
     } catch (error) {
+      console.error('Initialization error:', error);
       set({ 
         error: 'Failed to initialize app. Please refresh the page.',
         isInitializing: false 
       });
     }
   },
+
+  setNeedsOnboarding: (val: boolean | null) => set({ needsOnboarding: val }),
 
   fetchPosProfile: async () => {
     try {
