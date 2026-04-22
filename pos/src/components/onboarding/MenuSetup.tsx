@@ -208,7 +208,7 @@ export const MenuSetup = ({ onNext, onBack }: {
   const filledItemCount = items.filter(i => i.item_name.trim() && i.price.trim()).length;
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-2xl mx-auto">
       <input
         type="file"
         ref={fileInputRef}

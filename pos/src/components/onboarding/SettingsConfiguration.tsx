@@ -7,23 +7,23 @@ import {
   Layout, 
   CreditCard, 
   GitBranch, 
-  Utensils, 
   Users, 
   ChevronRight,
   ArrowLeft,
   CheckCircle2,
   Trash2,
-  Plus
+  Plus,
+  Store
 } from 'lucide-react';
 
 const settingsModules = [
   { id: 'printer', title: 'Printer Setup', desc: 'Configure your receipt and kitchen printers', icon: Printer, color: 'text-primary', bg: 'bg-primary/5' },
   { id: 'rooms', title: 'URY Rooms', desc: 'Add and manage dining rooms or sections', icon: Bed, color: 'text-primary', bg: 'bg-primary/5' },
-  { id: 'tables', title: 'URY Tables', desc: 'Define table layout and capacity', icon: Layout, color: 'text-primary', bg: 'bg-primary/5' },
+  { id: 'tables', title: 'URY Tables', desc: 'Set up your restaurant table layout', icon: Layout, color: 'text-primary', bg: 'bg-primary/5' },
   { id: 'payment', title: 'Mode of Payment', desc: 'Configure the payment methods your restaurant accepts', icon: CreditCard, color: 'text-primary', bg: 'bg-primary/5' },
-  { id: 'branch', title: 'Branch', desc: 'Configure branch details and location', icon: GitBranch, color: 'text-primary', bg: 'bg-primary/5' },
-  { id: 'restaurant', title: 'Restaurant', desc: 'Main restaurant profile settings', icon: Utensils, color: 'text-primary', bg: 'bg-primary/5' },
-  { id: 'users', title: 'User Management', desc: 'Setup waiters, cashiers and admins', icon: Users, color: 'text-primary', bg: 'bg-primary/5' },
+  { id: 'branch', title: 'Branch', desc: 'Manage your restaurant branches and locations', icon: GitBranch, color: 'text-primary', bg: 'bg-primary/5' },
+  { id: 'restaurant', title: 'Restaurant', desc: 'Configure your restaurant profiles', icon: Store, color: 'text-primary', bg: 'bg-primary/5' },
+  { id: 'users', title: 'User Management', desc: 'Create staff accounts and assign roles', icon: Users, color: 'text-primary', bg: 'bg-primary/5' },
 ];
 
 const PrinterSetupContent = () => (
@@ -90,6 +90,86 @@ const PaymentSetupContent = () => (
   </div>
 );
 
+const TablesSetupContent = () => (
+  <div className="space-y-4">
+    <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-card">
+      <span className="font-medium text-foreground">Table 1</span>
+      <button className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 size={18} /></button>
+    </div>
+    <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-card">
+      <span className="font-medium text-foreground">Table 2</span>
+      <button className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 size={18} /></button>
+    </div>
+    <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-card">
+      <span className="font-medium text-foreground">Table 3</span>
+      <button className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 size={18} /></button>
+    </div>
+    <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+      <Input placeholder="Table name..." className="flex-1 w-full" />
+      <Button className="flex items-center gap-2 rounded-xl w-full sm:w-auto h-11 px-6 shrink-0">
+        <Plus size={18} /> Add Table
+      </Button>
+    </div>
+  </div>
+);
+
+const BranchSetupContent = () => (
+  <div className="space-y-4">
+    <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-card">
+      <span className="font-medium text-foreground">Main Branch</span>
+      <button className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 size={18} /></button>
+    </div>
+    <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+      <Input placeholder="Branch name..." className="flex-1 w-full" />
+      <Button className="flex items-center gap-2 rounded-xl w-full sm:w-auto h-11 px-6 shrink-0">
+        <Plus size={18} /> Add Branch
+      </Button>
+    </div>
+  </div>
+);
+
+const RestaurantSetupContent = () => (
+  <div className="space-y-4">
+    <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-card">
+      <span className="font-medium text-foreground">Main Restaurant</span>
+      <button className="text-muted-foreground hover:text-destructive transition-colors"><Trash2 size={18} /></button>
+    </div>
+    <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+      <Input placeholder="Restaurant name..." className="flex-1 w-full" />
+      <Button className="flex items-center gap-2 rounded-xl w-full sm:w-auto h-11 px-6 shrink-0">
+        <Plus size={18} /> Add Restaurant
+      </Button>
+    </div>
+  </div>
+);
+
+const UsersSetupContent = () => (
+  <div className="space-y-6">
+    <div className="flex items-center justify-between p-4 rounded-xl border border-border bg-card">
+      <div className="flex items-center gap-2">
+        <span className="font-medium text-foreground">Admin</span>
+        <span className="text-sm text-muted-foreground font-normal">Administrator</span>
+      </div>
+    </div>
+    
+    <div className="pt-2">
+      <h4 className="text-sm font-medium text-foreground mb-3">Create New User</h4>
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Input placeholder="Username" className="flex-1" />
+          <Input placeholder="Password" type="password" className="flex-1" />
+        </div>
+        <Select value="staff" onChange={() => {}} options={[{label: 'Staff', value: 'staff'}, {label: 'Manager', value: 'manager'}, {label: 'Admin', value: 'admin'}]} />
+        <div>
+          <Button className="flex items-center gap-2 rounded-xl h-11 px-6 mt-2">
+            <Plus size={18} /> Create User
+          </Button>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 export const SettingsConfiguration = ({ onFinish, onBack, disabled }: { onFinish: () => void, onBack: () => void, disabled?: boolean }) => {
   const [activeSetting, setActiveSetting] = useState<string | null>(null);
 
@@ -97,7 +177,7 @@ export const SettingsConfiguration = ({ onFinish, onBack, disabled }: { onFinish
     const activeModule = settingsModules.find(m => m.id === activeSetting);
     
     return (
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-2xl mx-auto">
         <button 
           onClick={() => setActiveSetting(null)}
           className="text-muted-foreground hover:text-foreground font-normal flex items-center gap-2 transition-colors mb-6 text-sm"
@@ -120,19 +200,17 @@ export const SettingsConfiguration = ({ onFinish, onBack, disabled }: { onFinish
           {activeSetting === 'printer' && <PrinterSetupContent />}
           {activeSetting === 'rooms' && <RoomsSetupContent />}
           {activeSetting === 'payment' && <PaymentSetupContent />}
-          
-          {!['printer', 'rooms', 'payment'].includes(activeSetting) && (
-            <div className="text-center py-10 text-muted-foreground">
-              Configuration for {activeModule?.title} goes here.
-            </div>
-          )}
+          {activeSetting === 'tables' && <TablesSetupContent />}
+          {activeSetting === 'branch' && <BranchSetupContent />}
+          {activeSetting === 'restaurant' && <RestaurantSetupContent />}
+          {activeSetting === 'users' && <UsersSetupContent />}
         </SetupCard>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-2xl mx-auto">
       <SetupCard>
         <div className="space-y-3 mb-10">
           {settingsModules.map((module) => (
