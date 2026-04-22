@@ -42,7 +42,7 @@ export const PrimaryButton = ({
 
 export const FormField = ({ label, children, error, required }: { label: string; children: React.ReactNode; error?: string; required?: boolean }) => (
   <div className="space-y-1.5 w-full text-left">
-    <label className="text-sm font-semibold text-foreground ml-1">
+    <label className="text-sm font-normal text-foreground ml-1">
       {label} {required && <span className="text-primary">*</span>}
     </label>
     {children}
@@ -50,7 +50,7 @@ export const FormField = ({ label, children, error, required }: { label: string;
   </div>
 );
 
-export const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
+export const Input = (props: Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>) => (
   <BaseInput 
     {...props}
     className={cn(

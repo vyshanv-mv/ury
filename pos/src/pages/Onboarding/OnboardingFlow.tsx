@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import '../../index.css';
 import { SetupLayout } from '../../components/onboarding/SetupLayout';
 import { WelcomeScreen } from '../../components/onboarding/WelcomeScreen';
 import { OrganizationSetup } from '../../components/onboarding/OrganizationSetup';

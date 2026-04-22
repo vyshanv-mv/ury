@@ -19,7 +19,7 @@ export const SetupLayout = ({
   footerText?: string;
 }) => {
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col items-center py-10 px-6 italic-none font-inter selection:bg-primary/20">
+    <div className="min-h-screen bg-background text-foreground flex flex-col items-center py-10 px-6 not-italic font-inter selection:bg-primary/20">
       <div className="w-full max-w-4xl flex-1 flex flex-col relative">
         
         {/* Branded Header */}
