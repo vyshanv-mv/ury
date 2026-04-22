@@ -32,10 +32,10 @@ export const SetupLayout = ({
                 className="w-full h-full object-contain p-3"
               />
             </div>
-            <h1 className="text-4xl md:text-5xl font-black text-foreground tracking-tight mb-4 leading-tight">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight mb-4 leading-tight">
               {title}
             </h1>
-            <p className="text-muted-foreground text-lg md:text-xl max-w-lg mx-auto font-medium leading-relaxed mb-10">
+            <p className="text-muted-foreground text-lg md:text-xl max-w-lg mx-auto font-normal leading-relaxed mb-10">
               {subtitle}
             </p>
 
@@ -58,7 +58,7 @@ export const SetupLayout = ({
         {/* Footer info */}
         <div className="mt-auto pt-16 text-center space-y-4">
           <div className="w-12 h-1 bg-border rounded-full mx-auto opacity-30" />
-          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/40">
+          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground/40">
             {footerText || "You can always change settings after setup"}
           </p>
         </div>

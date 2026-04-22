@@ -218,7 +218,7 @@ export const OrganizationSetup = ({ onNext, onBack }: { onNext: (data: any) => v
           </FormField>
 
           <div className="md:col-span-2 pt-4 border-t border-border">
-            <h4 className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-4">Admin Account</h4>
+            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-4">Admin Account</h4>
           </div>
 
           <FormField label="Admin Username" required error={touched.adminUsername ? errors.adminUsername : undefined}>
@@ -272,7 +272,7 @@ export const OrganizationSetup = ({ onNext, onBack }: { onNext: (data: any) => v
             disabled={submitting}
           />
           <div className="flex flex-col gap-1">
-            <label htmlFor="demoData" className="text-sm font-medium text-foreground cursor-pointer">
+            <label htmlFor="demoData" className="text-sm font-normal text-foreground cursor-pointer">
               Generate Demo Data for Exploration
             </label>
             <p className="text-xs text-muted-foreground leading-relaxed">
@@ -285,7 +285,7 @@ export const OrganizationSetup = ({ onNext, onBack }: { onNext: (data: any) => v
           <button
             onClick={onBack}
             disabled={submitting}
-            className="text-muted-foreground hover:text-foreground font-medium flex items-center gap-2 transition-colors px-4 py-2 text-sm disabled:opacity-50"
+            className="text-muted-foreground hover:text-foreground font-normal flex items-center gap-2 transition-colors px-4 py-2 text-sm disabled:opacity-50"
           >
             <ArrowLeft size={18} /> Back
           </button>

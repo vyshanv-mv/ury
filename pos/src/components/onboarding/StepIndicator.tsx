@@ -16,7 +16,7 @@ export const StepIndicator = ({ activeStep }: { activeStep: number }) => {
           <div className="flex items-center gap-2.5 group shrink-0">
             <div
               className={cn(
-                "w-9 h-9 rounded-xl flex items-center justify-center font-black transition-all duration-500 text-xs shrink-0",
+                "w-9 h-9 rounded-xl flex items-center justify-center font-medium transition-all duration-500 text-xs shrink-0",
                 activeStep >= step.id
                   ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-110"
                   : "bg-muted text-muted-foreground border border-border"
@@ -25,7 +25,7 @@ export const StepIndicator = ({ activeStep }: { activeStep: number }) => {
               {step.id}
             </div>
             <span className={cn(
-              "text-[10px] font-black uppercase tracking-widest transition-colors duration-500 whitespace-nowrap",
+              "text-[10px] font-medium uppercase tracking-widest transition-colors duration-500 whitespace-nowrap",
               activeStep >= step.id ? "text-foreground opacity-100" : "text-muted-foreground opacity-60"
             )}>
               {step.name}

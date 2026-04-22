@@ -54,7 +54,7 @@ export const Input = (props: Omit<React.InputHTMLAttributes<HTMLInputElement>, '
   <BaseInput 
     {...props}
     className={cn(
-      "bg-muted/50 border-input focus:ring-primary/20 rounded-xl px-4 py-3 h-auto transition-all",
+      "bg-muted/50 border-input focus:ring-primary/20 rounded-xl px-4 py-3 h-auto transition-all font-normal",
       props.className
     )}
   />
@@ -65,7 +65,7 @@ export const Select = ({ options, value, onChange, placeholder, disabled }: { op
     value={value}
     onChange={(e) => onChange(e.target.value)}
     disabled={disabled}
-    className="w-full px-4 py-3 rounded-xl border border-input focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-muted/50 appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%20stroke%3D%22currentColor%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%20d%3D%22M19%209l-7%207-7-7%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25em_1.25em] bg-[right_0.75rem_center] bg-no-repeat text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+    className="w-full px-4 py-3 rounded-xl border border-input focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all bg-muted/50 appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%20stroke%3D%22currentColor%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%20d%3D%22M19%209l-7%207-7-7%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25em_1.25em] bg-[right_0.75rem_center] bg-no-repeat text-foreground disabled:opacity-50 disabled:cursor-not-allowed font-normal"
   >
     {placeholder && <option value="" disabled>{placeholder}</option>}
     {options.map(opt => (

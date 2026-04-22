@@ -37,7 +37,7 @@ export const SettingsConfiguration = ({ onFinish, onBack, disabled }: { onFinish
                 <module.icon size={24} />
               </div>
               <div className="flex-1">
-                <h4 className="font-bold text-foreground">{module.title}</h4>
+                <h4 className="font-medium text-foreground">{module.title}</h4>
                 <p className="text-sm text-muted-foreground">{module.desc}</p>
               </div>
               <ChevronRight size={20} className="text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
@@ -48,7 +48,7 @@ export const SettingsConfiguration = ({ onFinish, onBack, disabled }: { onFinish
         <div className="flex items-center justify-between">
           <button 
             onClick={onBack}
-            className="text-muted-foreground hover:text-foreground font-medium flex items-center gap-2 transition-colors px-4 py-2 text-sm"
+            className="text-muted-foreground hover:text-foreground font-normal flex items-center gap-2 transition-colors px-4 py-2 text-sm"
           >
             <ArrowLeft size={18} /> Back
           </button>

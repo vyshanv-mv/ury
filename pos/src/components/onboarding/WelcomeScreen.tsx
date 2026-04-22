@@ -19,11 +19,11 @@ export const WelcomeScreen = ({ onNext }: { onNext: () => void }) => {
         </div>
 
 
-        <h2 className="text-4xl font-black text-foreground mb-5 tracking-tight">
+        <h2 className="text-4xl font-bold text-foreground mb-5 tracking-tight">
           Welcome to <span className="text-primary">URY</span>
         </h2>
 
-        <p className="text-muted-foreground text-lg leading-relaxed mb-12 max-w-md font-medium">
+        <p className="text-muted-foreground text-lg leading-relaxed mb-12 max-w-md font-normal">
           The next generation of restaurant management.
           Streamline your service, manage inventory, and grow your business with ease.
         </p>
@@ -35,7 +35,7 @@ export const WelcomeScreen = ({ onNext }: { onNext: () => void }) => {
               <LayoutDashboard className="w-5 h-5" />
             </div>
             <div className="text-left">
-              <h3 className="font-bold text-foreground text-sm">Intuitive POS</h3>
+              <h3 className="font-medium text-foreground text-sm">Intuitive POS</h3>
               <p className="text-muted-foreground text-xs leading-tight text-balance">Modern interface for fast ordering.</p>
             </div>
           </div>
@@ -44,7 +44,7 @@ export const WelcomeScreen = ({ onNext }: { onNext: () => void }) => {
               <Shield className="w-5 h-5" />
             </div>
             <div className="text-left">
-              <h3 className="font-bold text-foreground text-sm">Secure Data</h3>
+              <h3 className="font-medium text-foreground text-sm">Secure Data</h3>
               <p className="text-muted-foreground text-xs leading-tight text-balance">Enterprise-grade security and backups.</p>
             </div>
           </div>
@@ -54,7 +54,7 @@ export const WelcomeScreen = ({ onNext }: { onNext: () => void }) => {
         <div className="w-full max-w-sm mx-auto">
           <Button
             onClick={onNext}
-            className="w-full h-16 bg-primary text-primary-foreground rounded-2xl text-lg font-black hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
+            className="w-full h-16 bg-primary text-primary-foreground rounded-2xl text-lg font-semibold hover:bg-primary/90 hover:shadow-xl hover:shadow-primary/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3"
           >
             Get Started
             <ArrowRight className="w-5 h-5" />

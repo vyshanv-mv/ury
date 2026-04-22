@@ -219,7 +219,7 @@ export const MenuSetup = ({ onNext, onBack, companyName }: {
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={isWorking}
-            className="flex-1 flex items-center justify-center gap-2 py-4 bg-muted/30 hover:bg-muted/50 text-foreground font-semibold rounded-2xl border border-border transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 flex items-center justify-center gap-2 py-4 bg-muted/30 hover:bg-muted/50 text-foreground font-normal rounded-2xl border border-border transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {uploading ? (
               <Loader2 size={20} className="animate-spin text-primary" />
@@ -232,8 +232,8 @@ export const MenuSetup = ({ onNext, onBack, companyName }: {
 
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4 px-2">
-            <h4 className="font-bold text-foreground">Menu Items</h4>
-            <span className="text-xs font-black text-muted-foreground uppercase tracking-widest">
+            <h4 className="font-medium text-foreground">Menu Items</h4>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
               {filledItemCount} / {items.length} Items
             </span>
           </div>
@@ -285,14 +285,14 @@ export const MenuSetup = ({ onNext, onBack, companyName }: {
           <button
             onClick={addItem}
             disabled={isWorking || items.length >= MAX_ITEMS}
-            className="mt-4 flex items-center gap-2 text-primary font-bold text-sm hover:underline px-2 py-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="mt-4 flex items-center gap-2 text-primary font-normal text-sm hover:underline px-2 py-1 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Plus size={18} /> Add Item
           </button>
         </div>
 
         <div className="p-6 bg-muted/20 rounded-2xl border border-border mb-10">
-          <h4 className="text-sm font-bold text-foreground mb-4">Tax Configuration</h4>
+          <h4 className="text-sm font-medium text-foreground mb-4">Tax Configuration</h4>
           <div className="flex gap-8">
             <label className="flex items-center gap-2 cursor-pointer group">
               <input
@@ -303,7 +303,7 @@ export const MenuSetup = ({ onNext, onBack, companyName }: {
                 onChange={() => setTaxType('Inclusive')}
                 disabled={isWorking}
               />
-              <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+              <span className="text-sm font-normal text-muted-foreground group-hover:text-foreground transition-colors">
                 Inclusive Tax
               </span>
             </label>
@@ -316,7 +316,7 @@ export const MenuSetup = ({ onNext, onBack, companyName }: {
                 onChange={() => setTaxType('Exclusive')}
                 disabled={isWorking}
               />
-              <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">
+              <span className="text-sm font-normal text-muted-foreground group-hover:text-foreground transition-colors">
                 Exclusive Tax
               </span>
             </label>
@@ -327,7 +327,7 @@ export const MenuSetup = ({ onNext, onBack, companyName }: {
           <button
             onClick={onBack}
             disabled={isWorking}
-            className="text-muted-foreground hover:text-foreground font-medium flex items-center gap-2 transition-colors px-4 py-2 text-sm disabled:opacity-50"
+            className="text-muted-foreground hover:text-foreground font-normal flex items-center gap-2 transition-colors px-4 py-2 text-sm disabled:opacity-50"
           >
             <ArrowLeft size={18} /> Back
           </button>
@@ -336,7 +336,7 @@ export const MenuSetup = ({ onNext, onBack, companyName }: {
             <button
               onClick={() => onNext({ items: [], tax_calculation: taxType })}
               disabled={isWorking}
-              className="text-muted-foreground hover:text-foreground font-medium px-4 py-2 text-sm disabled:opacity-50"
+              className="text-muted-foreground hover:text-foreground font-normal px-4 py-2 text-sm disabled:opacity-50"
             >
               Skip
             </button>
