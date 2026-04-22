@@ -32,12 +32,16 @@ export const SetupLayout = ({
                 className="w-full h-full object-contain p-3"
               />
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight mb-4 leading-tight">
-              {title}
-            </h1>
-            <p className="text-muted-foreground text-lg md:text-xl max-w-lg mx-auto font-normal leading-relaxed mb-10">
-              {subtitle}
-            </p>
+            {title && (
+              <h1 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight mb-4 leading-tight">
+                {title}
+              </h1>
+            )}
+            {subtitle && (
+              <p className="text-muted-foreground text-lg md:text-xl max-w-lg mx-auto font-normal leading-relaxed mb-10">
+                {subtitle}
+              </p>
+            )}
 
             {/* Integrated Step Progress */}
             {activeStep !== undefined && activeStep > 0 && (

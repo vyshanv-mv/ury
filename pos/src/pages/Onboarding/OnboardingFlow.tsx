@@ -25,8 +25,8 @@ const PAGE_INFO: Record<number, { title: string; subtitle: string; footer: strin
     footer: "Let's get started with your new restaurant setup"
   },
   [STEPS.ORGANIZATION]: { 
-    title: 'Organization Setup', 
-    subtitle: 'Enter your organization details to personalize your system',
+    title: '', 
+    subtitle: '',
     footer: "This information will be used for your invoices and reports"
   },
   [STEPS.MENU]: { 
@@ -178,7 +178,7 @@ export default function OnboardingFlow() {
       title={stepInfo.title}
       subtitle={stepInfo.subtitle}
       footerText={stepInfo.footer}
-      hideHeader={currentStep === STEPS.WELCOME || currentStep === STEPS.ORGANIZATION}
+      hideHeader={currentStep === STEPS.WELCOME}
       activeStep={currentStep}
     >
       <div className="animate-in fade-in zoom-in-95 duration-500 ease-out">
