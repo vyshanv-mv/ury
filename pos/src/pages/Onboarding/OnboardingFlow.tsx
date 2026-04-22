@@ -24,8 +24,8 @@ const PAGE_INFO: Record<number, { title: string; subtitle: string; footer: strin
     footer: "This information will be used for your invoices and reports"
   },
   [STEPS.MENU]: { 
-    title: 'Create Your Menu', 
-    subtitle: 'Define your core offerings and taxation',
+    title: '', 
+    subtitle: '',
     footer: "You can add more items and categories later in the menu builder"
   },
   [STEPS.SETTINGS]: { 
@@ -142,7 +142,6 @@ export default function OnboardingFlow() {
           <MenuSetup
             onNext={next}
             onBack={back}
-            companyName={formData.company_name}
           />
         );
       case STEPS.SETTINGS:

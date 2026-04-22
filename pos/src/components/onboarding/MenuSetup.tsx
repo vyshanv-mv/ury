@@ -1,8 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
 import { SetupCard, PrimaryButton, Input } from './Shared';
-import { Plus, Trash2, ArrowRight, ArrowLeft, Upload, Loader2 } from 'lucide-react';
+import { Plus, Trash2, ArrowRight, ArrowLeft, Upload, Loader2, Utensils } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { uploadMenuCSV, setupMenu } from '../../lib/onboarding-api';
+import { uploadMenuCSV } from '../../lib/onboarding-api';
 
 interface MenuItemRow {
   item_name: string;
@@ -20,10 +20,9 @@ function isHeaderRow(name: string, price: string): boolean {
   );
 }
 
-export const MenuSetup = ({ onNext, onBack, companyName }: {
+export const MenuSetup = ({ onNext, onBack }: {
   onNext: (data: any) => void;
   onBack: () => void;
-  companyName?: string;
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<MenuItemRow[]>([
@@ -218,6 +217,16 @@ export const MenuSetup = ({ onNext, onBack, companyName }: {
         onChange={handleFileUpload}
       />
       <SetupCard>
+        <div className="flex items-start gap-4 mb-8">
+          <div className="p-3 bg-primary/10 text-primary rounded-xl shrink-0">
+            <Utensils size={24} />
+          </div>
+          <div>
+            <h2 className="text-2xl font-semibold text-foreground tracking-tight">Menu Setup</h2>
+            <p className="text-muted-foreground mt-1">Add your menu items or load a sample to get started</p>
+          </div>
+        </div>
+
         <div className="flex flex-wrap gap-4 mb-8">
           <button
             onClick={() => fileInputRef.current?.click()}
