@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { SetupCard, PrimaryButton, FormField, Input, Select } from './Shared';
-import { ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Loader2, Building2 } from 'lucide-react';
 import { setupOrganization, SetupOrganizationPayload } from '../../lib/onboarding-api';
 import { toast } from 'react-toastify';
 
@@ -157,10 +157,25 @@ export const OrganizationSetup = ({ onNext, onBack }: { onNext: (data: any) => v
   return (
     <div className="max-w-2xl mx-auto">
       <SetupCard>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <FormField label="Company Name" required error={touched.companyName ? errors.companyName : undefined}>
+        <div className="flex items-start gap-4 mb-8">
+          <div className="p-3 bg-primary/10 text-primary rounded-xl shrink-0">
+            <Building2 size={24} />
+          </div>
+          <div>
+            <h2 className="text-2xl font-semibold text-foreground tracking-tight">Organization Setup</h2>
+            <p className="text-muted-foreground mt-1">Enter your organization details to personalize your system</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 mb-8">
+          <FormField 
+            label="Company Name" 
+            required 
+            error={touched.companyName ? errors.companyName : undefined}
+            helperText="Appears on receipts and reports"
+          >
             <Input
-              placeholder="e.g. Tasty Trails Restaurant"
+              placeholder="e.g. The Grand Cafe"
               value={formData.companyName}
               className={touched.companyName && errors.companyName ? "border-destructive focus:ring-destructive/20" : ""}
               onChange={(e) => handleCompanyNameChange(e.target.value)}
@@ -168,6 +183,28 @@ export const OrganizationSetup = ({ onNext, onBack }: { onNext: (data: any) => v
               disabled={submitting}
               maxLength={140}
               autoComplete="organization"
+            />
+          </FormField>
+
+          <FormField 
+            label="Abbreviation"
+            helperText="Auto-generated"
+          >
+            <Input
+              placeholder="e.g. TGC"
+              value={formData.abbreviation}
+              onChange={(e) => setFormData(prev => ({ ...prev, abbreviation: e.target.value.toUpperCase() }))}
+              disabled={submitting}
+              maxLength={5}
+            />
+          </FormField>
+
+          <FormField label="Country" required>
+            <Select
+              options={COUNTRY_OPTIONS}
+              value={formData.country}
+              onChange={(val) => setFormData(prev => ({ ...prev, country: val }))}
+              disabled={submitting}
             />
           </FormField>
 
@@ -180,26 +217,12 @@ export const OrganizationSetup = ({ onNext, onBack }: { onNext: (data: any) => v
             />
           </FormField>
 
-          <FormField label="Abbreviation">
-            <Input
-              placeholder="URY"
-              value={formData.abbreviation}
-              onChange={(e) => setFormData(prev => ({ ...prev, abbreviation: e.target.value.toUpperCase() }))}
-              disabled={submitting}
-              maxLength={5}
-            />
-          </FormField>
-
-          <FormField label="Country">
-            <Select
-              options={COUNTRY_OPTIONS}
-              value={formData.country}
-              onChange={(val) => setFormData(prev => ({ ...prev, country: val }))}
-              disabled={submitting}
-            />
-          </FormField>
-
-          <FormField label="Tax Type">
+          <FormField 
+            label="Tax Type" 
+            required
+            helperText={formData.country === 'India' ? "Auto-set to GST for India" : undefined}
+            helperTextClass={formData.country === 'India' ? "text-primary" : undefined}
+          >
             <Select
               options={TAX_TYPE_OPTIONS}
               value={formData.taxType}
@@ -208,7 +231,7 @@ export const OrganizationSetup = ({ onNext, onBack }: { onNext: (data: any) => v
             />
           </FormField>
 
-          <FormField label="Currency">
+          <FormField label="Currency" required>
             <Select
               options={CURRENCY_OPTIONS}
               value={formData.currency}
@@ -218,7 +241,7 @@ export const OrganizationSetup = ({ onNext, onBack }: { onNext: (data: any) => v
           </FormField>
 
           <div className="md:col-span-2 pt-4 border-t border-border">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-4">Admin Account</h4>
+            <h4 className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-4">Admin Account</h4>
           </div>
 
           <FormField label="Admin Username" required error={touched.adminUsername ? errors.adminUsername : undefined}>

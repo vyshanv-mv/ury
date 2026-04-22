@@ -40,13 +40,17 @@ export const PrimaryButton = ({
   );
 };
 
-export const FormField = ({ label, children, error, required }: { label: string; children: React.ReactNode; error?: string; required?: boolean }) => (
-  <div className="space-y-1.5 w-full text-left">
+export const FormField = ({ label, children, error, required, helperText, helperTextClass }: { label: string; children: React.ReactNode; error?: string; required?: boolean; helperText?: string; helperTextClass?: string; }) => (
+  <div className="space-y-1.5 w-full text-left flex flex-col">
     <label className="text-sm font-normal text-foreground ml-1">
       {label} {required && <span className="text-primary">*</span>}
     </label>
     {children}
-    {error && <p className="text-xs text-destructive mt-1">{error}</p>}
+    {error ? (
+      <p className="text-xs text-destructive mt-1">{error}</p>
+    ) : helperText ? (
+      <p className={cn("text-xs mt-1", helperTextClass || "text-muted-foreground")}>{helperText}</p>
+    ) : null}
   </div>
 );
 
