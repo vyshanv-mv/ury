@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SetupLayout } from '../../components/onboarding/SetupLayout';
 import { WelcomeScreen } from '../../components/onboarding/WelcomeScreen';
-import { ModeSelection } from '../../components/onboarding/ModeSelection';
 import { OrganizationSetup } from '../../components/onboarding/OrganizationSetup';
 import { MenuSetup } from '../../components/onboarding/MenuSetup';
 import { SettingsConfiguration } from '../../components/onboarding/SettingsConfiguration';
@@ -12,9 +11,8 @@ import { toast } from 'react-toastify';
 const STEPS = {
   WELCOME: 0,
   ORGANIZATION: 1,
-  MODE: 2,
-  MENU: 3,
-  SETTINGS: 4,
+  MENU: 2,
+  SETTINGS: 3,
 };
 
 const TOTAL_STEPS = Object.keys(STEPS).length;
@@ -29,11 +27,6 @@ const PAGE_INFO: Record<number, { title: string; subtitle: string; footer: strin
     title: 'Setup Your Organization', 
     subtitle: 'Start by defining your restaurant and branch',
     footer: "This information will be used for your invoices and reports"
-  },
-  [STEPS.MODE]: { 
-    title: 'Choose Experience Level', 
-    subtitle: 'Select a configuration mode that fits your needs',
-    footer: "Choose the mode that best fits your restaurant's complexity"
   },
   [STEPS.MENU]: { 
     title: 'Create Your Menu', 
@@ -124,6 +117,7 @@ export default function OnboardingFlow() {
       setIsFinishing(true);
 
       // Mark onboarding complete using the new action
+      localStorage.setItem('ury_setup_completed', 'true');
       usePOSStore.getState().setNeedsOnboarding(false);
 
       // Re-initialize the app so POS profile, menu, etc. are loaded fresh.
@@ -155,8 +149,6 @@ export default function OnboardingFlow() {
         return <WelcomeScreen onNext={() => goTo(STEPS.ORGANIZATION)} />;
       case STEPS.ORGANIZATION:
         return <OrganizationSetup onNext={next} onBack={() => goTo(STEPS.WELCOME)} />;
-      case STEPS.MODE:
-        return <ModeSelection onSelect={(mode) => next({ setup_mode: mode })} onBack={back} />;
       case STEPS.MENU:
         return (
           <MenuSetup

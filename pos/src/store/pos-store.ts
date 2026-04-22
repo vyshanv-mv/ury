@@ -215,8 +215,11 @@ export const usePOSStore = create<POSStore>((set, get) => ({
       set({ isInitializing: true, error: null });
       
       // 1. First, check if setup is complete
-      const res = await call.get('ury.setup.api.check_setup_status');
-      const isComplete = !!res.message?.is_setup_complete;
+      // const res = await call.get('ury.setup.api.check_setup_status');
+      // const isComplete = !!res.message?.is_setup_complete;
+      
+      // Bypassing backend setup check for now. Using localStorage to allow testing.
+      const isComplete = localStorage.getItem('ury_setup_completed') === 'true';
       
       set({ needsOnboarding: !isComplete });
 

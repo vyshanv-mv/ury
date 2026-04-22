@@ -3,9 +3,8 @@ import { cn } from './Shared';
 
 const steps = [
   { id: 1, name: 'Organization' },
-  { id: 2, name: 'Mode' },
-  { id: 3, name: 'Menu' },
-  { id: 4, name: 'Settings' }
+  { id: 2, name: 'Menu' },
+  { id: 3, name: 'Settings' }
 ];
 
 export const StepIndicator = ({ activeStep }: { activeStep: number }) => {
