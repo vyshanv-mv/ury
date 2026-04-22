@@ -168,9 +168,9 @@ export const OrganizationSetup = ({ onNext, onBack }: { onNext: (data: any) => v
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6 mb-8">
-          <FormField 
-            label="Company Name" 
-            required 
+          <FormField
+            label="Company Name"
+            required
             error={touched.companyName ? errors.companyName : undefined}
             helperText="Appears on receipts and reports"
           >
@@ -186,7 +186,7 @@ export const OrganizationSetup = ({ onNext, onBack }: { onNext: (data: any) => v
             />
           </FormField>
 
-          <FormField 
+          <FormField
             label="Abbreviation"
             helperText="Auto-generated"
           >
@@ -217,11 +217,9 @@ export const OrganizationSetup = ({ onNext, onBack }: { onNext: (data: any) => v
             />
           </FormField>
 
-          <FormField 
-            label="Tax Type" 
+          <FormField
+            label="Tax Type"
             required
-            helperText={formData.country === 'India' ? "Auto-set to GST for India" : undefined}
-            helperTextClass={formData.country === 'India' ? "text-primary" : undefined}
           >
             <Select
               options={TAX_TYPE_OPTIONS}
