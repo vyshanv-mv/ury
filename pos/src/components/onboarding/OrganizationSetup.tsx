@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { SetupCard, PrimaryButton, FormField, Input, Select } from './Shared';
-import { ArrowRight, ArrowLeft, Loader2, Building2 } from 'lucide-react';
+import { ArrowRight, Loader2, Building2 } from 'lucide-react';
 import { setupOrganization, SetupOrganizationPayload } from '../../lib/onboarding-api';
 import { toast } from 'react-toastify';
 
@@ -95,7 +95,7 @@ function generateAbbreviation(companyName: string): string {
     .slice(0, 5);
 }
 
-export const OrganizationSetup = ({ onNext, onBack }: { onNext: (data: any) => void; onBack: () => void }) => {
+export const OrganizationSetup = ({ onNext }: { onNext: (data: any) => void }) => {
   const [formData, setFormData] = useState<OrganizationFormData>(INITIAL_FORM);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -135,9 +135,11 @@ export const OrganizationSetup = ({ onNext, onBack }: { onNext: (data: any) => v
         generate_demo_data: formData.generateDemoData,
       };
 
-      const result = await setupOrganization(payload);
-      toast.success(result.message);
-
+      // Bypassing backend for now
+      // const result = await setupOrganization(payload);
+      // toast.success(result.message);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      toast.success("Organization setup successful (Bypassed)");
       onNext({
         company_name: payload.company_name,
         abbreviation: payload.abbr,
@@ -302,14 +304,7 @@ export const OrganizationSetup = ({ onNext, onBack }: { onNext: (data: any) => v
           </div>
         </div>
 
-        <div className="flex items-center justify-between pointer-events-auto">
-          <button
-            onClick={onBack}
-            disabled={submitting}
-            className="text-muted-foreground hover:text-foreground font-normal flex items-center gap-2 transition-colors px-4 py-2 text-sm disabled:opacity-50"
-          >
-            <ArrowLeft size={18} /> Back
-          </button>
+        <div className="flex items-center justify-end pointer-events-auto">
 
           <PrimaryButton
             disabled={!isFormValid || submitting}

@@ -183,17 +183,20 @@ export const MenuSetup = ({ onNext, onBack, companyName }: {
     setSubmitting(true);
 
     try {
-      const result = await setupMenu({
+      // Bypassing backend for now
+      /* const result = await setupMenu({
         items: filteredItems,
         tax_calculation: taxType,
         ...(companyName ? { company_name: companyName } : {}),
-      });
+      }); */
 
-      toast.success(result.message);
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      toast.success("Menu setup successful (Bypassed)");
       onNext({
         items: filteredItems,
         tax_calculation: taxType,
-        created_items: result.created_items,
+        created_items: filteredItems.length,
       });
     } catch (error: any) {
       toast.error(error.message || 'Failed to create menu items');

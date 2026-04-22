@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../index.css';
 import { SetupLayout } from '../../components/onboarding/SetupLayout';
-import { WelcomeScreen } from '../../components/onboarding/WelcomeScreen';
+
 import { OrganizationSetup } from '../../components/onboarding/OrganizationSetup';
 import { MenuSetup } from '../../components/onboarding/MenuSetup';
 import { SettingsConfiguration } from '../../components/onboarding/SettingsConfiguration';
@@ -10,22 +10,16 @@ import { usePOSStore } from '../../store/pos-store';
 import { toast } from 'react-toastify';
 
 const STEPS = {
-  WELCOME: 0,
-  ORGANIZATION: 1,
-  MENU: 2,
-  SETTINGS: 3,
+  ORGANIZATION: 0,
+  MENU: 1,
+  SETTINGS: 2,
 };
 
 const TOTAL_STEPS = Object.keys(STEPS).length;
 
 const PAGE_INFO: Record<number, { title: string; subtitle: string; footer: string }> = {
-  [STEPS.WELCOME]: { 
-    title: 'Welcome to URY', 
-    subtitle: 'Modern Restaurant ERP & POS',
-    footer: "Let's get started with your new restaurant setup"
-  },
   [STEPS.ORGANIZATION]: { 
-    title: '', 
+    title: 'Welcome to URY', 
     subtitle: '',
     footer: "This information will be used for your invoices and reports"
   },
@@ -57,7 +51,7 @@ export default function OnboardingFlow() {
       console.error('Failed to restore onboarding state:', e);
       localStorage.removeItem(STORAGE_KEY);
     }
-    return STEPS.WELCOME;
+    return STEPS.ORGANIZATION;
   });
 
   const [formData, setFormData] = useState<Record<string, any>>(() => {
@@ -90,11 +84,6 @@ export default function OnboardingFlow() {
     return () => clearTimeout(timer);
   }, [currentStep, formData]);
 
-  const goTo = useCallback((step: number) => {
-    if (step >= 0 && step < TOTAL_STEPS) {
-      setCurrentStep(step);
-    }
-  }, []);
 
   const next = useCallback((data?: Record<string, any>) => {
     if (data) setFormData((prev: Record<string, any>) => ({ ...prev, ...data }));
@@ -146,10 +135,8 @@ export default function OnboardingFlow() {
 
   const renderContent = () => {
     switch (currentStep) {
-      case STEPS.WELCOME:
-        return <WelcomeScreen onNext={() => goTo(STEPS.ORGANIZATION)} />;
       case STEPS.ORGANIZATION:
-        return <OrganizationSetup onNext={next} onBack={() => goTo(STEPS.WELCOME)} />;
+        return <OrganizationSetup onNext={next} />;
       case STEPS.MENU:
         return (
           <MenuSetup
@@ -171,14 +158,14 @@ export default function OnboardingFlow() {
     }
   };
 
-  const stepInfo = PAGE_INFO[currentStep] ?? PAGE_INFO[STEPS.WELCOME];
+  const stepInfo = PAGE_INFO[currentStep] ?? PAGE_INFO[STEPS.ORGANIZATION];
 
   return (
     <SetupLayout
       title={stepInfo.title}
       subtitle={stepInfo.subtitle}
       footerText={stepInfo.footer}
-      hideHeader={currentStep === STEPS.WELCOME}
+      hideHeader={false}
       activeStep={currentStep}
     >
       <div className="animate-in fade-in zoom-in-95 duration-500 ease-out">
