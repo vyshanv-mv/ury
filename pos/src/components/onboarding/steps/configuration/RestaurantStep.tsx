@@ -120,7 +120,7 @@ export const RestaurantStep: React.FC = () => {
                       <div>
                         <p className="font-bold text-gray-900">{r.restaurant_name}</p>
                         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                          {r.type.replace('_', ' ')}
+                          {r.type?.replace('_', ' ') || ''}
                         </p>
                       </div>
                     </div>

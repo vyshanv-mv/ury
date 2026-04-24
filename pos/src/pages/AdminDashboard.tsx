@@ -41,8 +41,8 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard, group: "Main", description: "Real-time performance metrics" },
-  { id: "branch", label: "Branch", icon: GitBranch, group: "Management", description: "Location and contact details" },
-  { id: "restaurant", label: "Restaurant", icon: Store, group: "Management", description: "Branding and profile settings" },
+  { id: "branch", label: "Branch", icon: GitBranch, group: "Operations", description: "Location and contact details" },
+  { id: "restaurant", label: "Restaurant", icon: Store, group: "Operations", description: "Branding and profile settings" },
   { id: "printer", label: "Printers", icon: Printer, group: "Operations", description: "Billing and KOT configuration" },
   { id: "rooms", label: "Rooms", icon: BedDouble, group: "Operations", description: "Dining area management" },
   { id: "tables", label: "Tables", icon: Table2, group: "Operations", description: "Table layout and seating" },
