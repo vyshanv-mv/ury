@@ -20,7 +20,6 @@ import { useOnboardingStore } from '../../../store/onboarding-store';
 import { showToast } from '../../ui/toast';
 import { cn } from '../../../lib/utils';
 import type { OnboardingStepProps } from '../../../data/steps-data';
-import Header from '../../Header';
 
 // Sub-step components
 import { BranchStep } from './configuration/BranchStep';
@@ -105,10 +104,7 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-gray-50 text-gray-900 overflow-hidden font-inter">
-      {/* Global POS Header */}
-      <Header />
-
+    <div className="flex-1 flex bg-gray-50 text-gray-900 overflow-hidden font-inter">
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
         <aside className="w-72 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col z-30 shadow-sm">
@@ -143,9 +139,9 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
                         )}
                       >
                         {isActive && (
-                          <motion.div 
+                          <motion.div
                             layoutId="active-indicator"
-                            className="absolute start-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-600 rounded-e-full" 
+                            className="absolute start-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-600 rounded-e-full"
                           />
                         )}
 
@@ -208,31 +204,6 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
 
         {/* Main Content Area */}
         <main className="flex-1 flex flex-col overflow-hidden bg-gray-50/30">
-          {/* Step Header */}
-          <div className="px-12 py-10 border-b border-gray-200 bg-white/80 backdrop-blur-md sticky top-0 z-20">
-            <div className="max-w-5xl w-full mx-auto">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-100">
-                      {React.createElement(currentStep.icon, { className: "w-5 h-5" })}
-                    </div>
-                    <div>
-                      <h2 className="text-2xl font-black text-gray-900 tracking-tight">{currentStep.title}</h2>
-                      <p className="text-gray-500 text-sm font-bold opacity-70 mt-0.5">{currentStep.desc}</p>
-                    </div>
-                  </div>
-                </div>
-                {completedSteps.includes(currentStep.id) && (
-                  <div className="flex items-center gap-2 bg-emerald-50 text-emerald-600 font-black px-4 py-2 rounded-xl text-xs uppercase tracking-widest border border-emerald-100 shadow-sm shadow-emerald-50">
-                    <CheckCircle2 className="w-4 h-4" />
-                    Verified
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
           {/* Dynamic Content Area */}
           <div className="flex-1 overflow-y-auto p-12 custom-scrollbar">
             <div className="max-w-5xl w-full mx-auto">

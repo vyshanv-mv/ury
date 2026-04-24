@@ -173,7 +173,7 @@ export const MenuStep: React.FC = () => {
               </div>
               <h4 className="text-sm font-bold text-foreground">Items & Pricing</h4>
             </div>
-            
+
             <div className="flex gap-2">
               <Button
                 variant="outline"
@@ -222,7 +222,7 @@ export const MenuStep: React.FC = () => {
                   </div>
                   <div className="w-10 flex justify-center">
                     <Button
-                      variant="ghost" 
+                      variant="ghost"
                       size="icon"
                       onClick={() => removeRow(i)}
                       className="w-8 h-8 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-all"
@@ -259,7 +259,7 @@ export const MenuStep: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground font-medium py-2">
             <FileText className="w-3.5 h-3.5 opacity-50" />
             <span>Empty rows are automatically ignored. You can always edit this later.</span>

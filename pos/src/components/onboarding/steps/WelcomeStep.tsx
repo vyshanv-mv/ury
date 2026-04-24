@@ -43,13 +43,13 @@ export const WelcomeStep: React.FC<OnboardingStepProps> = ({ onNext }) => {
 
         {/* Center content */}
         <div className="relative z-10">
-          <p className="text-primary-300 mb-3 text-sm font-medium tracking-widest uppercase">
+          <p className="text-primary-300 mb-3 text-xs font-black tracking-widest uppercase opacity-80">
             All-in-one platform
           </p>
-          <h2 className="text-white mb-5 text-4xl font-bold leading-tight">
+          <h2 className="text-white mb-5 text-4xl font-black leading-tight tracking-tight">
             The smarter way to<br />run your restaurant
           </h2>
-          <p className="text-primary-100 mb-10 text-lg leading-relaxed max-w-md">
+          <p className="text-primary-100 mb-10 text-lg font-bold leading-relaxed max-w-md opacity-70">
             From POS to kitchen management, billing to inventory — every tool your restaurant needs, unified in one place.
           </p>
 
@@ -102,10 +102,10 @@ export const WelcomeStep: React.FC<OnboardingStepProps> = ({ onNext }) => {
               Setup takes less than 5 minutes
             </div>
 
-            <h1 className="text-gray-900 mb-3 text-4xl font-bold leading-tight">
+            <h1 className="text-gray-900 mb-3 text-4xl font-black leading-tight tracking-tight">
               Welcome to URY
             </h1>
-            <p className="text-gray-500 mb-9 text-base leading-relaxed">
+            <p className="text-gray-500 mb-9 text-base font-bold leading-relaxed opacity-60">
               A complete Restaurant ERP platform — set up your workspace, configure your menu, and start taking orders today.
             </p>
 

@@ -6,6 +6,8 @@ import { ONBOARDING_STEPS } from '../../data/steps-data';
 import { showToast } from '../../components/ui/toast';
 import { useOnboardingStore } from '../../store/onboarding-store';
 
+import Header from '../../components/Header';
+
 const OnboardingFlow: React.FC = () => {
   const { currentStepIndex, setStepIndex, resetStore } = useOnboardingStore();
   const { completeOnboarding } = usePOSStore();
@@ -53,14 +55,22 @@ const OnboardingFlow: React.FC = () => {
     data: {} // Satisfy interface
   };
 
-  if (currentStepDef.id === 'welcome' || currentStepDef.id === 'success' || currentStepDef.id === 'configuration') {
-    return <StepComponent {...stepProps} key={currentStepDef.id} />;
-  }
+  const showHeader = currentStepDef.id !== 'welcome' && currentStepDef.id !== 'success';
 
   return (
-    <SetupLayout>
-      <StepComponent {...stepProps} key={currentStepDef.id} />
-    </SetupLayout>
+    <div className="flex flex-col h-screen overflow-hidden">
+      {showHeader && <Header hideSearch hideUserMenu />}
+      
+      <div className="flex-1 overflow-y-auto flex flex-col">
+        {currentStepDef.id === 'welcome' || currentStepDef.id === 'success' || currentStepDef.id === 'configuration' || currentStepDef.id === 'loading' ? (
+          <StepComponent {...stepProps} key={currentStepDef.id} />
+        ) : (
+          <SetupLayout>
+            <StepComponent {...stepProps} key={currentStepDef.id} />
+          </SetupLayout>
+        )}
+      </div>
+    </div>
   );
 };
 

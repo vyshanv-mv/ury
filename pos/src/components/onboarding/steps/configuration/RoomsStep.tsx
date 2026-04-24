@@ -27,7 +27,7 @@ export const RoomsStep: React.FC = () => {
       .then((res) => {
         if (res?.rooms?.length > 0) updateData('rooms', res.rooms);
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
   }, []);
 

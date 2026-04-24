@@ -30,7 +30,7 @@ export const ProgressLoader: React.FC<ProgressLoaderProps> = ({ progress, steps 
             cx="64"
             cy="64"
             r="60"
-            className="stroke-primary fill-none transition-all duration-500"
+            className="stroke-blue-600 fill-none transition-all duration-500"
             strokeWidth="8"
             strokeLinecap="round"
             strokeDasharray="377"
@@ -38,7 +38,7 @@ export const ProgressLoader: React.FC<ProgressLoaderProps> = ({ progress, steps 
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-2xl font-bold text-primary">{Math.round(progress)}%</span>
+          <span className="text-2xl font-black text-gray-900 tracking-tight">{Math.round(progress)}%</span>
         </div>
       </div>
 
@@ -53,8 +53,8 @@ export const ProgressLoader: React.FC<ProgressLoaderProps> = ({ progress, steps 
           >
             <div className={cn(
               "w-8 h-8 rounded-full flex items-center justify-center transition-colors",
-              step.status === 'completed' ? "bg-green-100 text-green-600" : 
-              step.status === 'loading' ? "bg-primary text-white" : "bg-gray-100 text-gray-400"
+              step.status === 'completed' ? "bg-emerald-50 text-emerald-500" : 
+              step.status === 'loading' ? "bg-blue-600 text-white shadow-lg shadow-blue-200" : "bg-gray-100 text-gray-400"
             )}>
               {step.status === 'completed' ? (
                 <Check className="w-5 h-5" />
@@ -65,17 +65,17 @@ export const ProgressLoader: React.FC<ProgressLoaderProps> = ({ progress, steps 
               )}
             </div>
             <span className={cn(
-              "text-sm font-semibold transition-colors",
-              step.status === 'completed' ? "text-gray-400 line-through" : 
-              step.status === 'loading' ? "text-primary" : "text-gray-400"
+              "text-sm font-bold transition-colors",
+              step.status === 'completed' ? "text-gray-400 line-through opacity-50" : 
+              step.status === 'loading' ? "text-gray-900" : "text-gray-400"
             )}>
               {step.label}
             </span>
             {step.status === 'loading' && (
               <div className="ml-auto flex gap-1">
-                <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]" />
-                <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]" />
-                <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" />
+                <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce" />
               </div>
             )}
           </div>
