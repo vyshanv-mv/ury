@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -6,7 +6,8 @@ import {
   UtensilsCrossed, CreditCard, Users, Layers, TrendingUp,
   ShoppingBag, DollarSign, Clock, MoreHorizontal,
   PanelRightOpen, ChevronRight,
-  Printer, CheckCircle2, ShieldCheck, Activity, Share2
+  Printer, CheckCircle2, ShieldCheck, Activity, Share2,
+  Loader2
 } from "lucide-react";
 import Header from "../components/Header";
 import {
@@ -16,6 +17,7 @@ import {
 import { Button } from "../components/ui/button";
 import { useRootStore } from "../store/root-store";
 import { cn } from "../lib/utils";
+import { onboardsetupApi } from "../lib/onboardsetup-api";
 
 // Sub-step components for configuration
 import { BranchStep } from "../components/onboarding/steps/configuration/BranchStep";
@@ -53,41 +55,57 @@ const NAV_ITEMS: NavItem[] = [
   { id: "integration", label: "Integration", icon: Share2, group: "System", description: "Third-party connections" },
 ];
 
-const revenueData = [
-  { time: "09:00", amount: 4500 },
-  { time: "11:00", amount: 7200 },
-  { time: "13:00", amount: 12500 },
-  { time: "15:00", amount: 9800 },
-  { time: "17:00", amount: 11200 },
-  { time: "19:00", amount: 18500 },
-  { time: "21:00", amount: 14200 },
-];
-
-const pieData = [
-  { name: "Dine-in", value: 55 },
-  { name: "Takeaway", value: 30 },
-  { name: "Delivery", value: 15 },
-];
-
 const COLORS = ["#2563eb", "#6366f1", "#10b981"];
 
-const popularItems = [
-  { name: "Chicken Tikka", sales: 42, revenue: 12500 },
-  { name: "Paneer Butter Masala", sales: 38, revenue: 8400 },
-  { name: "Garlic Naan", sales: 85, revenue: 4250 },
-  { name: "Mango Lassi", sales: 25, revenue: 3125 },
-];
+const ICON_MAP: Record<string, React.ElementType> = {
+  DollarSign,
+  ShoppingBag,
+  Clock,
+  Table2,
+  Users
+};
 
 export function AdminDashboard() {
   const { user, checkAuth } = useRootStore();
   const [activeSection, setActiveSection] = useState<Section>("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [loading, setLoading] = useState(true);
+  
+  // Dashboard Data State
+  const [stats, setStats] = useState<any[]>([]);
+  const [revenueData, setRevenueData] = useState<any[]>([]);
+  const [pieData, setPieData] = useState<any[]>([]);
+  const [popularItems, setPopularItems] = useState<any[]>([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!user) {
       checkAuth();
     }
   }, [user, checkAuth]);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (activeSection !== 'overview') return;
+      
+      setLoading(true);
+      try {
+        const response = await onboardsetupApi.getAdminStats();
+        if (response.message) {
+          const data = response.message;
+          setStats(data.stats || []);
+          setRevenueData(data.revenueData || []);
+          setPieData(data.pieData || []);
+          setPopularItems(data.popularItems || []);
+        }
+      } catch (error) {
+        console.error("Failed to fetch admin stats:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, [activeSection]);
 
   const groups = Array.from(new Set(NAV_ITEMS.map((item) => item.group)));
 
@@ -122,182 +140,194 @@ export function AdminDashboard() {
     }
   };
 
-  const renderOverview = () => (
-    <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight mb-0.5">Dashboard</h1>
-          <p className="text-sm text-gray-500 font-medium">Welcome back, {user?.full_name?.split(' ')[0] || 'Admin'}! Here's your restaurant's performance.</p>
+  const renderOverview = () => {
+    if (loading) {
+      return (
+        <div className="flex flex-col items-center justify-center py-32 space-y-4">
+          <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
+          <p className="text-sm font-bold text-gray-500">Loading your performance metrics...</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="gap-2 shadow-sm font-bold border-2 h-11 px-5 rounded-xl bg-white">
-            <Clock className="w-4 h-4" />
-            Last 24 Hours
-          </Button>
-          <Button className="gap-2 shadow-lg shadow-blue-100 font-bold h-11 px-5 rounded-xl">
-            <Activity className="w-4 h-4" />
-            Live View
-          </Button>
-        </div>
-      </div>
+      );
+    }
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {[
-          { label: "Total Revenue", value: "₹84,250", trend: "+12.5%", icon: DollarSign, color: "blue" },
-          { label: "Total Orders", value: "156", trend: "+8.2%", icon: ShoppingBag, color: "indigo" },
-          { label: "Average Order", value: "₹540", trend: "-2.4%", icon: Clock, color: "emerald" },
-          { label: "Active Tables", value: "12/20", trend: "Steady", icon: Table2, color: "orange" },
-          { label: "New Customers", value: "42", trend: "+15.2%", icon: Users, color: "blue" },
-        ].map((stat, i) => (
-          <div key={i} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 group">
-            <div className="flex items-center justify-between mb-4">
-              <div className={cn(
-                "p-3 rounded-xl transition-colors",
-                stat.color === "blue" ? "bg-blue-50 text-blue-600" :
-                stat.color === "indigo" ? "bg-indigo-50 text-indigo-600" :
-                stat.color === "emerald" ? "bg-emerald-50 text-emerald-600" : "bg-orange-50 text-orange-600"
-              )}>
-                <stat.icon className="w-5 h-5" />
+    return (
+      <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 tracking-tight mb-0.5">Dashboard</h1>
+            <p className="text-sm text-gray-500 font-medium">Welcome back, {user?.full_name?.split(' ')[0] || 'Admin'}! Here's your restaurant's performance.</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" className="gap-2 shadow-sm font-bold border-2 h-11 px-5 rounded-xl bg-white">
+              <Clock className="w-4 h-4" />
+              Last 24 Hours
+            </Button>
+            <Button className="gap-2 shadow-lg shadow-blue-100 font-bold h-11 px-5 rounded-xl">
+              <Activity className="w-4 h-4" />
+              Live View
+            </Button>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {stats.map((stat, i) => {
+            const Icon = ICON_MAP[stat.icon] || LayoutDashboard;
+            return (
+              <div key={i} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 group">
+                <div className="flex items-center justify-between mb-4">
+                  <div className={cn(
+                    "p-3 rounded-xl transition-colors",
+                    stat.color === "blue" ? "bg-blue-50 text-blue-600" :
+                    stat.color === "indigo" ? "bg-indigo-50 text-indigo-600" :
+                    stat.color === "emerald" ? "bg-emerald-50 text-emerald-600" : "bg-orange-50 text-orange-600"
+                  )}>
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <span className={cn(
+                    "text-xs font-bold px-2.5 py-1 rounded-full",
+                    stat.trend?.startsWith('+') ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-50 text-gray-500'
+                  )}>
+                    {stat.trend}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-500 font-medium mb-1 opacity-70">{stat.label}</p>
+                <h3 className="text-xl font-bold text-gray-900 tracking-tight">{stat.value}</h3>
               </div>
-              <span className={cn(
-                "text-xs font-bold px-2.5 py-1 rounded-full",
-                stat.trend.startsWith('+') ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-50 text-gray-500'
-              )}>
-                {stat.trend}
-              </span>
-            </div>
-            <p className="text-sm text-gray-500 font-medium mb-1 opacity-70">{stat.label}</p>
-            <h3 className="text-xl font-bold text-gray-900 tracking-tight">{stat.value}</h3>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Revenue Chart */}
-        <div className="lg:col-span-2 bg-white p-8 rounded-3xl border border-gray-200 shadow-sm">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
-                <TrendingUp className="w-5 h-5" />
-              </div>
-              <h3 className="text-lg font-bold text-gray-900">Revenue Analytics</h3>
-            </div>
-            <button className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors">
-              <MoreHorizontal className="w-5 h-5" />
-            </button>
-          </div>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={revenueData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#2563eb" stopOpacity={0.1} />
-                    <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }} />
-                <Tooltip 
-                  contentStyle={{ 
-                    borderRadius: '16px', 
-                    border: 'none', 
-                    boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', 
-                    backgroundColor: '#ffffff',
-                    padding: '12px'
-                  }} 
-                  itemStyle={{ fontWeight: 800, color: '#1e293b' }}
-                />
-                <Area type="monotone" dataKey="amount" stroke="#2563eb" strokeWidth={4} fillOpacity={1} fill="url(#colorAmount)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+            );
+          })}
         </div>
 
-        <div className="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm flex flex-col">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-              <ShoppingBag className="w-5 h-5" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Revenue Chart */}
+          <div className="lg:col-span-2 bg-white p-8 rounded-3xl border border-gray-200 shadow-sm">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+                  <TrendingUp className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">Revenue Analytics</h3>
+              </div>
+              <button className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors">
+                <MoreHorizontal className="w-5 h-5" />
+              </button>
             </div>
-            <h3 className="text-lg font-bold text-gray-900">Order Sources</h3>
-          </div>
-          <div className="flex-1 flex flex-col justify-center">
-            <div className="h-56 mb-8">
+            <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={pieData} cx="50%" cy="50%" innerRadius={70} outerRadius={90} paddingAngle={8} dataKey="value">
-                    {pieData.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
+                <AreaChart data={revenueData.length > 0 ? revenueData : [{time: '', amount: 0}]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#2563eb" stopOpacity={0.1} />
+                      <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }} dy={10} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 600 }} />
                   <Tooltip 
                     contentStyle={{ 
                       borderRadius: '16px', 
                       border: 'none', 
                       boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', 
-                      backgroundColor: '#ffffff' 
+                      backgroundColor: '#ffffff',
+                      padding: '12px'
                     }} 
+                    itemStyle={{ fontWeight: 800, color: '#1e293b' }}
                   />
-                </PieChart>
+                  <Area type="monotone" dataKey="amount" stroke="#2563eb" strokeWidth={4} fillOpacity={1} fill="url(#colorAmount)" />
+                </AreaChart>
               </ResponsiveContainer>
             </div>
-            <div className="space-y-4">
-              {pieData.map((item, index) => (
-                <div key={index} className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-3">
-                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index] }}></span>
-                    <span className="text-gray-500 font-bold">{item.name}</span>
-                  </div>
-                  <span className="font-bold text-gray-900">{item.value}%</span>
-                </div>
-              ))}
-            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Popular Items */}
-      <div className="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-              <UtensilsCrossed className="w-5 h-5" />
+          <div className="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm flex flex-col">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
+                <ShoppingBag className="w-5 h-5" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900">Order Sources</h3>
             </div>
-            <h3 className="text-lg font-bold text-gray-900">Popular Items Today</h3>
+            <div className="flex-1 flex flex-col justify-center">
+              <div className="h-56 mb-8">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={70} outerRadius={90} paddingAngle={8} dataKey="value">
+                      {pieData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{ 
+                        borderRadius: '16px', 
+                        border: 'none', 
+                        boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', 
+                        backgroundColor: '#ffffff' 
+                      }} 
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="space-y-4">
+                {pieData.map((item, index) => (
+                  <div key={index} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-3">
+                      <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></span>
+                      <span className="text-gray-500 font-bold">{item.name}</span>
+                    </div>
+                    <span className="font-bold text-gray-900">{item.value}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-          <Button variant="ghost" className="text-blue-600 font-bold hover:bg-blue-50">View Menu</Button>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="text-gray-400 border-b border-gray-100">
-                <th className="pb-4 font-bold text-gray-500 text-xs">Item Name</th>
-                <th className="pb-4 font-bold text-gray-500 text-xs text-right">Sales</th>
-                <th className="pb-4 font-bold text-gray-500 text-xs text-right">Revenue</th>
-                <th className="pb-4 font-bold text-gray-500 text-xs text-right">Trend</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {popularItems.map((item, i) => (
-                <tr key={i} className="group hover:bg-gray-50/50 transition-colors">
-                  <td className="py-5 font-bold text-gray-900 text-sm">{item.name}</td>
-                  <td className="py-5 text-right text-gray-500 font-bold">{item.sales}</td>
-                  <td className="py-5 text-right text-gray-900 font-bold">₹{item.revenue}</td>
-                  <td className="py-5 text-right">
-                    <span className="inline-flex items-center gap-1.5 text-blue-600 bg-blue-50 px-3 py-1 rounded-full text-xs font-bold">
-                      <TrendingUp className="w-3 h-3" />
-                      {Math.floor(Math.random() * 20) + 1}%
-                    </span>
-                  </td>
+
+        {/* Popular Items */}
+        <div className="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                <UtensilsCrossed className="w-5 h-5" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900">Popular Items Today</h3>
+            </div>
+            <Button variant="ghost" className="text-blue-600 font-bold hover:bg-blue-50">View Menu</Button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="text-gray-400 border-b border-gray-100">
+                  <th className="pb-4 font-bold text-gray-500 text-xs">Item Name</th>
+                  <th className="pb-4 font-bold text-gray-500 text-xs text-right">Sales</th>
+                  <th className="pb-4 font-bold text-gray-500 text-xs text-right">Revenue</th>
+                  <th className="pb-4 font-bold text-gray-500 text-xs text-right">Trend</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {popularItems.length > 0 ? popularItems.map((item, i) => (
+                  <tr key={i} className="group hover:bg-gray-50/50 transition-colors">
+                    <td className="py-5 font-bold text-gray-900 text-sm">{item.name}</td>
+                    <td className="py-5 text-right text-gray-500 font-bold">{item.sales}</td>
+                    <td className="py-5 text-right text-gray-900 font-bold">₹{item.revenue}</td>
+                    <td className="py-5 text-right">
+                      <span className="inline-flex items-center gap-1.5 text-blue-600 bg-blue-50 px-3 py-1 rounded-full text-xs font-bold">
+                        <TrendingUp className="w-3 h-3" />
+                        {item.trend || '0%'}
+                      </span>
+                    </td>
+                  </tr>
+                )) : (
+                  <tr>
+                    <td colSpan={4} className="py-10 text-center text-gray-400 font-bold">No sales data recorded today</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="flex flex-col h-screen bg-gray-50/50 font-inter text-gray-900 overflow-hidden selection:bg-blue-100 selection:text-blue-900">

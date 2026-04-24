@@ -296,6 +296,16 @@ export const onboardsetupApi = {
     }
   },
 
+  // Get Admin Dashboard Stats
+  getAdminStats: async (): Promise<any> => {
+    try {
+      const response = await call.post('ury.setup.api.get_admin_stats', {});
+      return response.message;
+    } catch (error: any) {
+      throw new Error(extractErrorMessage(error, 'Failed to fetch dashboard stats.'));
+    }
+  },
+
   // Finalize Onboarding
   completeOnboarding: async (): Promise<SetupResult> => {
     try {
