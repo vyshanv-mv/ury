@@ -107,7 +107,7 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
   return (
     <div className="h-screen w-screen flex flex-col bg-gray-50 text-gray-900 overflow-hidden font-inter">
       {/* Global POS Header */}
-      <Header title="Setup Wizard" hideSearch />
+      <Header />
 
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
