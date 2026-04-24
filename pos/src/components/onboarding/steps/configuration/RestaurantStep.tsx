@@ -69,17 +69,6 @@ export const RestaurantStep: React.FC = () => {
                 value={restaurant.type || 'casual_dining'}
                 onChange={(e) => handleChange('type', e.target.value)}
               />
-              <FormField
-                label="Base Currency"
-                type="select"
-                options={[
-                  { value: 'INR', label: 'Indian Rupee (₹)' },
-                  { value: 'USD', label: 'US Dollar ($)' },
-                  { value: 'AED', label: 'UAE Dirham' },
-                ]}
-                value={restaurant.currency || 'INR'}
-                onChange={(e) => handleChange('currency', e.target.value)}
-              />
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   label="Opening Time"
