@@ -26,7 +26,7 @@ export const FormField: React.FC<FormFieldProps> = ({
   required
 }) => (
   <div className="space-y-1.5 group">
-    <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1 opacity-70 group-focus-within:text-primary group-focus-within:opacity-100 transition-all">
+    <label className="text-xs font-bold text-gray-500 ml-1 group-focus-within:text-blue-600 transition-all">
       {label} {required && <span className="text-destructive">*</span>}
     </label>
     <div className="relative">

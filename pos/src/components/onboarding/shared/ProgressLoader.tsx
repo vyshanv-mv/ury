@@ -38,7 +38,7 @@ export const ProgressLoader: React.FC<ProgressLoaderProps> = ({ progress, steps 
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-2xl font-black text-gray-900 tracking-tight">{Math.round(progress)}%</span>
+          <span className="text-2xl font-bold text-gray-900 tracking-tight">{Math.round(progress)}%</span>
         </div>
       </div>
 

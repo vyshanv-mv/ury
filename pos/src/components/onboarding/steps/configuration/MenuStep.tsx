@@ -1,12 +1,17 @@
 import React, { useState, useRef } from 'react';
-import { Loader2, Upload, Trash2, Check, Plus, Info, Percent, Receipt, Pencil, X, Search } from 'lucide-react';
+import { 
+  Loader2, Upload, Trash2, Plus, Info, Percent, Receipt, Pencil, Search, MoreVertical 
+} from 'lucide-react';
 import { Button } from '../../../ui/button';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
 import { showToast } from '../../../ui/toast';
 import { Input } from '../../../ui/input';
-import { FormField } from '../../shared/FormField';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Pagination } from '../../../ui/pagination';
+import { 
+  Dialog, DialogContent, DialogHeader, DialogTitle, 
+  DialogFooter, DialogDescription 
+} from '../../../ui/dialog';
 
 interface MenuForm {
   item_name: string;
@@ -24,22 +29,15 @@ export const MenuStep: React.FC = () => {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
+  const itemsPerPage = 8;
 
-  // Local list for easier manipulation before saving to store
-  const [items, setItems] = useState<MenuForm[]>(() => {
-    const storeItems = menu.items;
-    if (Array.isArray(storeItems) && storeItems.length > 0) {
-      return storeItems.map((it: any) => ({
-        item_name: it.item_name || it.name || '',
-        standard_rate: String(it.standard_rate || it.price || ''),
-      }));
-    }
-    return [];
-  });
+  const items = Array.isArray(menu.items) ? menu.items.map((it: any) => ({
+    item_name: it.item_name || it.name || '',
+    standard_rate: String(it.standard_rate || it.price || ''),
+  })) : [];
 
   const saveToStore = (newItems: MenuForm[]) => {
-    updateData('menu', { items: newItems });
+    updateData('menu', { ...menu, items: newItems });
   };
 
   const openEdit = (i: number) => {
@@ -53,27 +51,42 @@ export const MenuStep: React.FC = () => {
   };
 
   const handleSaveItem = () => {
-    if (!form.item_name.trim() || !form.standard_rate) {
-      showToast.error('Item name and price are required');
+    const trimmedName = form.item_name?.trim();
+    const rate = parseFloat(form.standard_rate);
+
+    if (!trimmedName || isNaN(rate)) {
+      showToast.error('Item name and a valid price are required');
       return;
     }
+
+    // Duplicate check
+    const exists = items.some((it, idx) => 
+      it.item_name.toLowerCase() === trimmedName.toLowerCase() && idx !== editIndex
+    );
+    if (exists) {
+      showToast.error('An item with this name already exists');
+      return;
+    }
+
     const next = [...items];
-    if (editIndex !== null) {
-      next[editIndex] = form;
+    const entry = { item_name: trimmedName, standard_rate: String(rate) };
+    
+    if (editIndex !== null && editIndex !== -1) {
+      next[editIndex] = entry;
       showToast.success('Item updated');
     } else {
-      next.push(form);
+      next.push(entry);
       showToast.success('Item added');
     }
-    setItems(next);
     saveToStore(next);
     cancelEdit();
   };
 
   const removeItem = (i: number) => {
     const next = items.filter((_, idx) => idx !== i);
-    setItems(next);
     saveToStore(next);
+    showToast.success('Item removed');
+    setEditIndex(null);
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,7 +120,6 @@ export const MenuStep: React.FC = () => {
         if (imported.length === 0) { showToast.error('No valid items found in file'); return; }
 
         const next = [...items, ...imported];
-        setItems(next);
         saveToStore(next);
         showToast.success(`${imported.length} items imported`);
       } catch {
@@ -130,217 +142,235 @@ export const MenuStep: React.FC = () => {
     currentPage * itemsPerPage
   );
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="max-w-4xl mx-auto space-y-8">
-        {/* Tax Configuration */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="p-1.5 bg-primary/10 rounded-md text-primary">
-              <Percent className="w-4 h-4" />
-            </div>
-            <h4 className="text-sm font-bold text-foreground">Tax Settings</h4>
-          </div>
-
-          <div className="p-6 bg-card border border-border rounded-2xl shadow-sm space-y-6">
-            <div className="flex flex-col sm:flex-row gap-8">
-              <div className="w-full sm:w-1/3">
-                <FormField
-                  label="Tax Rate (%)"
-                  type="number"
-                  placeholder="5"
-                  value={menu.tax_rate ?? ''}
-                  onChange={(e) => updateData('menu', { tax_rate: e.target.value })}
-                />
-              </div>
-
-              <div className="flex-1 space-y-2">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1 opacity-70">
-                  Tax Calculation
-                </label>
-                <div className="flex gap-3">
-                  {[
-                    { value: 'Inclusive', subtitle: 'Tax within price' },
-                    { value: 'Exclusive', subtitle: 'Tax added on top' },
-                  ].map(({ value, subtitle }) => {
-                    const selected = menu.tax_calculation === value || (!menu.tax_calculation && value === 'Inclusive');
-                    return (
-                      <button
-                        key={value}
-                        onClick={() => updateData('menu', { tax_calculation: value })}
-                        className={`flex-1 flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all duration-200 text-left ${selected
-                          ? 'border-primary bg-primary/5'
-                          : 'border-border bg-background hover:border-primary/20'
-                          }`}
-                      >
-                        <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${selected ? 'border-primary' : 'border-muted-foreground/40'
-                          }`}>
-                          {selected && <span className="w-2 h-2 rounded-full bg-primary" />}
-                        </span>
-                        <span>
-                          <span className={`block text-xs font-bold ${selected ? 'text-primary' : 'text-foreground'}`}>{value}</span>
-                          <span className="block text-xs text-muted-foreground opacity-80">{subtitle}</span>
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
+    <div className="space-y-6">
+      {/* Tax Quick Settings */}
+      <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col md:flex-row items-center gap-6">
+        <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center flex-shrink-0 text-blue-600">
+          <Percent className="w-6 h-6" />
         </div>
-
-        {/* Menu Items List */}
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 bg-primary/10 rounded-md text-primary">
-                <Receipt className="w-4 h-4" />
-              </div>
-              <h4 className="text-sm font-bold text-foreground">Menu Items</h4>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="relative w-full sm:w-64 group">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                <Input 
-                  placeholder="Search menu..." 
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="pl-9 h-9 text-xs font-semibold bg-background/50 border-border/50 focus:bg-background transition-all"
-                />
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className="font-bold gap-2 text-xs h-9 px-4"
+        <div className="flex-1">
+          <h4 className="text-sm font-bold text-gray-900">Tax Configuration</h4>
+          <p className="text-xs text-gray-500 font-medium">Set global tax rate and calculation method</p>
+        </div>
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <div className="relative w-32">
+            <Input 
+              type="number"
+              placeholder="5.0"
+              value={menu.tax_rate ?? ''}
+              onChange={(e) => updateData('menu', { ...menu, tax_rate: e.target.value })}
+              className="h-11 rounded-xl pr-8 font-bold border-gray-200"
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-xs">%</span>
+          </div>
+          <div className="flex bg-gray-50 p-1 rounded-xl border border-gray-100">
+            {['Inclusive', 'Exclusive'].map((type) => (
+              <button
+                key={type}
+                onClick={() => updateData('menu', { ...menu, tax_calculation: type })}
+                className={`px-4 py-2 text-[10px] font-bold rounded-lg transition-all ${
+                  (menu.tax_calculation || 'Inclusive') === type 
+                  ? 'bg-white text-blue-600 shadow-sm' 
+                  : 'text-gray-400 hover:text-gray-600'
+                }`}
               >
-                {isUploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-                {isUploading ? 'Importing...' : 'Upload CSV'}
-              </Button>
-              <input type="file" accept=".csv" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[140px]">
-            <AnimatePresence mode="popLayout">
-              {paginatedItems.map((item) => {
-                const realIndex = items.indexOf(item);
-                return (
-                  <motion.div
-                    key={`${item.item_name}-${realIndex}`}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    className="p-5 bg-card rounded-2xl border border-border shadow-sm flex items-center justify-between group hover:border-primary/30 transition-all"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-secondary rounded-xl flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                        <Receipt className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-foreground line-clamp-1">{item.item_name}</p>
-                        <p className="text-xs font-bold text-primary">₹ {item.standard_rate}</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                      <Button variant="ghost" size="icon" onClick={() => openEdit(realIndex)} className="w-8 h-8 text-primary hover:bg-primary/10">
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => removeItem(realIndex)} className="w-8 h-8 text-destructive hover:bg-destructive/10">
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
-            
-            {filteredItems.length === 0 && (
-              <div className="col-span-full py-12 flex flex-col items-center justify-center text-center bg-secondary/5 rounded-[2rem] border border-dashed border-border">
-                <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center text-muted-foreground mb-4">
-                  <Search className="w-6 h-6" />
-                </div>
-                <h5 className="text-sm font-bold text-foreground">No menu items found</h5>
-                <p className="text-xs text-muted-foreground mt-1">Try adjusting your search term or add a new item.</p>
-              </div>
-            )}
-          </div>
-
-          <Pagination 
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
-        </div>
-
-        {/* Add / Edit Form */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="p-1.5 bg-primary/10 rounded-md text-primary">
-              <Plus className="w-4 h-4" />
-            </div>
-            <h4 className="text-sm font-bold text-foreground">
-              {editIndex !== null ? 'Edit Item' : 'Add New Item'}
-            </h4>
-          </div>
-
-          <div className="p-6 bg-secondary/10 rounded-2xl border border-border/50 flex flex-col sm:flex-row gap-4 items-end">
-            <div className="flex-2 w-full">
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1 mb-1.5 block opacity-60">Item Name</label>
-              <Input
-                value={form.item_name}
-                onChange={(e) => setForm({ ...form, item_name: e.target.value })}
-                className="w-full text-sm font-semibold h-11"
-                placeholder="e.g. Chicken Biryani"
-              />
-            </div>
-            <div className="w-full sm:w-40">
-              <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1 mb-1.5 block opacity-60">Rate (₹)</label>
-              <Input
-                type="number"
-                value={form.standard_rate}
-                onChange={(e) => setForm({ ...form, standard_rate: e.target.value })}
-                className="w-full text-sm font-bold h-11"
-                placeholder="250.00"
-              />
-            </div>
-            <div className="flex gap-2">
-              {editIndex !== null && (
-                <Button variant="outline" size="lg" onClick={cancelEdit} className="h-11 px-6 font-bold gap-2">
-                  <X className="w-4 h-4" />
-                </Button>
-              )}
-              <Button size="lg" onClick={handleSaveItem} className="h-11 px-8 font-bold gap-2 shadow-lg shadow-primary/10">
-                {editIndex !== null ? <><Check className="w-5 h-5" /> Update</> : <><Plus className="w-5 h-5" /> Add Item</>}
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Info Box */}
-        <div className="p-6 bg-secondary/20 rounded-2xl border border-border/50 flex gap-4">
-          <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center flex-shrink-0 text-muted-foreground border border-border shadow-sm">
-            <Info className="w-5 h-5" />
-          </div>
-          <div>
-            <h4 className="text-sm font-bold text-foreground">Menu Optimization</h4>
-            <p className="text-xs text-muted-foreground leading-relaxed mt-1">
-              Start by adding your most popular items. You can use the CSV upload to import a large menu instantly. All changes are saved automatically.
-            </p>
+                {type}
+              </button>
+            ))}
           </div>
         </div>
       </div>
+
+      {/* Header Area */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+        <div>
+          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-3">
+            <Receipt className="w-7 h-7 text-blue-600" />
+            Menu Management
+          </h2>
+          <p className="text-gray-500 text-xs mt-1 font-medium">Create your menu items or import them from a CSV file</p>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+            <Input 
+              placeholder="Search items..." 
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="pl-9 h-11 text-xs font-semibold bg-gray-50 border-gray-200 focus:bg-white transition-all rounded-xl w-64"
+            />
+          </div>
+          <Button 
+            variant="outline" 
+            onClick={() => fileInputRef.current?.click()}
+            className="h-11 px-4 rounded-xl gap-2 font-bold border-gray-200"
+            disabled={isUploading}
+          >
+            {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+            Import
+          </Button>
+          <input type="file" accept=".csv" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
+          <Button onClick={() => setEditIndex(-1)} className="h-11 px-6 rounded-xl gap-2 font-bold shadow-lg shadow-blue-100 bg-blue-600">
+            <Plus className="w-4 h-4" />
+            Add Item
+          </Button>
+        </div>
+      </div>
+
+      {/* Table Section */}
+      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-gray-50/50 border-b border-gray-100">
+                <th className="px-6 py-4 text-xs font-bold text-gray-500 w-12 text-center">#</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-500">Item Details</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-500">Standard Rate</th>
+                <th className="px-6 py-4 text-xs font-bold text-gray-500 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              <AnimatePresence mode='popLayout'>
+                {paginatedItems.length > 0 ? (
+                  paginatedItems.map((item, i) => {
+                    const globalIndex = items.findIndex(it => it === item);
+                    return (
+                      <motion.tr 
+                        key={item.item_name + i}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="hover:bg-blue-50/30 transition-colors group"
+                      >
+                        <td className="px-6 py-4 text-xs font-bold text-gray-400 text-center">
+                          {(currentPage - 1) * itemsPerPage + i + 1}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
+                              <Receipt className="w-5 h-5" />
+                            </div>
+                            <div className="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                              {item.item_name}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm font-bold text-blue-600">
+                            ₹ {parseFloat(item.standard_rate).toFixed(2)}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => openEdit(globalIndex)}
+                            className="h-8 w-8 p-0 rounded-lg hover:bg-white hover:shadow-md transition-all"
+                          >
+                            <MoreVertical className="w-4 h-4 text-gray-400" />
+                          </Button>
+                        </td>
+                      </motion.tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="px-6 py-12 text-center">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
+                          <Receipt className="w-8 h-8 text-gray-200" />
+                        </div>
+                        <div className="text-gray-400 text-sm font-bold">No menu items configured</div>
+                        <Button variant="outline" onClick={() => setEditIndex(-1)} size="sm" className="mt-2 rounded-xl border-gray-200 font-bold">
+                          Add your first item
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </AnimatePresence>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Pagination Area */}
+      <div className="pt-4 border-t border-gray-100">
+        <Pagination 
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
+      </div>
+
+      {/* Form Dialog */}
+      <Dialog open={editIndex !== null} onOpenChange={(open) => !open && cancelEdit()}>
+        <DialogContent size="lg" onClose={cancelEdit}>
+          <DialogHeader className="border-b border-gray-100 pb-4">
+            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-4">
+              <Receipt className="w-6 h-6 text-blue-600" />
+            </div>
+            <DialogTitle className="text-lg font-bold text-gray-900">
+              {editIndex === -1 ? 'Add New Menu Item' : 'Edit Item Details'}
+            </DialogTitle>
+            <DialogDescription className="text-gray-500 font-medium">
+              Define the item name and its standard selling price.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="p-6 space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-2 col-span-2">
+                <label className="text-xs font-bold text-gray-500 ml-1">Item Name</label>
+                <div className="relative">
+                  <Receipt className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input 
+                    value={form.item_name} 
+                    onChange={e => setForm({...form, item_name: e.target.value})}
+                    placeholder="e.g. Chicken Biryani Full"
+                    className="pl-10 rounded-xl border-gray-200 bg-white h-11 font-semibold" 
+                  />
+                </div>
+              </div>
+              <div className="space-y-2 col-span-2">
+                <label className="text-xs font-bold text-gray-500 ml-1">Standard Rate (₹)</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">₹</span>
+                  <Input 
+                    type="number"
+                    value={form.standard_rate} 
+                    onChange={e => setForm({...form, standard_rate: e.target.value})}
+                    placeholder="250.00"
+                    className="pl-10 rounded-xl border-gray-200 bg-white h-11 font-semibold" 
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="bg-gray-50/50 mt-4 border-t border-gray-100">
+            {editIndex !== null && editIndex !== -1 && (
+              <Button 
+                variant="ghost" 
+                onClick={() => removeItem(editIndex)} 
+                className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-bold gap-2 mr-auto"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete Item
+              </Button>
+            )}
+            <Button variant="ghost" onClick={cancelEdit} className="font-bold rounded-xl h-11 px-6">Cancel</Button>
+            <Button onClick={handleSaveItem} className="px-8 font-bold rounded-xl h-11 shadow-lg shadow-blue-100 bg-blue-600">
+              {editIndex === -1 ? 'Add Item' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -61,7 +61,7 @@ export const LoadingStep: React.FC<OnboardingStepProps> = ({ onNext, data }) => 
           <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-50 rounded-full blur-3xl opacity-50" />
 
           <div className="relative z-10 mb-12">
-            <h2 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 tracking-tight">
               Setting up your workspace
             </h2>
             <p className="text-gray-500 font-bold text-lg opacity-60">

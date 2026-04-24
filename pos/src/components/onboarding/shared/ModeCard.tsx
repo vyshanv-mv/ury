@@ -31,7 +31,7 @@ export const ModeCard: React.FC<ModeCardProps> = ({
       )}
     >
       {recommended && (
-        <span className="absolute -top-3 left-6 px-3 py-1 bg-primary-50 text-primary-700 text-[10px] font-bold uppercase tracking-wider rounded-full border border-primary-100">
+        <span className="absolute -top-3 left-6 px-3 py-1 bg-primary-50 text-primary-700 text-[10px] font-bold rounded-full border border-primary-100">
           Recommended
         </span>
       )}

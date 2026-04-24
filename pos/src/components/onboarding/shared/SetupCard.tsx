@@ -22,7 +22,7 @@ export const SetupCard: React.FC<SetupCardProps> = ({
       )}
     >
       <div className="bg-primary p-8 md:p-12 text-white text-center">
-        <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-3">{title}</h2>
+        <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-3">{title}</h2>
         <p className="text-primary-foreground/80 text-lg font-bold opacity-60">{description}</p>
       </div>
       <div className="p-8 md:p-12">

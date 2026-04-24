@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Printer, Globe, Hash, ReceiptText, Loader2, Plus, Trash2, Pencil, X, Check, Search } from 'lucide-react';
-import { FormField } from '../../shared/FormField';
+import { 
+  Printer, Globe, Hash, ReceiptText, Loader2, Plus, Trash2, 
+  Search, MoreVertical 
+} from 'lucide-react';
 import { Button } from '../../../ui/button';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
 import { onboardingApi } from '../../../../lib/onboarding-api';
@@ -8,6 +10,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { showToast } from '../../../ui/toast';
 import { Input } from '../../../ui/input';
 import { Pagination } from '../../../ui/pagination';
+import { 
+  Dialog, DialogContent, DialogHeader, DialogTitle, 
+  DialogFooter, DialogDescription 
+} from '../../../ui/dialog';
 
 interface PrinterForm {
   printer_name: string;
@@ -31,7 +37,7 @@ export const PrinterStep: React.FC = () => {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4;
+  const itemsPerPage = 8;
 
   useEffect(() => {
     const fetchContext = async () => {
@@ -66,16 +72,31 @@ export const PrinterStep: React.FC = () => {
   };
 
   const save = () => {
-    if (!form.printer_name.trim() || !form.server_ip.trim()) {
+    const trimmedName = form.printer_name?.trim();
+    const trimmedIp = form.server_ip?.trim();
+
+    if (!trimmedName || !trimmedIp) {
       showToast.error('Printer name and IP are required');
       return;
     }
+
+    // Duplicate check
+    const exists = printers.some((p, idx) => 
+      p.printer_name.toLowerCase() === trimmedName.toLowerCase() && idx !== editIndex
+    );
+    if (exists) {
+      showToast.error('A printer with this name already exists');
+      return;
+    }
+
     const next = [...printers];
-    if (editIndex !== null) {
-      next[editIndex] = form;
+    const entry = { ...form, printer_name: trimmedName, server_ip: trimmedIp };
+    
+    if (editIndex !== null && editIndex !== -1) {
+      next[editIndex] = entry;
       showToast.success('Printer updated');
     } else {
-      next.push(form);
+      next.push(entry);
       showToast.success('Printer added');
     }
     updateData('printer', next);
@@ -87,6 +108,7 @@ export const PrinterStep: React.FC = () => {
     next.splice(i, 1);
     updateData('printer', next);
     showToast.success('Printer removed');
+    setEditIndex(null);
   };
 
   const filteredPrinters = printers.filter(p => 
@@ -100,31 +122,28 @@ export const PrinterStep: React.FC = () => {
     currentPage * itemsPerPage
   );
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-6">
       {loading ? (
         <div className="py-20 flex flex-col items-center justify-center space-y-4">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-sm font-medium text-muted-foreground">Scanning for printers...</p>
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          <p className="text-sm font-bold text-gray-500">Scanning for printers...</p>
         </div>
       ) : (
-        <div className="max-w-4xl mx-auto space-y-8">
-          {/* List Section */}
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-1">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-blue-50 text-blue-600 rounded-md">
-                  <Printer className="w-4 h-4" />
-                </div>
-                <h4 className="text-sm font-bold text-gray-900">Configured Printers</h4>
-              </div>
-
-              <div className="relative w-full sm:w-64 group">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+        <>
+          {/* Header Area */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-3">
+                <Printer className="w-7 h-7 text-blue-600" />
+                Network Printers
+              </h2>
+              <p className="text-gray-500 text-xs mt-1 font-medium">Manage POS and Kitchen Order Ticket (KOT) printers</p>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <div className="relative group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
                 <Input 
                   placeholder="Search printers..." 
                   value={searchTerm}
@@ -132,169 +151,226 @@ export const PrinterStep: React.FC = () => {
                     setSearchTerm(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="pl-9 h-9 text-xs font-semibold bg-background/50 border-border/50 focus:bg-background transition-all"
+                  className="pl-9 h-11 text-xs font-semibold bg-gray-50 border-gray-200 focus:bg-white transition-all rounded-xl w-64"
                 />
               </div>
+              <Button onClick={() => setEditIndex(-1)} className="h-11 px-6 rounded-xl gap-2 font-bold shadow-lg shadow-blue-100 bg-blue-600">
+                <Plus className="w-4 h-4" />
+                Add Printer
+              </Button>
             </div>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[140px]">
-              <AnimatePresence mode="popLayout">
-                {paginatedPrinters.map((p) => {
-                  const realIndex = printers.indexOf(p);
-                  return (
-                    <motion.div
-                      key={`${p.printer_name}-${realIndex}`}
-                      layout
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      className="flex items-center justify-between p-5 bg-white rounded-2xl border border-gray-200 shadow-sm hover:border-blue-300 transition-all group"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                          <Printer className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <p className="font-bold text-gray-900">{p.printer_name}</p>
-                          <p className="text-xs font-medium text-gray-500">
-                            {p.server_ip}:{p.port} {p.bill && '• Bill Printer'}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => openEdit(realIndex)}
-                          className="text-blue-600 hover:bg-blue-50 transition-colors"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => remove(realIndex)}
-                          className="text-red-600 hover:bg-red-50 transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-
-              {filteredPrinters.length === 0 && (
-                <div className="col-span-full py-12 flex flex-col items-center justify-center text-center bg-gray-50/50 rounded-[2rem] border border-dashed border-gray-200">
-                  <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400 mb-4">
-                    <Search className="w-6 h-6" />
-                  </div>
-                  <h5 className="text-sm font-bold text-gray-900">No printers found</h5>
-                  <p className="text-xs text-gray-500 mt-1">Try adjusting your search term or add a new printer below.</p>
-                </div>
-              )}
+          {/* Table Section */}
+          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-gray-50/50 border-b border-gray-100">
+                    <th className="px-6 py-4 text-xs font-bold text-gray-500 w-12 text-center">#</th>
+                    <th className="px-6 py-4 text-xs font-bold text-gray-500">Printer Details</th>
+                    <th className="px-6 py-4 text-xs font-bold text-gray-500">Network Address</th>
+                    <th className="px-6 py-4 text-xs font-bold text-gray-500">Status</th>
+                    <th className="px-6 py-4 text-xs font-bold text-gray-500 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  <AnimatePresence mode='popLayout'>
+                    {paginatedPrinters.length > 0 ? (
+                      paginatedPrinters.map((p, i) => {
+                        const globalIndex = printers.findIndex(item => item === p);
+                        return (
+                          <motion.tr 
+                            key={p.printer_name + i}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="hover:bg-blue-50/30 transition-colors group"
+                          >
+                            <td className="px-6 py-4 text-xs font-bold text-gray-400 text-center">
+                              {(currentPage - 1) * itemsPerPage + i + 1}
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
+                                  <Printer className="w-5 h-5" />
+                                </div>
+                                <div>
+                                  <div className="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                                    {p.printer_name}
+                                  </div>
+                                  {p.bill && (
+                                    <div className="flex items-center gap-1 text-[10px] text-emerald-600 font-bold mt-0.5">
+                                      <ReceiptText className="w-3 h-3" />
+                                      Bill Printer
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex flex-col">
+                                <div className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
+                                  <Globe className="w-3 h-3 text-gray-400" />
+                                  {p.server_ip}
+                                </div>
+                                <div className="text-[10px] font-medium text-gray-400 ml-4.5">
+                                  Port: {p.port}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-bold border border-blue-100 inline-flex items-center gap-1.5">
+                                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                                Ready
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => openEdit(globalIndex)}
+                                className="h-8 w-8 p-0 rounded-lg hover:bg-white hover:shadow-md transition-all"
+                              >
+                                <MoreVertical className="w-4 h-4 text-gray-400" />
+                              </Button>
+                            </td>
+                          </motion.tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-12 text-center">
+                          <div className="flex flex-col items-center gap-3">
+                            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
+                              <Printer className="w-8 h-8 text-gray-200" />
+                            </div>
+                            <div className="text-gray-400 text-sm font-bold">No printers configured</div>
+                            <Button variant="outline" onClick={() => setEditIndex(-1)} size="sm" className="mt-2 rounded-xl border-gray-200 font-bold">
+                              Add new printer
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </AnimatePresence>
+                </tbody>
+              </table>
             </div>
+          </div>
 
+          {/* Pagination Area */}
+          <div className="pt-4 border-t border-gray-100">
             <Pagination 
               currentPage={currentPage}
               totalPages={totalPages}
-              onPageChange={handlePageChange}
+              onPageChange={(page) => setCurrentPage(page)}
             />
           </div>
 
-          {/* Form Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="p-1.5 bg-blue-50 text-blue-600 rounded-md">
-                <Plus className="w-4 h-4" />
-              </div>
-              <h4 className="text-sm font-bold text-gray-900">
-                {editIndex !== null ? 'Edit Printer' : 'Add New Printer'}
-              </h4>
+          {/* Help Info */}
+          <div className="p-6 bg-amber-50 rounded-3xl border border-amber-100 flex gap-4 items-center shadow-sm">
+            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center flex-shrink-0 text-amber-600 shadow-sm border border-amber-100">
+              <Hash className="w-6 h-6" />
             </div>
+            <div>
+              <h4 className="text-sm font-bold text-amber-900">Printer Connectivity</h4>
+              <p className="text-xs text-amber-700 leading-relaxed mt-0.5">
+                Ensure your printers are on the same local network. The standard port for thermal printers is <b>9100</b>. You can test connections in the advanced settings later.
+              </p>
+            </div>
+          </div>
 
-            <div className="p-8 bg-gray-50/50 rounded-3xl border border-gray-100 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  label="Printer Name"
-                  placeholder="e.g. Kitchen 1"
-                  icon={<Printer className="w-4 h-4" />}
-                  value={form.printer_name}
-                  onChange={(e) => handleChange('printer_name', e.target.value)}
-                  required
-                />
-                <FormField
-                  label="Server IP"
-                  placeholder="192.168.1.100"
-                  icon={<Globe className="w-4 h-4" />}
-                  value={form.server_ip}
-                  onChange={(e) => handleChange('server_ip', e.target.value)}
-                  required
-                />
-                <FormField
-                  label="Port"
-                  placeholder="9100"
-                  icon={<Hash className="w-4 h-4" />}
-                  value={form.port}
-                  onChange={(e) => handleChange('port', e.target.value)}
-                  required
-                />
+          {/* Form Dialog */}
+          <Dialog open={editIndex !== null} onOpenChange={(open) => !open && cancelEdit()}>
+            <DialogContent size="lg" onClose={cancelEdit}>
+              <DialogHeader className="border-b border-gray-100 pb-4">
+                <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-4">
+                  <Printer className="w-6 h-6 text-blue-600" />
+                </div>
+                <DialogTitle className="text-lg font-bold text-gray-900">
+                  {editIndex === -1 ? 'Add New Printer' : 'Edit Printer'}
+                </DialogTitle>
+                <DialogDescription className="text-gray-500 font-medium">
+                  Configure network details for your thermal printer.
+                </DialogDescription>
+              </DialogHeader>
 
-                <div className="flex flex-col space-y-3 p-5 bg-white border border-gray-100 rounded-2xl">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
-                        <ReceiptText className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-gray-900">Bill Printing</p>
-                        <p className="text-xs text-gray-400">Enable automatic receipt printing</p>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleChange('bill', !form.bill)}
-                      className={`w-12 h-6 p-0 min-w-0 rounded-full transition-all duration-300 relative ${form.bill ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-200 hover:bg-gray-300'
-                        }`}
-                    >
-                      <div
-                        className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${form.bill ? 'left-7' : 'left-1'
-                          }`}
+              <div className="p-6 space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 ml-1">Printer Name</label>
+                    <div className="relative">
+                      <Printer className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input 
+                        value={form.printer_name} 
+                        onChange={e => handleChange('printer_name', e.target.value)}
+                        placeholder="e.g. Kitchen Printer"
+                        className="pl-10 rounded-xl border-gray-200 bg-white h-11 font-semibold" 
                       />
-                    </Button>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 ml-1">IP Address</label>
+                    <div className="relative">
+                      <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input 
+                        value={form.server_ip} 
+                        onChange={e => handleChange('server_ip', e.target.value)}
+                        placeholder="192.168.1.100"
+                        className="pl-10 rounded-xl border-gray-200 bg-white h-11 font-semibold" 
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 ml-1">Port</label>
+                    <div className="relative">
+                      <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input 
+                        value={form.port} 
+                        onChange={e => handleChange('port', e.target.value)}
+                        placeholder="9100"
+                        className="pl-10 rounded-xl border-gray-200 bg-white h-11 font-semibold" 
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 ml-1">Print Type</label>
+                    <div className="flex items-center justify-between p-3 border border-gray-100 rounded-xl bg-gray-50/50">
+                      <div className="flex items-center gap-2">
+                        <ReceiptText className="w-4 h-4 text-blue-600" />
+                        <span className="text-xs font-bold text-gray-700">Bill Printer</span>
+                      </div>
+                      <button 
+                        onClick={() => handleChange('bill', !form.bill)}
+                        className={`w-10 h-5 rounded-full transition-colors relative ${form.bill ? 'bg-blue-600' : 'bg-gray-300'}`}
+                      >
+                        <div className={`absolute top-1 w-3 h-3 rounded-full bg-white transition-all ${form.bill ? 'left-6' : 'left-1'}`} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex gap-3 justify-end">
-                {editIndex !== null && (
-                  <Button variant="outline" onClick={cancelEdit} className="font-bold gap-2 rounded-xl h-11 px-6">
-                    <X className="w-4 h-4" /> Cancel
+              <DialogFooter className="bg-gray-50/50 mt-4 border-t border-gray-100">
+                {editIndex !== null && editIndex !== -1 && (
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => remove(editIndex)} 
+                    className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-bold gap-2 mr-auto"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Remove Printer
                   </Button>
                 )}
-                <Button onClick={save} className="font-bold gap-2 rounded-xl h-11 px-8 shadow-lg shadow-blue-100">
-                  {editIndex !== null ? (
-                    <><Check className="w-4 h-4" /> Update Printer</>
-                  ) : (
-                    <><Plus className="w-4 h-4" /> Add Printer</>
-                  )}
+                <Button variant="ghost" onClick={cancelEdit} className="font-bold rounded-xl h-11 px-6">Cancel</Button>
+                <Button onClick={save} className="px-8 font-bold rounded-xl h-11 shadow-lg shadow-blue-100 bg-blue-600">
+                  {editIndex === -1 ? 'Add Printer' : 'Save Changes'}
                 </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6 bg-amber-50 rounded-2xl border border-amber-100 flex gap-4">
-            <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 text-amber-600">
-              <Printer className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-amber-900">Network Printing</h4>
-              <p className="text-xs text-amber-700 leading-relaxed mt-1">
-                You can add multiple printers for separate areas like the Kitchen, Bar, and Front Desk. Each printer needs a valid IP address.
-              </p>
-            </div>
-          </div>
-        </div>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </>
       )}
     </div>
   );

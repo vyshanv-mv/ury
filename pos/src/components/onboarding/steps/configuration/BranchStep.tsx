@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { FormField } from '../../shared/FormField';
-import { Info, Building2, Phone, Mail, Navigation, Loader2, Plus, Trash2, Pencil, X, Check, Search } from 'lucide-react';
+import { 
+  Building2, Phone, Mail, Navigation, Loader2, 
+  Plus, Trash2, Pencil, Search, MoreVertical, Building
+} from 'lucide-react';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
 import { onboardingApi } from '../../../../lib/onboarding-api';
 import { Button } from '../../../ui/button';
@@ -8,6 +10,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { showToast } from '../../../ui/toast';
 import { Input } from '../../../ui/input';
 import { Pagination } from '../../../ui/pagination';
+import { 
+  Dialog, DialogContent, DialogHeader, DialogTitle, 
+  DialogFooter, DialogDescription 
+} from '../../../ui/dialog';
 
 interface BranchForm {
   branch_name: string;
@@ -31,7 +37,7 @@ export const BranchStep: React.FC = () => {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4;
+  const itemsPerPage = 8;
 
   useEffect(() => {
     const fetchContext = async () => {
@@ -40,7 +46,6 @@ export const BranchStep: React.FC = () => {
       try {
         const response = await onboardingApi.getBranchContext();
         if (response && response.branch_name) {
-          // If we get a single branch from context, put it in the list
           updateData('branch', [response]);
         }
       } catch (error) {
@@ -51,10 +56,6 @@ export const BranchStep: React.FC = () => {
     };
     fetchContext();
   }, []);
-
-  const handleChange = (field: keyof BranchForm, value: string) => {
-    setForm(prev => ({ ...prev, [field]: value }));
-  };
 
   const openEdit = (i: number) => {
     setForm({ ...branches[i] });
@@ -67,16 +68,31 @@ export const BranchStep: React.FC = () => {
   };
 
   const save = () => {
-    if (!form.branch_name.trim() || !form.branch_address.trim()) {
+    const trimmedName = form.branch_name?.trim();
+    const trimmedAddress = form.branch_address?.trim();
+    
+    if (!trimmedName || !trimmedAddress) {
       showToast.error('Branch name and address are required');
       return;
     }
+
+    // Duplicate check
+    const exists = branches.some((b, idx) => 
+      b.branch_name.toLowerCase() === trimmedName.toLowerCase() && idx !== editIndex
+    );
+    if (exists) {
+      showToast.error('A branch with this name already exists');
+      return;
+    }
+
     const next = [...branches];
-    if (editIndex !== null) {
-      next[editIndex] = form;
+    const entry = { ...form, branch_name: trimmedName, branch_address: trimmedAddress };
+    
+    if (editIndex !== null && editIndex !== -1) {
+      next[editIndex] = entry;
       showToast.success('Branch updated');
     } else {
-      next.push(form);
+      next.push(entry);
       showToast.success('Branch added');
     }
     updateData('branch', next);
@@ -88,6 +104,7 @@ export const BranchStep: React.FC = () => {
     next.splice(i, 1);
     updateData('branch', next);
     showToast.success('Branch removed');
+    setEditIndex(null);
   };
 
   const filteredBranches = branches.filter(b => 
@@ -101,31 +118,28 @@ export const BranchStep: React.FC = () => {
     currentPage * itemsPerPage
   );
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-6">
       {loading ? (
         <div className="py-20 flex flex-col items-center justify-center space-y-4">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-sm font-medium text-muted-foreground">Fetching branch details...</p>
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          <p className="text-sm font-bold text-gray-500">Fetching branch details...</p>
         </div>
       ) : (
-        <div className="max-w-4xl mx-auto space-y-8">
-          {/* List Section */}
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-1">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-blue-50 text-blue-600 rounded-md">
-                  <Building2 className="w-4 h-4" />
-                </div>
-                <h4 className="text-sm font-bold text-gray-900">Configured Branches</h4>
-              </div>
-
-              <div className="relative w-full sm:w-64 group">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+        <>
+          {/* Header Area */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-3">
+                <Building2 className="w-7 h-7 text-blue-600" />
+                Branches
+              </h2>
+              <p className="text-gray-500 text-xs mt-1 font-medium">Manage your restaurant locations and contact details</p>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <div className="relative group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
                 <Input 
                   placeholder="Search branches..." 
                   value={searchTerm}
@@ -133,150 +147,204 @@ export const BranchStep: React.FC = () => {
                     setSearchTerm(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="pl-9 h-9 text-xs font-semibold bg-background/50 border-border/50 focus:bg-background transition-all"
+                  className="pl-9 h-11 text-xs font-semibold bg-gray-50 border-gray-200 focus:bg-white transition-all rounded-xl w-64"
                 />
               </div>
+              <Button onClick={() => setEditIndex(-1)} className="h-11 px-6 rounded-xl gap-2 font-bold shadow-lg shadow-blue-100 bg-blue-600">
+                <Plus className="w-4 h-4" />
+                Add Branch
+              </Button>
             </div>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[140px]">
-              <AnimatePresence mode="popLayout">
-                {paginatedBranches.map((b) => {
-                  const realIndex = branches.indexOf(b);
-                  return (
-                    <motion.div
-                      key={`${b.branch_name}-${realIndex}`}
-                      layout
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      className="flex items-center justify-between p-5 bg-white rounded-2xl border border-gray-200 shadow-sm hover:border-blue-300 transition-all group"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                          <Building2 className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <p className="font-bold text-gray-900">{b.branch_name}</p>
-                          <p className="text-xs font-medium text-gray-500 truncate max-w-[180px]">
-                            {b.branch_address}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => openEdit(realIndex)}
-                          className="text-blue-600 hover:bg-blue-50 transition-colors"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => remove(realIndex)}
-                          className="text-red-600 hover:bg-red-50 transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-
-              {filteredBranches.length === 0 && (
-                <div className="col-span-full py-12 flex flex-col items-center justify-center text-center bg-gray-50/50 rounded-[2rem] border border-dashed border-gray-200">
-                  <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400 mb-4">
-                    <Search className="w-6 h-6" />
-                  </div>
-                  <h5 className="text-sm font-bold text-gray-900">No branches found</h5>
-                  <p className="text-xs text-gray-500 mt-1">Try adjusting your search term or add a new branch below.</p>
-                </div>
-              )}
+          {/* Table Section */}
+          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-gray-50/50 border-b border-gray-100">
+                    <th className="px-6 py-4 text-xs font-bold text-gray-500 w-12 text-center">#</th>
+                    <th className="px-6 py-4 text-xs font-bold text-gray-500">Branch</th>
+                    <th className="px-6 py-4 text-xs font-bold text-gray-500">Contact</th>
+                    <th className="px-6 py-4 text-xs font-bold text-gray-500 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  <AnimatePresence mode='popLayout'>
+                    {paginatedBranches.length > 0 ? (
+                      paginatedBranches.map((branch, i) => {
+                        const globalIndex = branches.findIndex(b => b === branch);
+                        return (
+                          <motion.tr 
+                            key={branch.branch_name + i}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="hover:bg-blue-50/30 transition-colors group"
+                          >
+                            <td className="px-6 py-4 text-xs font-bold text-gray-400 text-center">
+                              {(currentPage - 1) * itemsPerPage + i + 1}
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
+                                  <Building className="w-5 h-5" />
+                                </div>
+                                <div>
+                                  <div className="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{branch.branch_name}</div>
+                                  <div className="text-[10px] text-gray-400 font-medium flex items-center gap-1">
+                                    <Navigation className="w-2.5 h-2.5" />
+                                    {branch.branch_address}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="space-y-1">
+                                {branch.branch_phone && (
+                                  <div className="text-[10px] font-bold text-gray-600 flex items-center gap-1.5">
+                                    <Phone className="w-3 h-3 text-blue-400" />
+                                    {branch.branch_phone}
+                                  </div>
+                                )}
+                                {branch.branch_email && (
+                                  <div className="text-[10px] font-bold text-gray-400 flex items-center gap-1.5">
+                                    <Mail className="w-3 h-3 text-blue-300" />
+                                    {branch.branch_email}
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => openEdit(globalIndex)}
+                                className="h-8 w-8 p-0 rounded-lg hover:bg-white hover:shadow-md transition-all"
+                              >
+                                <MoreVertical className="w-4 h-4 text-gray-400" />
+                              </Button>
+                            </td>
+                          </motion.tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan={4} className="px-6 py-12 text-center">
+                          <div className="flex flex-col items-center gap-3">
+                            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
+                              <Building2 className="w-8 h-8 text-gray-200" />
+                            </div>
+                            <div className="text-gray-400 text-sm font-bold">No branches configured</div>
+                            <Button variant="outline" onClick={() => setEditIndex(-1)} size="sm" className="mt-2 rounded-xl border-gray-200 font-bold">
+                              Add your first branch
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </AnimatePresence>
+                </tbody>
+              </table>
             </div>
+          </div>
 
+          {/* Pagination Area */}
+          <div className="pt-4 border-t border-gray-100">
             <Pagination 
               currentPage={currentPage}
               totalPages={totalPages}
-              onPageChange={handlePageChange}
+              onPageChange={(page) => setCurrentPage(page)}
             />
           </div>
 
-          {/* Form Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="p-1.5 bg-blue-50 text-blue-600 rounded-md">
-                <Plus className="w-4 h-4" />
-              </div>
-              <h4 className="text-sm font-bold text-gray-900">
-                {editIndex !== null ? 'Edit Branch' : 'Add New Branch'}
-              </h4>
-            </div>
+          {/* Form Dialog */}
+          <Dialog open={editIndex !== null} onOpenChange={(open) => !open && cancelEdit()}>
+            <DialogContent size="lg" onClose={cancelEdit}>
+              <DialogHeader className="border-b border-gray-100 pb-4">
+                <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-4">
+                  <Building2 className="w-6 h-6 text-blue-600" />
+                </div>
+                <DialogTitle className="text-lg font-bold text-gray-900">
+                  {editIndex === -1 ? 'Add New Branch' : 'Edit Branch Details'}
+                </DialogTitle>
+                <DialogDescription className="text-gray-500 font-medium">
+                  Enter the location and contact information for this branch.
+                </DialogDescription>
+              </DialogHeader>
 
-            <div className="p-8 bg-gray-50/50 rounded-3xl border border-gray-100 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  label="Branch Name"
-                  placeholder="e.g. Downtown Outlet"
-                  icon={<Building2 className="w-4 h-4" />}
-                  value={form.branch_name}
-                  onChange={(e) => handleChange('branch_name', e.target.value)}
-                  required
-                />
-                <FormField
-                  label="Phone Number"
-                  placeholder="+91 98765 43210"
-                  icon={<Phone className="w-4 h-4" />}
-                  value={form.branch_phone}
-                  onChange={(e) => handleChange('branch_phone', e.target.value)}
-                />
-                <FormField
-                  label="Branch Email"
-                  placeholder="downtown@restaurant.com"
-                  icon={<Mail className="w-4 h-4" />}
-                  value={form.branch_email}
-                  onChange={(e) => handleChange('branch_email', e.target.value)}
-                />
-                <FormField
-                  label="Full Address"
-                  placeholder="Street name, City, Pincode"
-                  icon={<Navigation className="w-4 h-4" />}
-                  value={form.branch_address}
-                  onChange={(e) => handleChange('branch_address', e.target.value)}
-                  required
-                />
+              <div className="p-6 space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 ml-1">Branch Name</label>
+                    <div className="relative">
+                      <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input 
+                        value={form.branch_name} 
+                        onChange={e => setForm({...form, branch_name: e.target.value})}
+                        placeholder="e.g. Downtown Outlet"
+                        className="pl-10 rounded-xl border-gray-200 bg-white h-11 font-semibold" 
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 ml-1">Phone Number</label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input 
+                        value={form.branch_phone} 
+                        onChange={e => setForm({...form, branch_phone: e.target.value})}
+                        placeholder="+91 98765 43210"
+                        className="pl-10 rounded-xl border-gray-200 bg-white h-11 font-semibold" 
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 ml-1">Email Address</label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input 
+                        value={form.branch_email} 
+                        onChange={e => setForm({...form, branch_email: e.target.value})}
+                        placeholder="downtown@restaurant.com"
+                        className="pl-10 rounded-xl border-gray-200 bg-white h-11 font-semibold" 
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 ml-1">Full Address</label>
+                    <div className="relative">
+                      <Navigation className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input 
+                        value={form.branch_address} 
+                        onChange={e => setForm({...form, branch_address: e.target.value})}
+                        placeholder="Street, City, Pincode"
+                        className="pl-10 rounded-xl border-gray-200 bg-white h-11 font-semibold" 
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="flex gap-3 justify-end">
-                {editIndex !== null && (
-                  <Button variant="outline" onClick={cancelEdit} className="font-bold gap-2 rounded-xl h-11 px-6">
-                    <X className="w-4 h-4" /> Cancel
+              <DialogFooter className="bg-gray-50/50 mt-4 border-t border-gray-100">
+                {editIndex !== null && editIndex !== -1 && (
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => remove(editIndex)} 
+                    className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-bold gap-2 mr-auto"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete Branch
                   </Button>
                 )}
-                <Button onClick={save} className="font-bold gap-2 rounded-xl h-11 px-8 shadow-lg shadow-blue-100">
-                  {editIndex !== null ? (
-                    <><Check className="w-4 h-4" /> Update Branch</>
-                  ) : (
-                    <><Plus className="w-4 h-4" /> Add Branch</>
-                  )}
+                <Button variant="ghost" onClick={cancelEdit} className="font-bold rounded-xl h-11 px-6">Cancel</Button>
+                <Button onClick={save} className="px-8 font-bold rounded-xl h-11 shadow-lg shadow-blue-100 bg-blue-600">
+                  {editIndex === -1 ? 'Add Branch' : 'Save Changes'}
                 </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6 bg-blue-50/50 rounded-2xl border border-blue-100 flex gap-4">
-            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-blue-600 border border-blue-200">
-              <Info className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-blue-900">Multi-Outlet Management</h4>
-              <p className="text-xs text-blue-700 leading-relaxed mt-1">
-                You can add multiple branches for your restaurant. Each branch can have its own address, contact info, and operational settings.
-              </p>
-            </div>
-          </div>
-        </div>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </>
       )}
     </div>
   );

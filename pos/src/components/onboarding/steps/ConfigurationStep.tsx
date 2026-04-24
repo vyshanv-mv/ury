@@ -35,17 +35,16 @@ const CONFIG_STEPS = [
   { id: 'branch', title: 'Branch Setup', icon: MapPin, desc: 'Set up your branch location details' },
   { id: 'restaurant', title: 'Restaurant Profile', icon: Building2, desc: 'Branding, cuisine type and hours' },
   { id: 'printer', title: 'Printer Setup', icon: Printer, desc: 'Configure billing and kitchen printers' },
-  { id: 'rooms', title: 'URY Rooms', icon: DoorOpen, desc: 'Define your dining areas' },
-  { id: 'tables', title: 'URY Tables', icon: Table2, desc: 'Configure table numbers and seats' },
-  { id: 'menu', title: 'URY Menu', icon: Utensils, desc: 'Set up your catalog and taxes' },
-  { id: 'payments', title: 'Mode of Payment', icon: CreditCard, desc: 'Supported payment gateways' },
-  { id: 'users', title: 'Team Setup', icon: Users, desc: 'Create cashier and admin accounts' },
+  { id: 'rooms', title: 'Dining Areas', icon: DoorOpen, desc: 'Define your dining areas' },
+  { id: 'tables', title: 'Table Layout', icon: Table2, desc: 'Configure table numbers and seats' },
+  { id: 'menu', title: 'Menu Items', icon: Utensils, desc: 'Set up your catalog and taxes' },
+  { id: 'payments', title: 'Payment Modes', icon: CreditCard, desc: 'Supported payment methods' },
+  { id: 'users', title: 'Team Members', icon: Users, desc: 'Create cashier and admin accounts' },
 ];
 
 export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack }) => {
   const { completedSteps, skippedSteps, markStepComplete, markStepSkipped } = useOnboardingStore();
 
-  // Local state — completely independent from the outer OnboardingFlow index
   const [subStepIndex, setSubStepIndex] = useState(0);
   const [loading, setLoading] = useState(false);
 
@@ -72,7 +71,6 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
   };
 
   const handleSkip = () => {
-    console.log(`[API] Skip step: ${currentStep.id}`, { skipped: true });
     markStepSkipped(currentStep.id);
     if (isLastStep) {
       onNext();
@@ -104,18 +102,18 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
   };
 
   return (
-    <div className="flex-1 flex bg-gray-50 text-gray-900 overflow-hidden font-inter">
+    <div className="flex-1 flex bg-gray-50/50 text-gray-900 overflow-hidden font-inter">
       <div className="flex-1 flex overflow-hidden">
         {/* Sidebar */}
-        <aside className="w-72 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col z-30 shadow-sm">
+        <aside className="w-[280px] bg-white border-r border-gray-100 flex-shrink-0 flex flex-col z-30 shadow-sm">
           <div className="flex flex-col h-full overflow-hidden">
-            <nav className="flex-1 p-6 overflow-y-auto">
-              <div className="bg-gray-50/50 border border-gray-200 rounded-xl p-4">
-                <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4 px-2">
-                  Configuration Progress
+            <nav className="flex-1 p-6 overflow-y-auto custom-scrollbar">
+              <div className="bg-gray-50/50 border border-gray-100 rounded-2xl p-3">
+                <h2 className="text-xs font-bold text-gray-400 mb-4 px-3">
+                  Setup Journey
                 </h2>
 
-                <div className="space-y-1.5">
+                <div className="space-y-1">
                   {CONFIG_STEPS.map((step, i) => {
                     const Icon = step.icon;
                     const isActive = subStepIndex === i;
@@ -124,50 +122,60 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
                     const isAccessible = i <= subStepIndex || isCompleted || isSkipped;
 
                     return (
-                      <Button
+                      <button
                         key={step.id}
-                        variant="ghost"
                         disabled={!isAccessible}
                         onClick={() => setSubStepIndex(i)}
                         className={cn(
-                          'w-full flex items-center justify-start px-3 py-2.5 text-sm font-medium transition-all duration-200 group relative rounded-lg h-auto',
+                          'w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-all duration-200 group relative rounded-xl h-auto',
                           isActive
-                            ? 'bg-white text-blue-600 shadow-sm border border-gray-200'
+                            ? 'bg-white text-blue-600 shadow-sm border border-gray-200 font-bold'
                             : isAccessible
-                              ? 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                              ? 'text-gray-500 hover:bg-gray-100 hover:text-gray-900 font-semibold'
                               : 'text-gray-300 cursor-not-allowed opacity-50'
                         )}
                       >
                         {isActive && (
-                          <motion.div
-                            layoutId="active-indicator"
-                            className="absolute start-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-600 rounded-e-full"
+                          <motion.div 
+                            layoutId="setup-nav-indicator"
+                            className="absolute start-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-600 rounded-e-full" 
                           />
                         )}
-
-                        <div className="flex items-center gap-3 w-full overflow-hidden">
-                          <div className={cn(
-                            "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
-                            isActive ? "bg-blue-50 text-blue-600" : "bg-gray-100 text-gray-400 group-hover:bg-gray-200"
-                          )}>
-                            {isCompleted ? (
-                              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                            ) : isSkipped ? (
-                              <SkipForward className="w-4 h-4 text-gray-400" />
-                            ) : (
-                              <Icon className="w-4 h-4 flex-shrink-0" />
-                            )}
-                          </div>
-                          <div className="flex flex-col items-start overflow-hidden w-full text-start">
-                            <span className={cn(
-                              "truncate w-full font-bold",
-                              isActive ? "text-gray-900" : "text-gray-500"
-                            )}>
-                              {step.title}
-                            </span>
-                          </div>
+                        
+                        <div className={cn(
+                          "flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-colors",
+                          isActive 
+                            ? "bg-blue-600 text-white" 
+                            : isCompleted 
+                              ? "bg-emerald-50 text-emerald-600"
+                              : isSkipped
+                                ? "bg-amber-50 text-amber-600"
+                                : "bg-gray-100 text-gray-400 group-hover:bg-gray-200"
+                        )}>
+                          {isCompleted ? (
+                            <CheckCircle2 className="w-4 h-4" />
+                          ) : isSkipped ? (
+                            <SkipForward className="w-4 h-4" />
+                          ) : (
+                            <Icon className="w-4 h-4 flex-shrink-0" />
+                          )}
                         </div>
-                      </Button>
+                        
+                        <div className="flex flex-col items-start overflow-hidden text-start">
+                          <span className={cn(
+                            "truncate w-full text-xs",
+                            isActive ? "text-blue-600" : "text-gray-700"
+                          )}>
+                            {step.title}
+                          </span>
+                          <span className={cn(
+                            "text-[10px] truncate w-full font-medium",
+                            isActive ? "text-blue-400/80" : "text-gray-400"
+                          )}>
+                            {step.desc}
+                          </span>
+                        </div>
+                      </button>
                     );
                   })}
                 </div>
@@ -175,28 +183,24 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
             </nav>
 
             {/* Overall Progress */}
-            <div className="px-6 pb-6 pt-2">
-              <div className="bg-blue-600 rounded-xl p-5 shadow-lg shadow-blue-200 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all duration-500" />
-                <div className="flex items-center justify-between mb-3 relative z-10">
-                  <span className="text-xs font-bold text-blue-100 uppercase tracking-widest">
-                    Overall Completion
+            <div className="p-6 border-t border-gray-50">
+              <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-bold text-gray-500">
+                    Completion
                   </span>
-                  <span className="text-xs font-bold text-white">
+                  <span className="text-xs font-bold text-blue-600">
                     {progressPercent}%
                   </span>
                 </div>
-                <div className="w-full h-2 bg-white/20 rounded-full overflow-hidden relative z-10">
+                <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
                   <motion.div
-                    className="h-full bg-white"
+                    className="h-full bg-blue-600"
                     initial={{ width: 0 }}
                     animate={{ width: `${progressPercent}%` }}
                     transition={{ duration: 0.5, ease: 'easeOut' }}
                   />
                 </div>
-                <p className="mt-3 text-xs font-medium text-blue-100/80 leading-relaxed relative z-10">
-                  {completedSteps.length} of {CONFIG_STEPS.length} steps verified and ready for production.
-                </p>
               </div>
             </div>
           </div>
@@ -204,15 +208,14 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
 
         {/* Main Content Area */}
         <main className="flex-1 flex flex-col overflow-hidden bg-gray-50/30">
-          {/* Dynamic Content Area */}
           <div className="flex-1 overflow-y-auto p-12 custom-scrollbar">
-            <div className="max-w-5xl w-full mx-auto">
+            <div className="max-w-5xl w-full mx-auto pb-12">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={currentStep.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.3, ease: "easeOut" }}
                   className="w-full"
                 >
@@ -223,43 +226,43 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
           </div>
 
           {/* Action Footer */}
-          <footer className="px-12 py-8 border-t border-gray-200 bg-white/90 backdrop-blur-md sticky bottom-0 z-20">
+          <footer className="px-12 py-6 border-t border-gray-100 bg-white z-20 shadow-[0_-4px_20px_0_rgba(0,0,0,0.02)]">
             <div className="max-w-5xl w-full mx-auto flex justify-between items-center">
               <Button
                 variant="ghost"
                 onClick={handleBack}
                 disabled={loading}
-                className="gap-3 font-black text-xs uppercase tracking-widest hover:bg-gray-100 px-6 h-12"
+                className="gap-2 font-bold text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 px-6 h-12 rounded-xl"
               >
-                <ArrowLeft className="w-5 h-5" />
-                Previous Step
+                <ArrowLeft className="w-4 h-4" />
+                Back
               </Button>
 
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 <Button
                   variant="outline"
                   onClick={handleSkip}
                   disabled={loading}
-                  className="gap-3 font-black text-xs uppercase tracking-widest px-8 h-12 border-2 hover:bg-gray-50"
+                  className="gap-2 font-bold text-sm px-8 h-12 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300"
                 >
-                  <SkipForward className="w-5 h-5" />
                   Skip Step
+                  <SkipForward className="w-4 h-4" />
                 </Button>
 
                 <Button
                   onClick={handleNext}
                   disabled={loading}
-                  className="gap-3 min-w-[240px] font-black text-xs uppercase tracking-widest h-12 shadow-lg shadow-blue-100"
+                  className="gap-2 min-w-[200px] font-bold text-sm h-12 rounded-xl shadow-lg shadow-blue-100 bg-blue-600"
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      Saving Progress...
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Saving...
                     </>
                   ) : (
                     <>
-                      {isLastStep ? 'Complete All Configuration' : 'Save & Continue'}
-                      <ArrowRight className="w-5 h-5" />
+                      {isLastStep ? 'Finish Configuration' : 'Next Step'}
+                      <ArrowRight className="w-4 h-4" />
                     </>
                   )}
                 </Button>

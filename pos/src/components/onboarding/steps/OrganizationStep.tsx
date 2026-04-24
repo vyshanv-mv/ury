@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Zap, Building2, Tag, Loader2,
-  User, Mail, Globe, Clock, Coins, CheckCircle2, Sliders, ArrowLeft, ArrowRight
+  User, Mail, CheckCircle2, Sliders, ArrowLeft, ArrowRight
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { StepIndicator } from '../shared/StepIndicator';
@@ -11,37 +11,26 @@ import { onboardingApi } from '../../../lib/onboarding-api';
 import { Input } from '../../ui/input';
 import { Select, SelectItem } from '../../ui/select';
 import { Button } from '../../ui/button';
+import { motion } from 'framer-motion';
 
 type CountryKey =
   | "India" | "United States" | "United Kingdom" | "Canada"
   | "Australia" | "UAE" | "Singapore" | "Germany" | "France";
 
 const countryDefaults: Record<CountryKey, { label: string; taxLabel: string; currency: string; timezone: string }> = {
-  India: { label: "IN India", taxLabel: "GSTIN", currency: "INR", timezone: "Asia/Kolkata (IST +5:30)" },
-  "United States": { label: "US United States", taxLabel: "EIN", currency: "USD", timezone: "America/New_York (EST -5:00)" },
-  "United Kingdom": { label: "GB United Kingdom", taxLabel: "VAT Number", currency: "GBP", timezone: "Europe/London (GMT +0:00)" },
-  Canada: { label: "CA Canada", taxLabel: "Business Number", currency: "CAD", timezone: "America/Toronto (EST -5:00)" },
-  Australia: { label: "AU Australia", taxLabel: "ABN", currency: "AUD", timezone: "Australia/Sydney (AEDT +11:00)" },
-  UAE: { label: "AE UAE", taxLabel: "TRN", currency: "AED", timezone: "Asia/Dubai (GST +4:00)" },
-  Singapore: { label: "SG Singapore", taxLabel: "GST Number", currency: "SGD", timezone: "Asia/Singapore (SGT +8:00)" },
-  Germany: { label: "DE Germany", taxLabel: "Steuernummer", currency: "EUR", timezone: "Europe/Berlin (CET +1:00)" },
-  France: { label: "FR France", taxLabel: "VAT", currency: "EUR", timezone: "Europe/Paris (CET +1:00)" },
+  India: { label: "🇮🇳 India", taxLabel: "GSTIN", currency: "INR", timezone: "Asia/Kolkata (IST +5:30)" },
+  "United States": { label: "🇺🇸 United States", taxLabel: "EIN", currency: "USD", timezone: "America/New_York (EST -5:00)" },
+  "United Kingdom": { label: "🇬🇧 United Kingdom", taxLabel: "VAT Number", currency: "GBP", timezone: "Europe/London (GMT +0:00)" },
+  Canada: { label: "🇨🇦 Canada", taxLabel: "Business Number", currency: "CAD", timezone: "America/Toronto (EST -5:00)" },
+  Australia: { label: "🇦🇺 Australia", taxLabel: "ABN", currency: "AUD", timezone: "Australia/Sydney (AEDT +11:00)" },
+  UAE: { label: "🇦🇪 UAE", taxLabel: "TRN", currency: "AED", timezone: "Asia/Dubai (GST +4:00)" },
+  Singapore: { label: "🇸🇬 Singapore", taxLabel: "GST Number", currency: "SGD", timezone: "Asia/Singapore (SGT +8:00)" },
+  Germany: { label: "🇩🇪 Germany", taxLabel: "Steuernummer", currency: "EUR", timezone: "Europe/Berlin (CET +1:00)" },
+  France: { label: "🇫🇷 France", taxLabel: "VAT", currency: "EUR", timezone: "Europe/Paris (CET +1:00)" },
 };
 
 const COUNTRIES = Object.keys(countryDefaults) as CountryKey[];
-
 const LANGUAGES = ["English", "Hindi", "Arabic", "French", "Spanish", "German", "Tamil", "Telugu"];
-
-const TIMEZONES = [
-  "Asia/Kolkata (IST +5:30)",
-  "America/New_York (EST -5:00)",
-  "America/Los_Angeles (PST -8:00)",
-  "Europe/London (GMT +0:00)",
-  "Europe/Berlin (CET +1:00)",
-  "Asia/Dubai (GST +4:00)",
-  "Asia/Singapore (SGT +8:00)",
-  "Australia/Sydney (AEDT +11:00)",
-];
 
 const CURRENCIES = [
   { value: "INR", label: "₹  INR — Indian Rupee" },
@@ -50,8 +39,6 @@ const CURRENCIES = [
   { value: "EUR", label: "€  EUR — Euro" },
   { value: "AED", label: "د.إ  AED — UAE Dirham" },
   { value: "SGD", label: "S$  SGD — Singapore Dollar" },
-  { value: "CAD", label: "CA$  CAD — Canadian Dollar" },
-  { value: "AUD", label: "A$  AUD — Australian Dollar" },
 ];
 
 export const OrganizationStep: React.FC<{ onNext: (data: any) => void; onBack: () => void }> = ({ onNext, onBack }) => {
@@ -72,7 +59,6 @@ export const OrganizationStep: React.FC<{ onNext: (data: any) => void; onBack: (
     generateDemo: organization.generate_demo_data !== undefined ? !!organization.generate_demo_data : false,
   });
 
-  // Smart defaults when country changes
   useEffect(() => {
     const defaults = countryDefaults[formData.country as CountryKey];
     if (defaults) {
@@ -84,7 +70,6 @@ export const OrganizationStep: React.FC<{ onNext: (data: any) => void; onBack: (
     }
   }, [formData.country]);
 
-  // Auto-generate abbreviation from company name
   useEffect(() => {
     if (formData.companyName) {
       const words = formData.companyName.trim().split(/\s+/);
@@ -99,14 +84,17 @@ export const OrganizationStep: React.FC<{ onNext: (data: any) => void; onBack: (
         }
         return prev;
       });
-    } else {
-      setFormData(prev => ({ ...prev, abbreviation: '' }));
     }
   }, [formData.companyName]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
+
+    if (!formData.companyName || !formData.email || !formData.userName) {
+      showToast.error("Please fill in all required fields");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -119,13 +107,10 @@ export const OrganizationStep: React.FC<{ onNext: (data: any) => void; onBack: (
         user_name: formData.userName,
         email: formData.email,
         generate_demo_data: formData.generateDemo,
-        // We can add installation_type to the payload if the backend supports it
-        // installation_type: formData.installationType
       };
 
       const result = await onboardingApi.setupOrganization(payload);
       if (result.success) {
-        // Save to store with snake_case keys to match backend/store expectations
         updateData('organization', {
           ...payload,
           installation_type: formData.installationType,
@@ -137,7 +122,6 @@ export const OrganizationStep: React.FC<{ onNext: (data: any) => void; onBack: (
         showToast.error(result.message || 'Failed to setup organization');
       }
     } catch (error: any) {
-      console.error('Setup error:', error);
       showToast.error(error.message || 'A connection error occurred. Please try again.');
     } finally {
       setLoading(false);
@@ -145,290 +129,238 @@ export const OrganizationStep: React.FC<{ onNext: (data: any) => void; onBack: (
   };
 
   const steps = [
-    { id: 1, label: 'Organization' },
+    { id: 1, label: 'Workspace' },
     { id: 2, label: 'Configuration' },
-    { id: 3, label: 'Finalize' }
+    { id: 3, label: 'Ready' }
   ];
 
-  const taxLabel = countryDefaults[formData.country as CountryKey]?.taxLabel || "Tax Number";
-  const labelCls = "text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2";
-  const inputCls = "w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-base text-gray-900 placeholder:text-gray-400 shadow-sm";
+  const labelCls = "text-xs font-bold text-gray-500 mb-2 flex items-center gap-2 px-1";
+  const inputCls = "w-full px-4 py-3 h-12 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 transition-all text-sm font-semibold text-gray-900 placeholder:text-gray-400 shadow-sm";
 
   return (
-    <div className="flex flex-col items-center w-full max-w-2xl font-inter animate-in fade-in duration-500 py-8">
+    <div className="flex flex-col items-center w-full max-w-3xl font-inter py-8">
       <StepIndicator steps={steps} currentStep={1} />
 
-      <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 w-full overflow-hidden">
-        <div className="bg-primary px-10 py-8 text-white">
-          <h2 className="text-3xl font-bold mb-2">Setup Your Workspace</h2>
-          <p className="text-primary-50/80 text-base">
-            Configure basic details to personalize your URY experience
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white rounded-[2.5rem] shadow-xl shadow-gray-200/50 border border-gray-100 w-full overflow-hidden"
+      >
+        <div className="bg-blue-600 px-12 py-10 text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+          <h2 className="text-2xl font-bold mb-2 relative z-10">Welcome to URY</h2>
+          <p className="text-blue-100 text-sm font-medium relative z-10">
+            Let's start by setting up your organization profile and regional preferences.
           </p>
         </div>
-        <form onSubmit={handleSubmit} className="p-10 space-y-8">
-          {/* Language + Country */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="language" className={labelCls}>
-                <Globe className="w-4 h-4 text-gray-400" />
-                Language
-              </label>
-              <Select
-                value={formData.language}
-                onValueChange={(val) => setFormData({ ...formData, language: val })}
-                disabled={loading}
-              >
-                {LANGUAGES.map((l) => (
-                  <SelectItem key={l} value={l}>{l}</SelectItem>
-                ))}
-              </Select>
-            </div>
-            <div>
-              <label htmlFor="country" className={labelCls}>
-                <Globe className="w-4 h-4 text-gray-400" />
-                Country
-              </label>
-              <Select
-                value={formData.country}
-                onValueChange={(val) => setFormData({ ...formData, country: val as CountryKey })}
-                disabled={loading}
-              >
-                {COUNTRIES.map((c) => (
-                  <SelectItem key={c} value={c}>{countryDefaults[c].label}</SelectItem>
-                ))}
-              </Select>
+
+        <form onSubmit={handleSubmit} className="p-12 space-y-10">
+          {/* Section: Regional Settings */}
+          <div className="space-y-6">
+            <h3 className="text-xs font-bold text-gray-500 flex items-center gap-2">
+              <span className="w-1.5 h-4 bg-blue-600 rounded-full" />
+              Regional Preferences
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+              <div className="space-y-2">
+                <label className={labelCls}>Language</label>
+                <Select
+                  value={formData.language}
+                  onValueChange={(val) => setFormData({ ...formData, language: val })}
+                  className="h-12 rounded-xl"
+                >
+                  {LANGUAGES.map((l) => (
+                    <SelectItem key={l} value={l}>{l}</SelectItem>
+                  ))}
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label className={labelCls}>Primary Country</label>
+                <Select
+                  value={formData.country}
+                  onValueChange={(val) => setFormData({ ...formData, country: val as CountryKey })}
+                  className="h-12 rounded-xl"
+                >
+                  {COUNTRIES.map((c) => (
+                    <SelectItem key={c} value={c}>{countryDefaults[c].label}</SelectItem>
+                  ))}
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label className={labelCls}>Currency</label>
+                <Select
+                  value={formData.currency}
+                  onValueChange={(val) => setFormData({ ...formData, currency: val })}
+                  className="h-12 rounded-xl"
+                >
+                  {CURRENCIES.map((c) => (
+                    <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                  ))}
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <label className={labelCls}>Timezone</label>
+                <Select
+                  value={formData.timezone}
+                  onValueChange={(val) => setFormData({ ...formData, timezone: val })}
+                  className="h-12 rounded-xl"
+                >
+                  {countryDefaults[formData.country as CountryKey] ? (
+                    <SelectItem value={formData.timezone}>{formData.timezone}</SelectItem>
+                  ) : null}
+                </Select>
+              </div>
             </div>
           </div>
 
-          {/* Timezone + Currency */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="timezone" className={labelCls}>
-                <Clock className="w-4 h-4 text-gray-400" />
-                Timezone
-              </label>
-              <Select
-                value={formData.timezone}
-                onValueChange={(val) => setFormData({ ...formData, timezone: val })}
-                disabled={loading}
-              >
-                {TIMEZONES.map((tz) => (
-                  <SelectItem key={tz} value={tz}>{tz}</SelectItem>
-                ))}
-              </Select>
-            </div>
-            <div>
-              <label htmlFor="currency" className={labelCls}>
-                <Coins className="w-4 h-4 text-gray-400" />
-                Currency
-              </label>
-              <Select
-                value={formData.currency}
-                onValueChange={(val) => setFormData({ ...formData, currency: val })}
-                disabled={loading}
-              >
-                {CURRENCIES.map((c) => (
-                  <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-                ))}
-              </Select>
+          <div className="h-px bg-gray-50 w-full" />
+
+          {/* Section: Organization Details */}
+          <div className="space-y-6">
+            <h3 className="text-xs font-bold text-gray-500 flex items-center gap-2">
+              <span className="w-1.5 h-4 bg-blue-600 rounded-full" />
+              Organization Details
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+              <div className="space-y-2">
+                <label className={labelCls}>Full Name</label>
+                <div className="relative">
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    value={formData.userName}
+                    onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
+                    className={cn(inputCls, "pl-11")}
+                    placeholder="e.g. John Doe"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className={labelCls}>Email Address</label>
+                <div className="relative">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className={cn(inputCls, "pl-11")}
+                    placeholder="admin@restaurant.com"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className={labelCls}>Business Name</label>
+                <div className="relative">
+                  <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    value={formData.companyName}
+                    onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
+                    className={cn(inputCls, "pl-11")}
+                    placeholder="e.g. The Grand Cafe"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className={labelCls}>Abbreviation</label>
+                <div className="relative">
+                  <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    value={formData.abbreviation}
+                    onChange={(e) => setFormData({ ...formData, abbreviation: e.target.value.toUpperCase() })}
+                    className={cn(inputCls, "pl-11")}
+                    placeholder="e.g. TGC"
+                    maxLength={5}
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="h-px bg-border/50 w-full" />
-
-          {/* User Name + Email */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="userName" className={labelCls}>
-                <User className="w-4 h-4 text-gray-400" />
-                User Name
-              </label>
-              <Input
-                type="text"
-                id="userName"
-                name="userName"
-                value={formData.userName}
-                onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
-                required
-                className={inputCls}
-                placeholder="Your full name"
-                disabled={loading}
-              />
-            </div>
-            <div>
-              <label htmlFor="email" className={labelCls}>
-                <Mail className="w-4 h-4 text-gray-400" />
-                Email Address
-              </label>
-              <Input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required
-                className={inputCls}
-                placeholder="admin@restaurant.com"
-                disabled={loading}
-              />
-            </div>
-          </div>
-
-          {/* Company Name + Abbreviation */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="companyName" className={labelCls}>
-                <Building2 className="w-4 h-4 text-gray-400" />
-                Company Name
-              </label>
-              <Input
-                type="text"
-                id="companyName"
-                name="companyName"
-                value={formData.companyName}
-                onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                required
-                className={inputCls}
-                placeholder="e.g. The Grand Cafe"
-                disabled={loading}
-              />
-            </div>
-            <div>
-              <label htmlFor="abbreviation" className={labelCls}>
-                <Tag className="w-4 h-4 text-gray-400" />
-                Abbreviation
-              </label>
-              <Input
-                type="text"
-                id="abbreviation"
-                name="abbreviation"
-                value={formData.abbreviation}
-                onChange={(e) => setFormData({ ...formData, abbreviation: e.target.value.toUpperCase() })}
-                required
-                className={inputCls}
-                placeholder="e.g. TGC"
-                disabled={loading}
-                maxLength={5}
-              />
-            </div>
-          </div>
-
-          {/* Tax ID */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="taxNumber" className={labelCls}>
-                <Tag className="w-4 h-4 text-gray-400" />
-                {taxLabel} <span className="text-gray-400 font-normal">(Optional)</span>
-              </label>
-              <Input
-                type="text"
-                id="taxNumber"
-                name="taxNumber"
-                value={formData.taxNumber}
-                onChange={(e) => setFormData({ ...formData, taxNumber: e.target.value })}
-                className={inputCls}
-                placeholder={`Enter ${taxLabel}`}
-                disabled={loading}
-              />
-            </div>
-          </div>
-
-          {/* Installation Type */}
-          <div className="space-y-4">
-            <label className="text-base font-semibold text-foreground">Installation Type</label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {/* Installation Strategy */}
+          <div className="space-y-6">
+            <h3 className="text-xs font-bold text-gray-500 flex items-center gap-2">
+              <span className="w-1.5 h-4 bg-blue-600 rounded-full" />
+              Installation Strategy
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div
-                onClick={() => !loading && setFormData({ ...formData, installationType: 'minimal' })}
+                onClick={() => setFormData({ ...formData, installationType: 'minimal' })}
                 className={cn(
-                  "relative cursor-pointer p-6 rounded-lg border-2 transition-all duration-300 h-full flex flex-col",
+                  "relative cursor-pointer p-6 rounded-[2rem] border-2 transition-all duration-300 h-full flex flex-col group",
                   formData.installationType === 'minimal'
-                    ? "border-primary bg-primary-50/30"
-                    : "border-border bg-card hover:border-border/80"
+                    ? "border-blue-600 bg-blue-50/30"
+                    : "border-gray-100 bg-white hover:border-gray-200"
                 )}
               >
-                {formData.installationType === 'minimal' && (
-                  <div className="absolute top-4 right-4 text-primary">
-                    <CheckCircle2 className="w-6 h-6 fill-primary text-white" />
-                  </div>
-                )}
-                <div className="w-12 h-12 bg-primary-50 rounded-2xl flex items-center justify-center mb-5">
-                  <Zap className="w-6 h-6 text-primary" />
+                <div className={cn(
+                  "w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-colors",
+                  formData.installationType === 'minimal' ? "bg-blue-600 text-white" : "bg-gray-50 text-gray-400 group-hover:bg-blue-50 group-hover:text-blue-600"
+                )}>
+                  <Zap className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-bold text-foreground mb-2">Minimal Installation</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                  Quick setup with guided configuration. Ideal for most restaurants.
+                <h3 className="text-sm font-bold text-gray-900 mb-1">Guided Setup</h3>
+                <p className="text-[11px] text-gray-500 font-medium leading-relaxed">
+                  Best for new restaurants. We'll guide you through each configuration step.
                 </p>
-                <div className="mt-auto">
-                  <span className="inline-flex px-3 py-1 bg-primary-50 text-primary-700 text-xs font-bold uppercase tracking-wider rounded-md">
-                    Recommended
-                  </span>
-                </div>
+                {formData.installationType === 'minimal' && (
+                  <CheckCircle2 className="absolute top-6 right-6 w-5 h-5 text-blue-600" />
+                )}
               </div>
 
               <div
-                onClick={() => !loading && setFormData({ ...formData, installationType: 'advanced' })}
+                onClick={() => setFormData({ ...formData, installationType: 'advanced' })}
                 className={cn(
-                  "relative cursor-pointer p-6 rounded-lg border-2 transition-all duration-300 h-full flex flex-col",
+                  "relative cursor-pointer p-6 rounded-[2rem] border-2 transition-all duration-300 h-full flex flex-col group",
                   formData.installationType === 'advanced'
-                    ? "border-primary bg-primary-50/30"
-                    : "border-border bg-card hover:border-border/80"
+                    ? "border-blue-600 bg-blue-50/30"
+                    : "border-gray-100 bg-white hover:border-gray-200"
                 )}
               >
-                {formData.installationType === 'advanced' && (
-                  <div className="absolute top-4 right-4 text-primary">
-                    <CheckCircle2 className="w-6 h-6 fill-primary text-white" />
-                  </div>
-                )}
-                <div className="w-12 h-12 bg-gray-100/80 rounded-2xl flex items-center justify-center mb-5">
-                  <Sliders className="w-6 h-6 text-gray-500" />
+                <div className={cn(
+                  "w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-colors",
+                  formData.installationType === 'advanced' ? "bg-blue-600 text-white" : "bg-gray-50 text-gray-400 group-hover:bg-blue-50 group-hover:text-blue-600"
+                )}>
+                  <Sliders className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-bold text-foreground mb-2">Advanced Installation</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                  Skip setup wizard, go directly to the full dashboard.
+                <h3 className="text-sm font-bold text-gray-900 mb-1">Advanced Mode</h3>
+                <p className="text-[11px] text-gray-500 font-medium leading-relaxed">
+                  For experienced users. Skip the wizard and configure everything from the dashboard.
                 </p>
-                <div className="mt-auto">
-                  <span className="inline-flex px-3 py-1 bg-gray-100 text-gray-500 text-xs font-bold uppercase tracking-wider rounded-md">
-                    For experienced users
-                  </span>
-                </div>
+                {formData.installationType === 'advanced' && (
+                  <CheckCircle2 className="absolute top-6 right-6 w-5 h-5 text-blue-600" />
+                )}
               </div>
             </div>
           </div>
 
-          {/* Demo Data - Small checkbox style if needed, but not in image. I'll keep it subtle. */}
-          {/* Note: Image doesn't show demo data checkbox. I'll hide it or keep it very subtle if requested. */}
-
-          {/* Actions Bar */}
-          <div className="flex items-center justify-between pt-4 border-t border-border/50 bg-secondary/30 -mx-10 -mb-10 px-10 py-6">
+          {/* Footer Actions */}
+          <div className="flex items-center justify-between pt-10 border-t border-gray-50">
             <Button
               variant="ghost"
               type="button"
               onClick={onBack}
               disabled={loading}
-              className="gap-2 font-bold"
+              className="gap-2 font-bold text-gray-500 hover:text-gray-900 hover:bg-gray-50 h-12 px-6 rounded-xl"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" />
               Back
             </Button>
             <Button
               type="submit"
               disabled={loading}
-              size="lg"
-              className="gap-2 min-w-[240px] font-bold"
+              className="gap-2 min-w-[240px] font-bold h-12 rounded-xl bg-blue-600 shadow-xl shadow-blue-100"
             >
               {loading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
                 <>
-                  Start Setup
-                  <ArrowRight className="w-5 h-5" />
+                  Begin Journey
+                  <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </Button>
           </div>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 };
-

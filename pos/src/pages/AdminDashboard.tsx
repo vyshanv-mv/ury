@@ -103,8 +103,8 @@ export function AdminDashboard() {
             <div className="w-24 h-24 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center mb-8 rotate-3 shadow-xl shadow-blue-100">
               <Layers className="w-10 h-10" />
             </div>
-            <h2 className="text-3xl font-extrabold text-gray-900 capitalize mb-3">{activeSection} Module</h2>
-            <p className="text-gray-500 max-w-lg text-lg">
+            <h2 className="text-2xl font-bold text-gray-900 capitalize mb-2">{activeSection} Module</h2>
+            <p className="text-gray-500 max-w-lg text-sm font-medium">
               We're currently perfecting the {activeSection} management tools. Stay tuned for advanced analytics and control features!
             </p>
             <Button className="mt-8 px-8 py-6 rounded-2xl text-lg shadow-xl shadow-blue-100 font-bold gap-2" onClick={() => setActiveSection("overview")}>
@@ -120,8 +120,8 @@ export function AdminDashboard() {
     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight mb-1">Dashboard</h1>
-          <p className="text-gray-500 font-medium">Welcome back, {user?.full_name?.split(' ')[0] || 'Admin'}! Here's your restaurant's performance.</p>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight mb-0.5">Dashboard</h1>
+          <p className="text-sm text-gray-500 font-medium">Welcome back, {user?.full_name?.split(' ')[0] || 'Admin'}! Here's your restaurant's performance.</p>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" className="gap-2 shadow-sm font-bold border-2 h-11 px-5 rounded-xl bg-white">
@@ -161,8 +161,8 @@ export function AdminDashboard() {
                 {stat.trend}
               </span>
             </div>
-            <p className="text-sm text-gray-500 font-bold uppercase tracking-wider mb-1 opacity-70">{stat.label}</p>
-            <h3 className="text-2xl font-black text-gray-900 tracking-tight">{stat.value}</h3>
+            <p className="text-sm text-gray-500 font-medium mb-1 opacity-70">{stat.label}</p>
+            <h3 className="text-xl font-bold text-gray-900 tracking-tight">{stat.value}</h3>
           </div>
         ))}
       </div>
@@ -175,7 +175,7 @@ export function AdminDashboard() {
               <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
                 <TrendingUp className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-black text-gray-900">Revenue Analytics</h3>
+              <h3 className="text-lg font-bold text-gray-900">Revenue Analytics</h3>
             </div>
             <button className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors">
               <MoreHorizontal className="w-5 h-5" />
@@ -214,7 +214,7 @@ export function AdminDashboard() {
             <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600">
               <ShoppingBag className="w-5 h-5" />
             </div>
-            <h3 className="text-lg font-black text-gray-900">Order Sources</h3>
+            <h3 className="text-lg font-bold text-gray-900">Order Sources</h3>
           </div>
           <div className="flex-1 flex flex-col justify-center">
             <div className="h-56 mb-8">
@@ -243,7 +243,7 @@ export function AdminDashboard() {
                     <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index] }}></span>
                     <span className="text-gray-500 font-bold">{item.name}</span>
                   </div>
-                  <span className="font-black text-gray-900">{item.value}%</span>
+                  <span className="font-bold text-gray-900">{item.value}%</span>
                 </div>
               ))}
             </div>
@@ -258,7 +258,7 @@ export function AdminDashboard() {
             <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
               <UtensilsCrossed className="w-5 h-5" />
             </div>
-            <h3 className="text-lg font-black text-gray-900">Popular Items Today</h3>
+            <h3 className="text-lg font-bold text-gray-900">Popular Items Today</h3>
           </div>
           <Button variant="ghost" className="text-blue-600 font-bold hover:bg-blue-50">View Menu</Button>
         </div>
@@ -266,20 +266,20 @@ export function AdminDashboard() {
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="text-gray-400 border-b border-gray-100">
-                <th className="pb-4 font-black uppercase tracking-widest text-xs">Item Name</th>
-                <th className="pb-4 font-black uppercase tracking-widest text-xs text-right">Sales</th>
-                <th className="pb-4 font-black uppercase tracking-widest text-xs text-right">Revenue</th>
-                <th className="pb-4 font-black uppercase tracking-widest text-xs text-right">Trend</th>
+                <th className="pb-4 font-bold text-gray-500 text-xs">Item Name</th>
+                <th className="pb-4 font-bold text-gray-500 text-xs text-right">Sales</th>
+                <th className="pb-4 font-bold text-gray-500 text-xs text-right">Revenue</th>
+                <th className="pb-4 font-bold text-gray-500 text-xs text-right">Trend</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {popularItems.map((item, i) => (
                 <tr key={i} className="group hover:bg-gray-50/50 transition-colors">
-                  <td className="py-5 font-bold text-gray-900 text-base">{item.name}</td>
+                  <td className="py-5 font-bold text-gray-900 text-sm">{item.name}</td>
                   <td className="py-5 text-right text-gray-500 font-bold">{item.sales}</td>
-                  <td className="py-5 text-right text-gray-900 font-black">₹{item.revenue}</td>
+                  <td className="py-5 text-right text-gray-900 font-bold">₹{item.revenue}</td>
                   <td className="py-5 text-right">
-                    <span className="inline-flex items-center gap-1.5 text-blue-600 bg-blue-50 px-3 py-1 rounded-full text-xs font-black">
+                    <span className="inline-flex items-center gap-1.5 text-blue-600 bg-blue-50 px-3 py-1 rounded-full text-xs font-bold">
                       <TrendingUp className="w-3 h-3" />
                       {Math.floor(Math.random() * 20) + 1}%
                     </span>
@@ -322,7 +322,7 @@ export function AdminDashboard() {
                 {groups.map((group) => (
                   <div key={group} className="mb-6 last:mb-0">
                     {sidebarOpen && (
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 px-3">
+                      <p className="text-xs font-bold text-gray-500 mb-3 px-3">
                         {group}
                       </p>
                     )}
@@ -371,11 +371,11 @@ export function AdminDashboard() {
         {/* Modern Sub-header / Breadcrumbs */}
         <header className="h-16 border-b border-gray-200 bg-white/50 backdrop-blur-md flex items-center justify-between px-10 flex-shrink-0 z-20">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest">
+            <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
               <ShieldCheck className="w-4 h-4 text-blue-600" />
               <span>Admin Control</span>
               <ChevronRight className="w-3 h-3" />
-              <span className="text-gray-900 font-black">{activeSection}</span>
+              <span className="text-gray-900 font-bold">{activeSection}</span>
             </div>
           </div>
         </header>
@@ -399,10 +399,10 @@ export function AdminDashboard() {
                         {React.createElement(NAV_ITEMS.find(n => n.id === activeSection)?.icon || LayoutDashboard, { className: "w-6 h-6" })}
                       </div>
                       <div>
-                        <h2 className="text-3xl font-black text-gray-900 tracking-tight capitalize">
+                        <h2 className="text-2xl font-bold text-gray-900 tracking-tight capitalize">
                           {NAV_ITEMS.find(n => n.id === activeSection)?.label} Settings
                         </h2>
-                        <p className="text-gray-500 font-medium">
+                        <p className="text-sm text-gray-500 font-medium">
                           {NAV_ITEMS.find(n => n.id === activeSection)?.description}
                         </p>
                       </div>
@@ -420,7 +420,7 @@ export function AdminDashboard() {
 
                 {/* Footer hint for non-overview sections */}
                 {activeSection !== "overview" && (
-                  <div className="mt-12 flex items-center justify-center gap-3 text-gray-400 font-bold text-xs uppercase tracking-widest">
+                  <div className="mt-12 flex items-center justify-center gap-3 text-gray-500 font-bold text-xs">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                     <span>Changes are saved automatically to your restaurant profile</span>
                   </div>

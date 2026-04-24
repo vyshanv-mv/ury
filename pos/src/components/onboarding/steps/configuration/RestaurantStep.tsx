@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { FormField } from '../../shared/FormField';
-import { Info, Building2, Image, Loader2, Plus, Trash2, Pencil, X, Check, Search } from 'lucide-react';
+import { 
+  Image, Loader2, Plus, Trash2, Search, MoreVertical, 
+  Clock, Utensils, Info, Building
+} from 'lucide-react';
 import { Button } from '../../../ui/button';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
 import { onboardingApi } from '../../../../lib/onboarding-api';
@@ -8,6 +10,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { showToast } from '../../../ui/toast';
 import { Input } from '../../../ui/input';
 import { Pagination } from '../../../ui/pagination';
+import { Select, SelectItem } from '../../../ui/select';
+import { 
+  Dialog, DialogContent, DialogHeader, DialogTitle, 
+  DialogFooter, DialogDescription 
+} from '../../../ui/dialog';
 
 interface RestaurantForm {
   restaurant_name: string;
@@ -33,7 +40,7 @@ export const RestaurantStep: React.FC = () => {
   const [editIndex, setEditIndex] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4;
+  const itemsPerPage = 8;
 
   useEffect(() => {
     const fetchContext = async () => {
@@ -53,10 +60,6 @@ export const RestaurantStep: React.FC = () => {
     fetchContext();
   }, []);
 
-  const handleChange = (field: keyof RestaurantForm, value: string) => {
-    setForm(prev => ({ ...prev, [field]: value }));
-  };
-
   const openEdit = (i: number) => {
     setForm({ ...restaurants[i] });
     setEditIndex(i);
@@ -68,16 +71,29 @@ export const RestaurantStep: React.FC = () => {
   };
 
   const save = () => {
-    if (!form.restaurant_name.trim()) {
+    const trimmedName = form.restaurant_name?.trim();
+    if (!trimmedName) {
       showToast.error('Restaurant name is required');
       return;
     }
+
+    // Duplicate check
+    const exists = restaurants.some((r, idx) => 
+      r.restaurant_name.toLowerCase() === trimmedName.toLowerCase() && idx !== editIndex
+    );
+    if (exists) {
+      showToast.error('A restaurant with this name already exists');
+      return;
+    }
+
     const next = [...restaurants];
-    if (editIndex !== null) {
-      next[editIndex] = form;
+    const entry = { ...form, restaurant_name: trimmedName };
+    
+    if (editIndex !== null && editIndex !== -1) {
+      next[editIndex] = entry;
       showToast.success('Restaurant updated');
     } else {
-      next.push(form);
+      next.push(entry);
       showToast.success('Restaurant added');
     }
     updateData('restaurant', next);
@@ -89,6 +105,7 @@ export const RestaurantStep: React.FC = () => {
     next.splice(i, 1);
     updateData('restaurant', next);
     showToast.success('Restaurant removed');
+    setEditIndex(null);
   };
 
   const filteredRestaurants = restaurants.filter(r => 
@@ -102,31 +119,28 @@ export const RestaurantStep: React.FC = () => {
     currentPage * itemsPerPage
   );
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-6">
       {loading ? (
         <div className="py-20 flex flex-col items-center justify-center space-y-4">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-sm font-medium text-muted-foreground">Fetching restaurant details...</p>
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          <p className="text-sm font-bold text-gray-500">Fetching restaurant details...</p>
         </div>
       ) : (
-        <div className="max-w-4xl mx-auto space-y-8">
-          {/* List Section */}
-          <div className="space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-1">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-blue-50 text-blue-600 rounded-md">
-                  <Building2 className="w-4 h-4" />
-                </div>
-                <h4 className="text-sm font-bold text-gray-900">Registered Restaurants</h4>
-              </div>
-
-              <div className="relative w-full sm:w-64 group">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+        <>
+          {/* Header Area */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-3">
+                <Utensils className="w-7 h-7 text-blue-600" />
+                Restaurants
+              </h2>
+              <p className="text-gray-500 text-xs mt-1 font-medium">Manage your restaurant brands and their identities</p>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <div className="relative group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
                 <Input 
                   placeholder="Search restaurants..." 
                   value={searchTerm}
@@ -134,177 +148,215 @@ export const RestaurantStep: React.FC = () => {
                     setSearchTerm(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="pl-9 h-9 text-xs font-semibold bg-white border-gray-200 focus:bg-white transition-all"
+                  className="pl-9 h-11 text-xs font-semibold bg-gray-50 border-gray-200 focus:bg-white transition-all rounded-xl w-64"
                 />
               </div>
+              <Button onClick={() => setEditIndex(-1)} className="h-11 px-6 rounded-xl gap-2 font-bold shadow-lg shadow-blue-100 bg-blue-600">
+                <Plus className="w-4 h-4" />
+                Add Restaurant
+              </Button>
             </div>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[120px]">
-              <AnimatePresence mode="popLayout">
-                {paginatedRestaurants.map((r) => {
-                  const realIndex = restaurants.indexOf(r);
-                  return (
-                    <motion.div
-                      key={`${r.restaurant_name}-${realIndex}`}
-                      layout
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      className="flex items-center justify-between p-5 bg-white rounded-2xl border border-gray-200 shadow-sm hover:border-blue-300 transition-all group"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                          <Building2 className="w-6 h-6" />
-                        </div>
-                        <div>
-                          <p className="font-bold text-gray-900">{r.restaurant_name}</p>
-                          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">
-                            {r.type?.replace('_', ' ') || ''}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => openEdit(realIndex)}
-                          className="text-blue-600 hover:bg-blue-50 transition-colors"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => remove(realIndex)}
-                          className="text-red-600 hover:bg-red-50 transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </AnimatePresence>
-
-              {filteredRestaurants.length === 0 && (
-                <div className="col-span-full py-10 flex flex-col items-center justify-center text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                  <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center text-gray-400 mb-3">
-                    <Search className="w-5 h-5" />
-                  </div>
-                  <h5 className="text-sm font-bold text-gray-900">No restaurants found</h5>
-                  <p className="text-xs text-gray-500 mt-1">Try a different search term or add a new restaurant.</p>
-                </div>
-              )}
+          {/* Table Section */}
+          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-gray-50/50 border-b border-gray-100">
+                    <th className="px-6 py-4 text-xs font-bold text-gray-500 w-12 text-center">#</th>
+                    <th className="px-6 py-4 text-xs font-bold text-gray-500">Restaurant</th>
+                    <th className="px-6 py-4 text-xs font-bold text-gray-500">Details</th>
+                    <th className="px-6 py-4 text-xs font-bold text-gray-500 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  <AnimatePresence mode='popLayout'>
+                    {paginatedRestaurants.length > 0 ? (
+                      paginatedRestaurants.map((restaurant, i) => {
+                        const globalIndex = restaurants.findIndex(r => r === restaurant);
+                        return (
+                          <motion.tr 
+                            key={restaurant.restaurant_name + i}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="hover:bg-blue-50/30 transition-colors group"
+                          >
+                            <td className="px-6 py-4 text-xs font-bold text-gray-400 text-center">
+                              {(currentPage - 1) * itemsPerPage + i + 1}
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-sm">
+                                  <Building className="w-5 h-5" />
+                                </div>
+                                <div>
+                                  <div className="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{restaurant.restaurant_name}</div>
+                                  <div className="text-[10px] text-gray-400 font-medium flex items-center gap-1">
+                                    <Info className="w-2.5 h-2.5" />
+                                    {restaurant.tagline || 'No tagline set'}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-bold">
+                                    {restaurant.type?.replace('_', ' ')}
+                                  </span>
+                                </div>
+                                <div className="text-[10px] font-bold text-gray-400 flex items-center gap-1.5">
+                                  <Clock className="w-3 h-3 text-blue-400" />
+                                  {restaurant.opening_time} - {restaurant.closing_time}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => openEdit(globalIndex)}
+                                className="h-8 w-8 p-0 rounded-lg hover:bg-white hover:shadow-md transition-all"
+                              >
+                                <MoreVertical className="w-4 h-4 text-gray-400" />
+                              </Button>
+                            </td>
+                          </motion.tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan={4} className="px-6 py-12 text-center">
+                          <div className="flex flex-col items-center gap-3">
+                            <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
+                              <Utensils className="w-8 h-8 text-gray-200" />
+                            </div>
+                            <div className="text-gray-400 text-sm font-bold">No restaurants configured</div>
+                            <Button variant="outline" onClick={() => setEditIndex(-1)} size="sm" className="mt-2 rounded-xl border-gray-200 font-bold">
+                              Add your first restaurant
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </AnimatePresence>
+                </tbody>
+              </table>
             </div>
+          </div>
 
+          {/* Pagination Area */}
+          <div className="pt-4 border-t border-gray-100">
             <Pagination 
               currentPage={currentPage}
               totalPages={totalPages}
-              onPageChange={handlePageChange}
+              onPageChange={(page) => setCurrentPage(page)}
             />
           </div>
 
-          {/* Form Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="p-1.5 bg-blue-50 text-blue-600 rounded-md">
-                <Plus className="w-4 h-4" />
-              </div>
-              <h4 className="text-sm font-bold text-gray-900">
-                {editIndex !== null ? 'Edit Restaurant' : 'Add New Restaurant'}
-              </h4>
-            </div>
+          {/* Form Dialog */}
+          <Dialog open={editIndex !== null} onOpenChange={(open) => !open && cancelEdit()}>
+            <DialogContent size="lg" onClose={cancelEdit}>
+              <DialogHeader className="border-b border-gray-100 pb-4">
+                <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-4">
+                  <Utensils className="w-6 h-6 text-blue-600" />
+                </div>
+                <DialogTitle className="text-lg font-bold text-gray-900">
+                  {editIndex === -1 ? 'Add New Restaurant' : 'Edit Restaurant Details'}
+                </DialogTitle>
+                <DialogDescription className="text-gray-500 font-medium">
+                  Define your restaurant brand, cuisine type, and operational hours.
+                </DialogDescription>
+              </DialogHeader>
 
-            <div className="p-8 bg-gray-50/50 rounded-3xl border border-gray-100 space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  label="Display Name"
-                  placeholder="e.g. URY Kitchen"
-                  icon={<Building2 className="w-4 h-4" />}
-                  value={form.restaurant_name}
-                  onChange={(e) => handleChange('restaurant_name', e.target.value)}
-                  required
-                />
-                <FormField
-                  label="Tagline"
-                  placeholder="e.g. Authentic Taste"
-                  icon={<Info className="w-4 h-4" />}
-                  value={form.tagline}
-                  onChange={(e) => handleChange('tagline', e.target.value)}
-                />
-                <FormField
-                  label="Cuisine Type"
-                  type="select"
-                  options={[
-                    { value: 'fine_dining', label: 'Fine Dining' },
-                    { value: 'casual_dining', label: 'Casual Dining' },
-                    { value: 'fast_food', label: 'Quick Service / Fast Food' },
-                    { value: 'cafe', label: 'Cafe / Bakery' },
-                  ]}
-                  value={form.type}
-                  onChange={(e) => handleChange('type', e.target.value)}
-                />
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    label="Opening Time"
-                    type="time"
-                    value={form.opening_time}
-                    onChange={(e) => handleChange('opening_time', e.target.value)}
-                  />
-                  <FormField
-                    label="Closing Time"
-                    type="time"
-                    value={form.closing_time}
-                    onChange={(e) => handleChange('closing_time', e.target.value)}
-                  />
+              <div className="p-6 space-y-6">
+                <div className="grid grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 ml-1">Restaurant Name</label>
+                    <Input 
+                      value={form.restaurant_name} 
+                      onChange={e => setForm({...form, restaurant_name: e.target.value})}
+                      placeholder="e.g. URY Kitchen"
+                      className="rounded-xl border-gray-200 bg-white h-11 font-semibold" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 ml-1">Tagline</label>
+                    <Input 
+                      value={form.tagline} 
+                      onChange={e => setForm({...form, tagline: e.target.value})}
+                      placeholder="e.g. Authentic Taste"
+                      className="rounded-xl border-gray-200 bg-white h-11 font-semibold" 
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-gray-500 ml-1">Cuisine Type</label>
+                    <Select value={form.type} onValueChange={val => setForm({...form, type: val})} className="h-11 rounded-xl">
+                      <SelectItem value="fine_dining">Fine Dining</SelectItem>
+                      <SelectItem value="casual_dining">Casual Dining</SelectItem>
+                      <SelectItem value="fast_food">Fast Food</SelectItem>
+                      <SelectItem value="cafe">Cafe / Bakery</SelectItem>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-gray-500 ml-1">Opening</label>
+                      <Input 
+                        type="time"
+                        value={form.opening_time} 
+                        onChange={e => setForm({...form, opening_time: e.target.value})}
+                        className="rounded-xl border-gray-200 bg-white h-11 font-semibold" 
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-gray-500 ml-1">Closing</label>
+                      <Input 
+                        type="time"
+                        value={form.closing_time} 
+                        onChange={e => setForm({...form, closing_time: e.target.value})}
+                        className="rounded-xl border-gray-200 bg-white h-11 font-semibold" 
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-gray-400 shadow-sm">
+                      <Image className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-gray-900">Brand Logo</p>
+                      <p className="text-[10px] text-gray-400 font-medium">PNG or JPG up to 2MB</p>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm" className="rounded-xl border-gray-200 font-bold text-xs">
+                    Upload
+                  </Button>
                 </div>
               </div>
 
-              {/* Logo Hint */}
-              <div className="p-5 bg-white border border-gray-100 rounded-2xl flex items-center justify-between group">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400">
-                    <Image className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-gray-900">Brand Logo</p>
-                    <p className="text-xs text-gray-400 font-bold tracking-widest">PNG, JPG up to 2MB</p>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" className="font-bold text-xs uppercase rounded-lg border-2">
-                  Upload
-                </Button>
-              </div>
-
-              <div className="flex gap-3 justify-end">
-                {editIndex !== null && (
-                  <Button variant="outline" onClick={cancelEdit} className="font-bold gap-2 rounded-xl h-11 px-6">
-                    <X className="w-4 h-4" /> Cancel
+              <DialogFooter className="bg-gray-50/50 mt-4 border-t border-gray-100">
+                {editIndex !== null && editIndex !== -1 && (
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => remove(editIndex)} 
+                    className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-bold gap-2 mr-auto"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete Restaurant
                   </Button>
                 )}
-                <Button onClick={save} className="font-bold gap-2 rounded-xl h-11 px-8 shadow-lg shadow-blue-100">
-                  {editIndex !== null ? (
-                    <><Check className="w-4 h-4" /> Update Restaurant</>
-                  ) : (
-                    <><Plus className="w-4 h-4" /> Add Restaurant</>
-                  )}
+                <Button variant="ghost" onClick={cancelEdit} className="font-bold rounded-xl h-11 px-6">Cancel</Button>
+                <Button onClick={save} className="px-8 font-bold rounded-xl h-11 shadow-lg shadow-blue-100 bg-blue-600">
+                  {editIndex === -1 ? 'Add Restaurant' : 'Save Changes'}
                 </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-6 bg-indigo-50/50 rounded-2xl border border-indigo-100 flex gap-4">
-            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0 text-indigo-600 border border-indigo-200">
-              <Info className="w-5 h-5" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-indigo-900">Brand Identity</h4>
-              <p className="text-xs text-indigo-700 leading-relaxed mt-1">
-                Manage multiple restaurant brands under your account. Each can have its own logo, tagline, and operational hours.
-              </p>
-            </div>
-          </div>
-        </div>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </>
       )}
     </div>
   );
