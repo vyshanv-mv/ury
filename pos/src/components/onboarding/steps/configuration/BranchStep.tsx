@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { FormField } from '../../shared/FormField';
-import { Info, Building2, Phone, Mail, Navigation, Loader2, Plus, Trash2, Pencil, X, Check } from 'lucide-react';
+import { Info, Building2, Phone, Mail, Navigation, Loader2, Plus, Trash2, Pencil, X, Check, Search } from 'lucide-react';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
 import { onboardingApi } from '../../../../lib/onboarding-api';
 import { Button } from '../../../ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { showToast } from '../../../ui/toast';
+import { Input } from '../../../ui/input';
+import { Pagination } from '../../../ui/pagination';
 
 interface BranchForm {
   branch_name: string;
@@ -27,6 +29,9 @@ export const BranchStep: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<BranchForm>(emptyBranch());
   const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
 
   useEffect(() => {
     const fetchContext = async () => {
@@ -85,6 +90,21 @@ export const BranchStep: React.FC = () => {
     showToast.success('Branch removed');
   };
 
+  const filteredBranches = branches.filter(b => 
+    b.branch_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    b.branch_address.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredBranches.length / itemsPerPage);
+  const paginatedBranches = filteredBranches.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {loading ? (
@@ -96,56 +116,91 @@ export const BranchStep: React.FC = () => {
         <div className="max-w-4xl mx-auto space-y-8">
           {/* List Section */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="p-1.5 bg-blue-50 text-blue-600 rounded-md">
-                <Building2 className="w-4 h-4" />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-1">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-blue-50 text-blue-600 rounded-md">
+                  <Building2 className="w-4 h-4" />
+                </div>
+                <h4 className="text-sm font-bold text-gray-900">Configured Branches</h4>
               </div>
-              <h4 className="text-sm font-bold text-gray-900">Configured Branches</h4>
+
+              <div className="relative w-full sm:w-64 group">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <Input 
+                  placeholder="Search branches..." 
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="pl-9 h-9 text-xs font-semibold bg-background/50 border-border/50 focus:bg-background transition-all"
+                />
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <AnimatePresence>
-                {branches.map((b, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    className="flex items-center justify-between p-5 bg-white rounded-2xl border border-gray-200 shadow-sm hover:border-blue-300 transition-all group"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                        <Building2 className="w-6 h-6" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[140px]">
+              <AnimatePresence mode="popLayout">
+                {paginatedBranches.map((b) => {
+                  const realIndex = branches.indexOf(b);
+                  return (
+                    <motion.div
+                      key={`${b.branch_name}-${realIndex}`}
+                      layout
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="flex items-center justify-between p-5 bg-white rounded-2xl border border-gray-200 shadow-sm hover:border-blue-300 transition-all group"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                          <Building2 className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900">{b.branch_name}</p>
+                          <p className="text-xs font-medium text-gray-500 truncate max-w-[180px]">
+                            {b.branch_address}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-bold text-gray-900">{b.branch_name}</p>
-                        <p className="text-xs font-medium text-gray-500 truncate max-w-[180px]">
-                          {b.branch_address}
-                        </p>
+                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => openEdit(realIndex)}
+                          className="text-blue-600 hover:bg-blue-50 transition-colors"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => remove(realIndex)}
+                          className="text-red-600 hover:bg-red-50 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
-                    </div>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openEdit(i)}
-                        className="text-blue-600 hover:bg-blue-50 transition-colors"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => remove(i)}
-                        className="text-red-600 hover:bg-red-50 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </motion.div>
-                ))}
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
+
+              {filteredBranches.length === 0 && (
+                <div className="col-span-full py-12 flex flex-col items-center justify-center text-center bg-gray-50/50 rounded-[2rem] border border-dashed border-gray-200">
+                  <div className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center text-gray-400 mb-4">
+                    <Search className="w-6 h-6" />
+                  </div>
+                  <h5 className="text-sm font-bold text-gray-900">No branches found</h5>
+                  <p className="text-xs text-gray-500 mt-1">Try adjusting your search term or add a new branch below.</p>
+                </div>
+              )}
             </div>
+
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
           </div>
 
           {/* Form Section */}

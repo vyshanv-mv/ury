@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { User, Shield, Loader2, Trash2, UserPlus, Pencil, X, Check } from 'lucide-react';
+import { User, Shield, Loader2, Trash2, UserPlus, Pencil, X, Check, Search } from 'lucide-react';
 import { Button } from '../../../ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
@@ -7,6 +7,7 @@ import { onboardingApi } from '../../../../lib/onboarding-api';
 import { showToast } from '../../../ui/toast';
 import { Input } from '../../../ui/input';
 import { Select, SelectItem } from '../../../ui/select';
+import { Pagination } from '../../../ui/pagination';
 
 interface UserForm { name: string; role: string; }
 const emptyForm = (): UserForm => ({ name: '', role: 'Cashier' });
@@ -24,6 +25,9 @@ export const UsersStep: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<UserForm>(emptyForm());
   const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
 
   useEffect(() => {
     if (users.length > 0) return;
@@ -51,6 +55,21 @@ export const UsersStep: React.FC = () => {
     const next = [...users]; next.splice(i, 1); updateData('users', next);
   };
 
+  const filteredUsers = users.filter(u => 
+    u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    u.role.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   if (loading) return (
     <div className="py-20 flex flex-col items-center justify-center space-y-4">
       <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -60,37 +79,80 @@ export const UsersStep: React.FC = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* User cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <AnimatePresence>
-          {users.map((u, i) => (
-            <motion.div key={i}
-              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
-              className="p-5 bg-card rounded-2xl border border-border shadow-sm group hover:border-primary/30 transition-all flex items-center justify-between"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-secondary rounded-full flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                  <User className="w-6 h-6" />
-                </div>
-                <div>
-                  <p className="font-bold text-foreground">{u.name}</p>
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-widest ${ROLE_COLORS[u.role] ?? 'bg-secondary text-muted-foreground'}`}>
-                    {u.role}
-                  </span>
-                </div>
-              </div>
-              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                <Button variant="ghost" size="icon" onClick={() => openEdit(i)} className="text-primary hover:bg-primary/10 transition-colors">
-                  <Pencil className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => remove(i)} className="text-destructive hover:bg-destructive/10 transition-colors">
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+      {/* Search and Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 bg-primary/10 rounded-md text-primary">
+            <Shield className="w-4 h-4" />
+          </div>
+          <h4 className="text-sm font-bold text-foreground">Team Members</h4>
+        </div>
+
+        <div className="relative w-full sm:w-64 group">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+          <Input 
+            placeholder="Search team..." 
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="pl-9 h-9 text-xs font-semibold bg-background/50 border-border/50 focus:bg-background transition-all"
+          />
+        </div>
       </div>
+
+      {/* User cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[140px]">
+        <AnimatePresence mode="popLayout">
+          {paginatedUsers.map((u) => {
+            const realIndex = users.indexOf(u);
+            return (
+              <motion.div key={`${u.name}-${realIndex}`}
+                layout
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}
+                className="p-5 bg-card rounded-2xl border border-border shadow-sm group hover:border-primary/30 transition-all flex items-center justify-between"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-secondary rounded-xl flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                    <User className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-foreground">{u.name}</p>
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-widest ${ROLE_COLORS[u.role] ?? 'bg-secondary text-muted-foreground'}`}>
+                      {u.role}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                  <Button variant="ghost" size="icon" onClick={() => openEdit(realIndex)} className="text-primary hover:bg-primary/10 transition-colors">
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => remove(realIndex)} className="text-destructive hover:bg-destructive/10 transition-colors">
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+
+        {filteredUsers.length === 0 && (
+          <div className="col-span-full py-12 flex flex-col items-center justify-center text-center bg-secondary/5 rounded-[2rem] border border-dashed border-border">
+            <div className="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center text-muted-foreground mb-4">
+              <Search className="w-6 h-6" />
+            </div>
+            <h5 className="text-sm font-bold text-foreground">No team members found</h5>
+            <p className="text-xs text-muted-foreground mt-1">Try adjusting your search term or add a new user.</p>
+          </div>
+        )}
+      </div>
+
+      <Pagination 
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
 
       {/* Add / Edit form */}
       <div className="p-6 bg-secondary/20 rounded-2xl border border-border/50 grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">

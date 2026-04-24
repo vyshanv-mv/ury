@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Share2, Check, Loader2, Plus, ExternalLink, Shield, Info, Power, Settings2 } from 'lucide-react';
+import { Share2, Check, Loader2, Plus, ExternalLink, Shield, Info, Power, Settings2, Search } from 'lucide-react';
 import { Button } from '../../../ui/button';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
 import { showToast } from '../../../ui/toast';
 import { cn } from '../../../../lib/utils';
+import { Input } from '../../../ui/input';
 
 interface Integration {
   id: string;
@@ -48,6 +49,30 @@ const AVAILABLE_INTEGRATIONS: Integration[] = [
     category: 'Aggregator',
     status: 'Available',
     color: 'bg-[#00d290]'
+  },
+  {
+    id: 'thrive',
+    name: 'Thrive',
+    description: 'Commission-free ordering for your restaurant.',
+    category: 'Aggregator',
+    status: 'Available',
+    color: 'bg-[#ff6b6b]'
+  },
+  {
+    id: 'dotpe',
+    name: 'DotPe',
+    description: 'Digital ordering and payments for your outlet.',
+    category: 'Aggregator',
+    status: 'Available',
+    color: 'bg-[#4a4a4a]'
+  },
+  {
+    id: 'petpooja',
+    name: 'Petpooja',
+    description: 'Sync with Petpooja ecosystem for inventory and more.',
+    category: 'Aggregator',
+    status: 'Available',
+    color: 'bg-[#6c5ce7]'
   }
 ];
 
@@ -55,6 +80,7 @@ export const IntegrationsStep: React.FC = () => {
   const { integrations: storeIntegrations, updateData } = useOnboardingStore();
   const integrations = Array.isArray(storeIntegrations) ? storeIntegrations : [];
   const [loading, setLoading] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const toggleConnection = async (integration: Integration) => {
     setLoading(integration.id);
@@ -80,104 +106,144 @@ export const IntegrationsStep: React.FC = () => {
     }
   };
 
+  const filteredIntegrations = AVAILABLE_INTEGRATIONS.filter(item => 
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="max-w-4xl mx-auto space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {AVAILABLE_INTEGRATIONS.map((item) => {
-            const isConnected = integrations.some(i => i.id === item.id);
-            const isPending = loading === item.id;
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 bg-blue-50 text-blue-600 rounded-md">
+              <Share2 className="w-4 h-4" />
+            </div>
+            <h4 className="text-sm font-bold text-gray-900">Available Integrations</h4>
+          </div>
 
-            return (
-              <motion.div
-                key={item.id}
-                whileHover={{ y: -4 }}
-                className={cn(
-                  "relative overflow-hidden p-6 rounded-3xl border-2 transition-all duration-300",
-                  isConnected 
-                    ? "bg-white border-blue-500 shadow-xl shadow-blue-50" 
-                    : "bg-white border-gray-100 hover:border-gray-200 shadow-sm"
-                )}
-              >
-                {/* Status Badge */}
-                <div className="absolute top-4 right-4">
-                  {isConnected ? (
-                    <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-100">
-                      <Check className="w-3 h-3" />
-                      Connected
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1.5 bg-gray-50 text-gray-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-gray-100">
-                      Available
-                    </div>
+          <div className="relative w-full sm:w-64 group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-blue-500 transition-colors" />
+            <Input 
+              placeholder="Search integrations..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 h-9 text-xs font-semibold bg-white border-gray-200 focus:bg-white transition-all"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-h-[200px]">
+          <AnimatePresence mode="popLayout">
+            {filteredIntegrations.map((item) => {
+              const isConnected = integrations.some(i => i.id === item.id);
+              const isPending = loading === item.id;
+
+              return (
+                <motion.div
+                  key={item.id}
+                  layout
+                  whileHover={{ y: -4 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className={cn(
+                    "relative overflow-hidden p-6 rounded-3xl border-2 transition-all duration-300",
+                    isConnected 
+                      ? "bg-white border-blue-500 shadow-xl shadow-blue-50" 
+                      : "bg-white border-gray-100 hover:border-gray-200 shadow-sm"
                   )}
-                </div>
-
-                <div className="flex items-start gap-5">
-                  {/* Logo Placeholder */}
-                  <div className={cn(
-                    "w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-black shadow-lg",
-                    item.color
-                  )}>
-                    {item.name[0]}
+                >
+                  {/* Status Badge */}
+                  <div className="absolute top-4 right-4">
+                    {isConnected ? (
+                      <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-100">
+                        <Check className="w-3 h-3" />
+                        Connected
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1.5 bg-gray-50 text-gray-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-gray-100">
+                        Available
+                      </div>
+                    )}
                   </div>
 
-                  <div className="flex-1 min-w-0 pr-12">
-                    <h3 className="text-xl font-black text-gray-900 mb-1">{item.name}</h3>
-                    <p className="text-sm font-medium text-gray-500 leading-relaxed mb-4">
-                      {item.description}
-                    </p>
-                    
-                    <div className="flex items-center gap-3">
-                      <Button
-                        onClick={() => toggleConnection(item)}
-                        disabled={!!loading}
-                        variant={isConnected ? "outline" : "default"}
-                        className={cn(
-                          "h-10 px-6 rounded-xl font-bold transition-all gap-2",
-                          isConnected 
-                            ? "border-2 hover:bg-red-50 hover:text-red-600 hover:border-red-100" 
-                            : "shadow-lg shadow-gray-200"
-                        )}
-                      >
-                        {isPending ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : isConnected ? (
-                          <>
-                            <Power className="w-4 h-4" />
-                            Disconnect
-                          </>
-                        ) : (
-                          <>
-                            <Plus className="w-4 h-4" />
-                            Connect
-                          </>
-                        )}
-                      </Button>
+                  <div className="flex items-start gap-5">
+                    {/* Logo Placeholder */}
+                    <div className={cn(
+                      "w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-black shadow-lg",
+                      item.color
+                    )}>
+                      {item.name[0]}
+                    </div>
+
+                    <div className="flex-1 min-w-0 pr-12">
+                      <h3 className="text-xl font-black text-gray-900 mb-1">{item.name}</h3>
+                      <p className="text-sm font-medium text-gray-500 leading-relaxed mb-4">
+                        {item.description}
+                      </p>
                       
-                      {isConnected && (
-                        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl bg-gray-50 text-gray-500 hover:text-blue-600 hover:bg-blue-50">
-                          <Settings2 className="w-4 h-4" />
+                      <div className="flex items-center gap-3">
+                        <Button
+                          onClick={() => toggleConnection(item)}
+                          disabled={!!loading}
+                          variant={isConnected ? "outline" : "default"}
+                          className={cn(
+                            "h-10 px-6 rounded-xl font-bold transition-all gap-2",
+                            isConnected 
+                              ? "border-2 hover:bg-red-50 hover:text-red-600 hover:border-red-100" 
+                              : "shadow-lg shadow-gray-200"
+                          )}
+                        >
+                          {isPending ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : isConnected ? (
+                            <>
+                              <Power className="w-4 h-4" />
+                              Disconnect
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="w-4 h-4" />
+                              Connect
+                            </>
+                          )}
                         </Button>
-                      )}
+                        
+                        {isConnected && (
+                          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl bg-gray-50 text-gray-500 hover:text-blue-600 hover:bg-blue-50">
+                            <Settings2 className="w-4 h-4" />
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Footer decorations */}
-                <div className="mt-6 pt-6 border-t border-gray-50 flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                    <Shield className="w-3.5 h-3.5 text-blue-500" />
-                    <span>Official Integration</span>
+                  {/* Footer decorations */}
+                  <div className="mt-6 pt-6 border-t border-gray-50 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                      <Shield className="w-3.5 h-3.5 text-blue-500" />
+                      <span>Official Integration</span>
+                    </div>
+                    <button className="text-[10px] font-bold text-blue-600 hover:underline flex items-center gap-1">
+                      Documentation
+                      <ExternalLink className="w-3 h-3" />
+                    </button>
                   </div>
-                  <button className="text-[10px] font-bold text-blue-600 hover:underline flex items-center gap-1">
-                    Documentation
-                    <ExternalLink className="w-3 h-3" />
-                  </button>
-                </div>
-              </motion.div>
-            );
-          })}
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+
+          {filteredIntegrations.length === 0 && (
+            <div className="col-span-full py-20 flex flex-col items-center justify-center text-center bg-gray-50 rounded-[2rem] border border-dashed border-gray-200">
+              <div className="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center text-gray-400 mb-4">
+                <Search className="w-8 h-8" />
+              </div>
+              <h5 className="text-sm font-bold text-gray-900">No integrations found</h5>
+              <p className="text-xs text-gray-500 mt-1">Try searching for a different aggregator or category.</p>
+            </div>
+          )}
         </div>
 
         <div className="bg-indigo-50/50 rounded-[2rem] p-8 border border-indigo-100 flex flex-col md:flex-row gap-6 items-center text-center md:text-left">
