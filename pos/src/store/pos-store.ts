@@ -120,10 +120,11 @@ interface POSState {
   territories: string[];
   tableOrder: TableOrder | null;
   isInitializing: boolean;
-  orderComment: string;
   needsOnboarding: boolean;
+  orderComment: string;
   onboardingCompleted: boolean;
 }
+
 
 interface POSStore extends POSState {
   fetchMenuItems: () => Promise<void>;
@@ -206,10 +207,10 @@ export const usePOSStore = create<POSStore>((set, get) => ({
   currencySymbol: storage.getItem('currencySymbol') || null,
   tableOrder: null,
   isInitializing: true,
+  needsOnboarding: false,
   isUpdatingOrder: false,
   orderId: null,
   orderComment: '',
-  needsOnboarding: false,
   onboardingCompleted: localStorage.getItem('ury_onboarding_done') === 'true',
 
   setNeedsOnboarding: (val: boolean) => set({ needsOnboarding: val }),
@@ -222,48 +223,48 @@ export const usePOSStore = create<POSStore>((set, get) => ({
     set({ needsOnboarding: false, onboardingCompleted: true });
   },
 
+
   initializeApp: async () => {
     try {
       set({ isInitializing: true, error: null });
 
-      // 1. Check Frontend Lock (Fastest)
+      // 1. First, check if setup is complete via Backend
+      const setupResponse = await (window as any).frappe.call('ury.setup.api.check_setup_status');
+      const setupComplete = setupResponse.message?.setup_complete;
+      
+      // Secondary check: local storage flag
       const localCompleted = localStorage.getItem('ury_onboarding_done') === 'true';
       
-      if (localCompleted) {
-        set({ needsOnboarding: false, onboardingCompleted: true });
-      } else {
-        // 2. Check Backend Fallback
-        try {
-          const { needsOnboarding } = await onboardingApi.checkSetupStatus();
-          set({ needsOnboarding });
-        } catch (e) {
-          // If backend fails during init, assume onboarding is needed if no local flag
-          set({ needsOnboarding: true });
-        }
+      const shouldOnboard = !setupComplete && !localCompleted;
+      set({ needsOnboarding: shouldOnboard, onboardingCompleted: !shouldOnboard });
+
+      if (shouldOnboard) {
+        set({ isInitializing: false });
+        return;
       }
 
-      // If onboarding is NOT needed, fetch core data
-      if (!get().needsOnboarding) {
-        const [profileResult, menuResult, categoriesResult, paymentModesResult] = await Promise.allSettled([
-          get().fetchPosProfile(),
-          get().fetchMenuItems(),
-          get().fetchCategories(),
-          get().fetchPaymentModes()
-        ]);
+      // 2. If setup is complete, fetch the rest of the app data
+      const [profileResult, menuResult, categoriesResult, paymentModesResult] = await Promise.allSettled([
+        get().fetchPosProfile(),
+        get().fetchMenuItems(),
+        get().fetchCategories(),
+        get().fetchPaymentModes(),
+      ]);
 
-        if (profileResult.status === 'rejected' ||
-          menuResult.status === 'rejected' ||
-          categoriesResult.status === 'rejected' ||
-          paymentModesResult.status === 'rejected') {
-          set({
-            error: 'Failed to initialize app. Please refresh the page.',
-            isInitializing: false
-          });
-          return;
-        }
+      if (profileResult.status === 'rejected' ||
+        menuResult.status === 'rejected' ||
+        categoriesResult.status === 'rejected' ||
+        paymentModesResult.status === 'rejected') {
+        
+        set({ 
+          error: 'Failed to initialize app. Please refresh the page.',
+          isInitializing: false 
+        });
+        return;
       }
 
       set({ isInitializing: false });
+
     } catch (error) {
       set({
         error: 'Failed to initialize app. Please refresh the page.',

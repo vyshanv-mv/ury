@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { t } from '../i18n';
 import { Link, useLocation } from 'react-router-dom';
-import { 
+import {
   Command,
   User,
   ChevronDown,
@@ -113,10 +113,10 @@ const Header = ({ hideSearch = false, hideUserMenu = false }: HeaderProps) => {
       <div className="flex items-center justify-between h-16 px-6">
         {/* Logo */}
         <div className="flex items-center">
-        <Link to="/" className="flex items-center gap-3">
-            <img 
-              src="/assets/ury/pos/ury_pos.png" 
-              alt="URY POS" 
+          <Link to="/" className="flex items-center gap-3">
+            <img
+              src="/assets/ury/pos/ury_pos.png"
+              alt="URY POS"
               className="h-10 w-auto"
             />
           </Link>

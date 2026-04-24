@@ -1,4 +1,6 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
+
+
 import Footer from './components/Footer';
 import Header from './components/Header';
 import Orders from './pages/Orders';
@@ -24,11 +26,7 @@ function MainLayout() {
     <div className="flex flex-col h-screen bg-gray-100 font-inter">
       <Header />
       <div className="flex-1 overflow-hidden">
-        <Routes>
-          <Route path="/" element={<POS />} />
-          <Route path="/orders" element={<Orders />} />
-          <Route path="/table" element={<Table />} />
-        </Routes>
+        <Outlet />
       </div>
       <Footer />
     </div>
@@ -36,7 +34,11 @@ function MainLayout() {
 }
 
 function App() {
-  const { initializeApp } = usePOSStore();
+  const {
+    initializeApp,
+    isInitializing,
+    needsOnboarding
+  } = usePOSStore();
 
   useEffect(() => {
     initializeApp();
@@ -48,6 +50,17 @@ function App() {
     document.documentElement.dir = isRtl ? 'rtl' : 'ltr';
     document.documentElement.lang = lang || 'en';
   }, []);
+
+  if (isInitializing) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-slate-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-slate-500 font-medium animate-pulse">Initializing URY POS...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -61,16 +74,22 @@ function App() {
               <Route path="/admin" element={<AdminDashboard />} />
 
               {/* 🔒 PROTECTED — Full auth + POS opening guard */}
-              <Route
-                path="/*"
+              <Route 
+                path="/" 
                 element={
-                  <AuthGuard>
-                    <POSOpeningProvider>
-                      <MainLayout />
-                    </POSOpeningProvider>
-                  </AuthGuard>
+                  needsOnboarding ? <Navigate to="/setup" replace /> : (
+                    <AuthGuard>
+                      <POSOpeningProvider>
+                        <MainLayout />
+                      </POSOpeningProvider>
+                    </AuthGuard>
+                  )
                 }
-              />
+              >
+                <Route index element={<POS />} />
+                <Route path="orders" element={<Orders />} />
+                <Route path="table" element={<Table />} />
+              </Route>
             </Routes>
           </RouteGuard>
         </Router>
