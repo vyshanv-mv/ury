@@ -24,7 +24,8 @@ const emptyRestaurant = (): RestaurantForm => ({
 });
 
 export const RestaurantStep: React.FC = () => {
-  const { restaurant: restaurants, updateData } = useOnboardingStore();
+  const { restaurant: storeRestaurants, updateData } = useOnboardingStore();
+  const restaurants = Array.isArray(storeRestaurants) ? storeRestaurants : [];
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<RestaurantForm>(emptyRestaurant());
   const [editIndex, setEditIndex] = useState<number | null>(null);

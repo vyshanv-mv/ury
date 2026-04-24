@@ -22,7 +22,8 @@ const emptyBranch = (): BranchForm => ({
 });
 
 export const BranchStep: React.FC = () => {
-  const { branch: branches, updateData } = useOnboardingStore();
+  const { branch: storeBranches, updateData } = useOnboardingStore();
+  const branches = Array.isArray(storeBranches) ? storeBranches : [];
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<BranchForm>(emptyBranch());
   const [editIndex, setEditIndex] = useState<number | null>(null);

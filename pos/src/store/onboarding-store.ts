@@ -13,18 +13,14 @@ interface OnboardingState {
     tax_calculation: string;
     tax_rate: string;
   };
-  printer: {
-    printer_name: string;
-    server_ip: string;
-    port: string;
-    bill: boolean;
-  };
+  printer: any[];
   rooms: any[];
   tables: any[];
   payments: any[];
     branch: any[];
     restaurant: any[];
     users: any[];
+    integrations: any[];
 
     // Actions
     setStepIndex: (index: number) => void;
@@ -43,13 +39,14 @@ export const useOnboardingStore = create<OnboardingState>()(
 
             organization: {},
             menu: { items: [], tax_calculation: 'Inclusive', tax_rate: '5' },
-            printer: { printer_name: '', server_ip: '', port: '9100', bill: true },
+            printer: [],
             rooms: [],
             tables: [],
             payments: [],
             branch: [],
             restaurant: [],
             users: [],
+            integrations: [],
 
             setStepIndex: (index) => set({ currentStepIndex: index }),
             markStepComplete: (stepId) => set((state) => ({
@@ -75,17 +72,36 @@ export const useOnboardingStore = create<OnboardingState>()(
                 skippedSteps: [],
                 organization: {},
                 menu: { items: [], tax_calculation: 'Inclusive', tax_rate: '5' },
-                printer: { printer_name: '', server_ip: '', port: '9100', bill: true },
+                printer: [],
                 rooms: [],
                 tables: [],
                 payments: [],
                 branch: [],
                 restaurant: [],
-                users: []
+                users: [],
+                integrations: []
             }),
     }),
     {
-      name: 'onboarding_state', // Mandatory key
+      name: 'onboarding_state',
+      version: 1,
+      migrate: (persistedState: any, version: number) => {
+        if (version === 0) {
+          // Migrate old object-based state to arrays
+          const migrateToArray = (val: any) => {
+            if (Array.isArray(val)) return val;
+            if (val && typeof val === 'object' && Object.keys(val).length > 0) return [val];
+            return [];
+          };
+
+          if (persistedState) {
+            persistedState.branch = migrateToArray(persistedState.branch);
+            persistedState.restaurant = migrateToArray(persistedState.restaurant);
+            persistedState.printer = migrateToArray(persistedState.printer);
+          }
+        }
+        return persistedState;
+      },
     }
   )
 );

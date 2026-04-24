@@ -19,7 +19,8 @@ const ROLE_COLORS: Record<string, string> = {
 };
 
 export const UsersStep: React.FC = () => {
-  const { users, updateData } = useOnboardingStore();
+  const { users: storeUsers, updateData } = useOnboardingStore();
+  const users = Array.isArray(storeUsers) ? storeUsers : [];
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<UserForm>(emptyForm());
   const [editIndex, setEditIndex] = useState<number | null>(null);

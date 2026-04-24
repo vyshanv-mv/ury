@@ -20,7 +20,8 @@ interface PaymentForm { name: string; type: string; }
 const emptyForm = (): PaymentForm => ({ name: '', type: 'Cash' });
 
 export const PaymentStep: React.FC = () => {
-  const { payments, updateData } = useOnboardingStore();
+  const { payments: storePayments, updateData } = useOnboardingStore();
+  const payments = Array.isArray(storePayments) ? storePayments : [];
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<PaymentForm>(emptyForm());
   const [editIndex, setEditIndex] = useState<number | null>(null);

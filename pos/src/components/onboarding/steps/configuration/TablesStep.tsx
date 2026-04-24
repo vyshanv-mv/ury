@@ -12,7 +12,9 @@ interface TableForm { name: string; seats: string; room: string; }
 const emptyTable = (defaultRoom = ''): TableForm => ({ name: '', seats: '', room: defaultRoom });
 
 export const TablesStep: React.FC = () => {
-  const { tables, rooms, updateData } = useOnboardingStore();
+  const { tables: storeTables, rooms: storeRooms, updateData } = useOnboardingStore();
+  const tables = Array.isArray(storeTables) ? storeTables : [];
+  const rooms = Array.isArray(storeRooms) ? storeRooms : [];
   const [loading, setLoading] = useState(false);
   const defaultRoom = rooms[0]?.name ?? '';
   const [form, setForm] = useState<TableForm>(emptyTable(defaultRoom));

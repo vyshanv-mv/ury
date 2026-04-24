@@ -6,7 +6,7 @@ import {
   UtensilsCrossed, CreditCard, Users, Layers, TrendingUp,
   ShoppingBag, DollarSign, Clock, MoreHorizontal,
   PanelRightOpen, ChevronRight,
-  Printer, CheckCircle2, ShieldCheck, Activity
+  Printer, CheckCircle2, ShieldCheck, Activity, Share2
 } from "lucide-react";
 import Header from "../components/Header";
 import {
@@ -26,6 +26,7 @@ import { TablesStep } from "../components/onboarding/steps/configuration/TablesS
 import { PaymentStep } from "../components/onboarding/steps/configuration/PaymentStep";
 import { UsersStep } from "../components/onboarding/steps/configuration/UsersStep";
 import { PrinterStep } from "../components/onboarding/steps/configuration/PrinterStep";
+import { IntegrationsStep } from "../components/onboarding/steps/configuration/IntegrationsStep";
 
 type Section =
   | "overview" | "branch" | "restaurant" | "rooms" | "tables"
@@ -49,7 +50,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "menu", label: "Menu", icon: UtensilsCrossed, group: "Content", description: "Catalog, items and pricing" },
   { id: "payment", label: "Payment", icon: CreditCard, group: "Financial", description: "Payment gateways and taxes" },
   { id: "users", label: "Users", icon: Users, group: "System", description: "Team roles and access" },
-  { id: "integration", label: "Integration", icon: Layers, group: "System", description: "Third-party connections" },
+  { id: "integration", label: "Integration", icon: Share2, group: "System", description: "Third-party connections" },
 ];
 
 const revenueData = [
@@ -94,6 +95,7 @@ export function AdminDashboard() {
       case "payment": return <PaymentStep />;
       case "users": return <UsersStep />;
       case "printer": return <PrinterStep />;
+      case "integration": return <IntegrationsStep />;
       case "overview": return renderOverview();
       default:
         return (

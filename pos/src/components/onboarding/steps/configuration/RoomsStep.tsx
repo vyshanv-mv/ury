@@ -14,7 +14,8 @@ interface RoomForm {
 const emptyRoom = (): RoomForm => ({ name: '', seats: '' });
 
 export const RoomsStep: React.FC = () => {
-  const { rooms, updateData } = useOnboardingStore();
+  const { rooms: storeRooms, updateData } = useOnboardingStore();
+  const rooms = Array.isArray(storeRooms) ? storeRooms : [];
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState<RoomForm>(emptyRoom());
   const [editIndex, setEditIndex] = useState<number | null>(null);

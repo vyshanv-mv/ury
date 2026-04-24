@@ -1,50 +1,77 @@
 import React, { useState, useRef } from 'react';
-import { Loader2, Upload, Trash2, Check, Plus, Info, Percent, Receipt, FileText } from 'lucide-react';
+import { Loader2, Upload, Trash2, Check, Plus, Info, Percent, Receipt, Pencil, X } from 'lucide-react';
 import { Button } from '../../../ui/button';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
 import { showToast } from '../../../ui/toast';
 import { Input } from '../../../ui/input';
 import { FormField } from '../../shared/FormField';
+import { motion, AnimatePresence } from 'framer-motion';
 
-interface RowItem {
+interface MenuForm {
   item_name: string;
   standard_rate: string;
 }
 
-const emptyRow = (): RowItem => ({ item_name: '', standard_rate: '' });
-const DEFAULT_ROWS = 5;
+const emptyForm = (): MenuForm => ({ item_name: '', standard_rate: '' });
 
 export const MenuStep: React.FC = () => {
   const { menu, updateData } = useOnboardingStore();
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const [form, setForm] = useState<MenuForm>(emptyForm());
+  const [editIndex, setEditIndex] = useState<number | null>(null);
 
-  // Editable rows — initialise from store or show default empty rows
-  const [rows, setRows] = useState<RowItem[]>(() => {
-    if (menu.items && menu.items.length > 0) {
-      return menu.items.map((it: any) => ({
+  // Local list for easier manipulation before saving to store
+  const [items, setItems] = useState<MenuForm[]>(() => {
+    const storeItems = menu.items;
+    if (Array.isArray(storeItems) && storeItems.length > 0) {
+      return storeItems.map((it: any) => ({
         item_name: it.item_name || it.name || '',
         standard_rate: String(it.standard_rate || it.price || ''),
       }));
     }
-    return Array.from({ length: DEFAULT_ROWS }, emptyRow);
+    return [];
   });
 
-  /* ── helpers ── */
-  const updateRow = (i: number, field: keyof RowItem, value: string) => {
-    setRows((prev) => prev.map((r, idx) => idx === i ? { ...r, [field]: value } : r));
+  const saveToStore = (newItems: MenuForm[]) => {
+    updateData('menu', { items: newItems });
   };
 
-  const addRow = () => setRows((prev) => [...prev, emptyRow()]);
-
-  const removeRow = (i: number) => {
-    setRows((prev) => {
-      const next = prev.filter((_, idx) => idx !== i);
-      return next.length === 0 ? [emptyRow()] : next;
-    });
+  const openEdit = (i: number) => {
+    setForm({ ...items[i] });
+    setEditIndex(i);
   };
 
-  /* ── Upload: parse CSV client-side, populate rows directly ── */
+  const cancelEdit = () => {
+    setForm(emptyForm());
+    setEditIndex(null);
+  };
+
+  const handleSaveItem = () => {
+    if (!form.item_name.trim() || !form.standard_rate) {
+      showToast.error('Item name and price are required');
+      return;
+    }
+    const next = [...items];
+    if (editIndex !== null) {
+      next[editIndex] = form;
+      showToast.success('Item updated');
+    } else {
+      next.push(form);
+      showToast.success('Item added');
+    }
+    setItems(next);
+    saveToStore(next);
+    cancelEdit();
+  };
+
+  const removeItem = (i: number) => {
+    const next = items.filter((_, idx) => idx !== i);
+    setItems(next);
+    saveToStore(next);
+  };
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -57,14 +84,13 @@ export const MenuStep: React.FC = () => {
         const lines = text.split(/\r?\n/).filter(l => l.trim());
         if (lines.length < 2) { showToast.error('File must have a header row and at least one item'); return; }
 
-        // Parse header — support flexible column names
         const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
         const nameIdx = headers.findIndex(h => h === 'item_name' || h === 'name');
         const priceIdx = headers.findIndex(h => h === 'standard_rate' || h === 'price' || h === 'rate');
 
         if (nameIdx === -1) { showToast.error('CSV must have an "item_name" or "name" column'); return; }
 
-        const imported: RowItem[] = lines.slice(1)
+        const imported: MenuForm[] = lines.slice(1)
           .map(line => {
             const cols = line.split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
             return {
@@ -76,37 +102,23 @@ export const MenuStep: React.FC = () => {
 
         if (imported.length === 0) { showToast.error('No valid items found in file'); return; }
 
-        const existing = rows.filter(r => r.item_name.trim() || r.standard_rate.trim());
-        const merged = [...existing, ...imported];
-        setRows(merged);
-        showToast.success(`${imported.length} item${imported.length !== 1 ? 's' : ''} imported`);
+        const next = [...items, ...imported];
+        setItems(next);
+        saveToStore(next);
+        showToast.success(`${imported.length} items imported`);
       } catch {
-        showToast.error('Failed to parse file — check the format');
+        showToast.error('Failed to parse file');
       } finally {
         setIsUploading(false);
         if (fileInputRef.current) fileInputRef.current.value = '';
       }
     };
-    reader.onerror = () => {
-      showToast.error('Could not read file');
-      setIsUploading(false);
-    };
     reader.readAsText(file);
   };
 
-  /* ── Save valid rows to store ── */
-  const handleSave = () => {
-    const valid = rows.filter(r => r.item_name.trim() && Number(r.standard_rate) > 0);
-    if (valid.length === 0) { showToast.error('Add at least one item with a valid price'); return; }
-    updateData('menu', { items: valid });
-    showToast.success(`${valid.length} items saved`);
-  };
-
-  const filledCount = rows.filter(r => r.item_name.trim()).length;
-
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="max-w-2xl mx-auto space-y-8">
+      <div className="max-w-4xl mx-auto space-y-8">
         {/* Tax Configuration */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 mb-1">
@@ -164,14 +176,14 @@ export const MenuStep: React.FC = () => {
           </div>
         </div>
 
-        {/* Menu Items */}
+        {/* Menu Items List */}
         <div className="space-y-4">
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
               <div className="p-1.5 bg-primary/10 rounded-md text-primary">
                 <Receipt className="w-4 h-4" />
               </div>
-              <h4 className="text-sm font-bold text-foreground">Items & Pricing</h4>
+              <h4 className="text-sm font-bold text-foreground">Menu Items</h4>
             </div>
 
             <div className="flex gap-2">
@@ -180,7 +192,7 @@ export const MenuStep: React.FC = () => {
                 size="sm"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
-                className="font-bold gap-2 text-xs h-9"
+                className="font-bold gap-2 text-xs h-9 px-4"
               >
                 {isUploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
                 {isUploading ? 'Importing...' : 'Upload CSV'}
@@ -189,92 +201,92 @@ export const MenuStep: React.FC = () => {
             </div>
           </div>
 
-          <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-sm">
-            {/* Table Header */}
-            <div className="flex items-center gap-4 px-6 py-3 bg-muted/30 border-b border-border">
-              <span className="flex-1 text-xs font-bold text-muted-foreground uppercase tracking-widest">Item Name</span>
-              <span className="w-24 text-xs font-bold text-muted-foreground uppercase tracking-widest text-right mr-4">Price (₹)</span>
-              <span className="w-10" />
-            </div>
-
-            {/* Table Body */}
-            <div className="divide-y divide-border/50 max-h-96 overflow-y-auto custom-scrollbar">
-              {rows.map((row, i) => (
-                <div key={i} className="flex items-center gap-4 px-4 py-2 group hover:bg-secondary/10 transition-colors">
-                  <div className="flex-1 px-2">
-                    <Input
-                      type="text"
-                      placeholder={`Item ${i + 1}`}
-                      value={row.item_name}
-                      onChange={(e) => updateRow(i, 'item_name', e.target.value)}
-                      className="w-full text-sm font-semibold bg-transparent border-transparent focus:bg-background border-none shadow-none focus-visible:ring-1 focus-visible:ring-primary/30"
-                    />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <AnimatePresence>
+              {items.map((item, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="p-5 bg-card rounded-2xl border border-border shadow-sm flex items-center justify-between group hover:border-primary/30 transition-all"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-secondary rounded-xl flex items-center justify-center text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                      <Receipt className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-foreground line-clamp-1">{item.item_name}</p>
+                      <p className="text-xs font-bold text-primary">₹ {item.standard_rate}</p>
+                    </div>
                   </div>
-                  <div className="w-24 flex items-center">
-                    <Input
-                      type="number"
-                      min="0"
-                      placeholder="0.00"
-                      value={row.standard_rate}
-                      onChange={(e) => updateRow(i, 'standard_rate', e.target.value)}
-                      className="w-full text-sm font-bold bg-transparent border-transparent focus:bg-background border-none shadow-none text-right focus-visible:ring-1 focus-visible:ring-primary/30 pr-4"
-                    />
-                  </div>
-                  <div className="w-10 flex justify-center">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeRow(i)}
-                      className="w-8 h-8 text-muted-foreground opacity-0 group-hover:opacity-100 hover:bg-destructive/10 hover:text-destructive transition-all"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                    <Button variant="ghost" size="icon" onClick={() => openEdit(i)} className="w-8 h-8 text-primary hover:bg-primary/10">
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => removeItem(i)} className="w-8 h-8 text-destructive hover:bg-destructive/10">
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
-                </div>
+                </motion.div>
               ))}
-            </div>
-
-            {/* Table Footer */}
-            <div className="px-6 py-4 border-t border-border bg-muted/5 flex items-center justify-between gap-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={addRow}
-                className="flex items-center gap-2 text-xs font-bold text-primary hover:bg-primary/5 transition-colors"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                Add New Row
-              </Button>
-
-              <div className="flex items-center gap-4">
-                {filledCount > 0 && (
-                  <span className="text-xs font-bold text-muted-foreground bg-secondary/50 px-2 py-1 rounded-md uppercase tracking-wider">
-                    {filledCount} Item{filledCount !== 1 ? 's' : ''} Ready
-                  </span>
-                )}
-                <Button onClick={handleSave} size="sm" className="font-bold gap-2 px-4 shadow-md shadow-primary/20">
-                  <Check className="w-4 h-4" />
-                  Save Changes
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground font-medium py-2">
-            <FileText className="w-3.5 h-3.5 opacity-50" />
-            <span>Empty rows are automatically ignored. You can always edit this later.</span>
+            </AnimatePresence>
           </div>
         </div>
 
-        {/* Info Section */}
+        {/* Add / Edit Form */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 mb-1">
+            <div className="p-1.5 bg-primary/10 rounded-md text-primary">
+              <Plus className="w-4 h-4" />
+            </div>
+            <h4 className="text-sm font-bold text-foreground">
+              {editIndex !== null ? 'Edit Item' : 'Add New Item'}
+            </h4>
+          </div>
+
+          <div className="p-6 bg-secondary/10 rounded-2xl border border-border/50 flex flex-col sm:flex-row gap-4 items-end">
+            <div className="flex-2 w-full">
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1 mb-1.5 block opacity-60">Item Name</label>
+              <Input
+                value={form.item_name}
+                onChange={(e) => setForm({ ...form, item_name: e.target.value })}
+                className="w-full text-sm font-semibold h-11"
+                placeholder="e.g. Chicken Biryani"
+              />
+            </div>
+            <div className="w-full sm:w-40">
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1 mb-1.5 block opacity-60">Rate (₹)</label>
+              <Input
+                type="number"
+                value={form.standard_rate}
+                onChange={(e) => setForm({ ...form, standard_rate: e.target.value })}
+                className="w-full text-sm font-bold h-11"
+                placeholder="250.00"
+              />
+            </div>
+            <div className="flex gap-2">
+              {editIndex !== null && (
+                <Button variant="outline" size="lg" onClick={cancelEdit} className="h-11 px-6 font-bold gap-2">
+                  <X className="w-4 h-4" />
+                </Button>
+              )}
+              <Button size="lg" onClick={handleSaveItem} className="h-11 px-8 font-bold gap-2 shadow-lg shadow-primary/10">
+                {editIndex !== null ? <><Check className="w-5 h-5" /> Update</> : <><Plus className="w-5 h-5" /> Add Item</>}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Info Box */}
         <div className="p-6 bg-secondary/20 rounded-2xl border border-border/50 flex gap-4">
           <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center flex-shrink-0 text-muted-foreground border border-border shadow-sm">
             <Info className="w-5 h-5" />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-foreground">Menu & Pricing</h4>
+            <h4 className="text-sm font-bold text-foreground">Menu Optimization</h4>
             <p className="text-xs text-muted-foreground leading-relaxed mt-1">
-              Adding your top selling items now helps you get started quickly. You can upload your full menu using a CSV template or enter them manually.
+              Start by adding your most popular items. You can use the CSV upload to import a large menu instantly. All changes are saved automatically.
             </p>
           </div>
         </div>
@@ -282,4 +294,3 @@ export const MenuStep: React.FC = () => {
     </div>
   );
 };
-
