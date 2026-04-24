@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { ProgressLoader } from '../shared/ProgressLoader';
 import type { OnboardingStepProps } from '../../../data/steps-data';
 
+import Header from '../../Header';
+
 type StepStatus = 'pending' | 'loading' | 'completed';
 
 interface LoaderStep {
@@ -55,13 +57,20 @@ export const LoadingStep: React.FC<OnboardingStepProps> = ({ onNext, data }) => 
   }, [progress]);
 
   return (
-    <div className="w-full max-w-xl bg-white rounded-lg p-12 md:p-16 shadow-xl border border-gray-100 text-center font-inter">
-      <div className="mb-12">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4 tracking-tight">Setting up your workspace</h2>
-        <p className="text-gray-500 font-medium text-base">This will only take a moment. Please don't close this window.</p>
-      </div>
+    <div className="h-screen w-screen flex flex-col bg-gray-50 overflow-hidden font-inter">
+      {/* Global POS Header */}
+      <Header />
 
-      <ProgressLoader progress={progress} steps={steps} />
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="w-full max-w-xl bg-white rounded-2xl p-12 md:p-16 shadow-xl border border-gray-100 text-center">
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4 tracking-tight">Setting up your workspace</h2>
+            <p className="text-gray-500 font-bold text-base opacity-70">This will only take a moment. Please don't close this window.</p>
+          </div>
+
+          <ProgressLoader progress={progress} steps={steps} />
+        </div>
+      </div>
     </div>
   );
 };
