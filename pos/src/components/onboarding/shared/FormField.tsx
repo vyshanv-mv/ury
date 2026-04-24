@@ -1,4 +1,6 @@
 import React from 'react';
+import { Input } from '../../ui/input';
+import { Select, SelectItem } from '../../ui/select';
 
 interface FormFieldProps {
   label: string;
@@ -35,29 +37,26 @@ export const FormField: React.FC<FormFieldProps> = ({
       )}
       {type === 'select' ? (
         <div className="relative w-full">
-          <select
+          <Select
             disabled={disabled}
             value={value}
-            onChange={onChange}
-            className={`w-full ${icon ? 'pl-11' : 'px-5'} py-3.5 bg-secondary/30 border border-border rounded-xl outline-none focus:border-primary focus:bg-card transition-all duration-300 disabled:bg-muted/50 text-sm font-semibold text-foreground appearance-none cursor-pointer`}
+            onValueChange={(val) => onChange?.({ target: { value: val } } as any)}
+            className={icon ? 'pl-10' : ''}
           >
             {options?.map((opt: any) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
+              <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
             ))}
-          </select>
-          <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground opacity-50">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-          </div>
+          </Select>
         </div>
       ) : (
-        <input
+        <Input
           type={type}
           value={value}
           onChange={onChange}
           disabled={disabled}
           placeholder={placeholder}
           required={required}
-          className={`w-full ${icon ? 'pl-11' : 'px-5'} py-3.5 bg-secondary/30 border border-border rounded-xl outline-none focus:border-primary focus:bg-card transition-all duration-300 disabled:bg-muted/50 text-sm font-semibold text-foreground placeholder:text-muted-foreground/30`}
+          className={icon ? 'pl-10' : ''}
         />
       )}
     </div>

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { User, Shield, Loader2, Trash2, UserPlus, Pencil, X, Check, ChevronDown } from 'lucide-react';
+import { User, Shield, Loader2, Trash2, UserPlus, Pencil, X, Check } from 'lucide-react';
 import { Button } from '../../../ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
 import { onboardingApi } from '../../../../lib/onboarding-api';
 import { showToast } from '../../../ui/toast';
+import { Input } from '../../../ui/input';
+import { Select, SelectItem } from '../../../ui/select';
 
 interface UserForm { name: string; role: string; }
 const emptyForm = (): UserForm => ({ name: '', role: 'Cashier' });
@@ -27,7 +29,7 @@ export const UsersStep: React.FC = () => {
     setLoading(true);
     onboardingApi.getUserManagementContext()
       .then(res => { if (res?.users?.length > 0) updateData('users', res.users); })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
   }, []);
 
@@ -71,18 +73,18 @@ export const UsersStep: React.FC = () => {
                 </div>
                 <div>
                   <p className="font-bold text-foreground">{u.name}</p>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest ${ROLE_COLORS[u.role] ?? 'bg-secondary text-muted-foreground'}`}>
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-widest ${ROLE_COLORS[u.role] ?? 'bg-secondary text-muted-foreground'}`}>
                     {u.role}
                   </span>
                 </div>
               </div>
               <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                <button onClick={() => openEdit(i)} className="p-2 hover:bg-primary/10 text-primary rounded-lg transition-all">
+                <Button variant="ghost" size="icon" onClick={() => openEdit(i)} className="text-primary hover:bg-primary/10 transition-colors">
                   <Pencil className="w-4 h-4" />
-                </button>
-                <button onClick={() => remove(i)} className="p-2 hover:bg-destructive/10 text-destructive rounded-lg transition-all">
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => remove(i)} className="text-destructive hover:bg-destructive/10 transition-colors">
                   <Trash2 className="w-4 h-4" />
-                </button>
+                </Button>
               </div>
             </motion.div>
           ))}
@@ -92,41 +94,38 @@ export const UsersStep: React.FC = () => {
       {/* Add / Edit form */}
       <div className="p-6 bg-secondary/20 rounded-2xl border border-border/50 grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
         <div className="w-full">
-          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1 mb-1.5 block opacity-60">Full Name</label>
-          <input
+          <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1 mb-1.5 block opacity-60">Full Name</label>
+          <Input
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             onKeyDown={(e) => e.key === 'Enter' && save()}
-            className="w-full px-5 py-3.5 bg-card border border-border rounded-xl outline-none focus:border-primary transition-all text-sm font-semibold shadow-sm"
+            className="w-full px-5 py-3.5 h-auto bg-card border border-border rounded-xl outline-none focus:border-primary focus:ring-0 transition-all text-sm font-semibold shadow-sm"
             placeholder="e.g. Jane Doe"
           />
         </div>
         <div className="w-full">
-          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1 mb-1.5 block opacity-60">Role</label>
-          <div className="relative">
-            <select
-              value={form.role}
-              onChange={(e) => setForm({ ...form, role: e.target.value })}
-              className="w-full px-5 py-3.5 bg-card border border-border rounded-xl outline-none focus:border-primary transition-all text-sm font-semibold appearance-none shadow-sm"
-            >
-              <option>Administrator</option>
-              <option>Manager</option>
-              <option>Cashier</option>
-              <option>Waiter</option>
-            </select>
-            <ChevronDown className="absolute right-3 top-4 w-4 h-4 text-muted-foreground pointer-events-none" />
-          </div>
+          <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1 mb-1.5 block opacity-60">Role</label>
+          <Select
+            value={form.role}
+            onValueChange={(val) => setForm({ ...form, role: val })}
+            className="w-full px-5 py-3.5 h-auto bg-card border border-border rounded-xl outline-none focus:border-primary focus:ring-0 transition-all text-sm font-semibold shadow-sm"
+          >
+            <SelectItem value="Administrator">Administrator</SelectItem>
+            <SelectItem value="Manager">Manager</SelectItem>
+            <SelectItem value="Cashier">Cashier</SelectItem>
+            <SelectItem value="Waiter">Waiter</SelectItem>
+          </Select>
         </div>
         <div className="flex gap-2">
           {editIndex !== null && (
-            <Button variant="outline" onClick={cancelEdit} className="h-[52px] px-4 rounded-xl font-bold gap-2 flex-1">
+            <Button variant="outline" size="lg" onClick={cancelEdit} className="gap-2 flex-1 font-bold">
               <X className="w-4 h-4" /> Cancel
             </Button>
           )}
-          <Button onClick={save} className="h-[52px] px-6 rounded-xl bg-foreground hover:bg-foreground/90 text-background font-bold shadow-lg gap-2 flex-1">
+          <Button size="lg" onClick={save} className="font-bold gap-2 flex-1 w-full sm:w-auto">
             {editIndex !== null
-              ? <><Check className="w-4 h-4" /> Update</>
-              : <><UserPlus className="w-4 h-4" /> Add</>}
+              ? <><Check className="w-5 h-5" /> Update</>
+              : <><UserPlus className="w-5 h-5" /> Add</>}
           </Button>
         </div>
       </div>

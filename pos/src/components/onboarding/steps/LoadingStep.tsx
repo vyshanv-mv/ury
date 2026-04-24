@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ProgressLoader } from '../shared/ProgressLoader';
-import type { OnboardingStepProps } from '../../../pages/onboarding/steps';
+import type { OnboardingStepProps } from '../../../data/steps-data';
 
 type StepStatus = 'pending' | 'loading' | 'completed';
 
@@ -44,7 +44,7 @@ export const LoadingStep: React.FC<OnboardingStepProps> = ({ onNext, data }) => 
     setSteps(prev => prev.map((step, idx) => {
       const stepThreshold = (idx + 1) * 20;
       const prevThreshold = idx * 20;
-      
+
       if (progress >= stepThreshold) {
         return { ...step, status: 'completed' as StepStatus };
       } else if (progress > prevThreshold) {

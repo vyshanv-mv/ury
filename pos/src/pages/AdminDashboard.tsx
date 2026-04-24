@@ -4,21 +4,23 @@ import { motion } from "framer-motion";
 import {
   LayoutDashboard, GitBranch, Store, BedDouble, Table2,
   UtensilsCrossed, CreditCard, Users, Layers, TrendingUp,
-  ShoppingBag, DollarSign, Clock, Edit2, Plus, Trash2,
-  MoreHorizontal, Bell, Search, ChevronDown, Check,
-  ArrowDownRight, WifiOff, PanelRightOpen, ChevronRight,
-  LogOut, User, Settings
+  ShoppingBag, DollarSign, Clock, MoreHorizontal, Bell, Search,
+  PanelRightOpen, ChevronRight, LogOut, User, Settings
 } from "lucide-react";
 import {
-  AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend,
+  AreaChart, Area, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
 } from "recharts";
 import { Button } from "../components/ui/button";
 import { useRootStore } from "../store/root-store";
+import { BranchStep } from "../components/onboarding/steps/configuration/BranchStep";
+import { RestaurantStep } from "../components/onboarding/steps/configuration/RestaurantStep";
+import { MenuStep } from "../components/onboarding/steps/configuration/MenuStep";
+import { RoomsStep } from "../components/onboarding/steps/configuration/RoomsStep";
+import { TablesStep } from "../components/onboarding/steps/configuration/TablesStep";
+import { PaymentStep } from "../components/onboarding/steps/configuration/PaymentStep";
+import { UsersStep } from "../components/onboarding/steps/configuration/UsersStep";
 
-interface DashboardProps {
-  onBack?: () => void;
-}
 
 type Section =
   | "overview" | "branch" | "restaurant" | "rooms" | "tables"
@@ -61,7 +63,7 @@ const popularItems = [
   { name: "Mango Lassi", sales: 25, revenue: 3125 },
 ];
 
-export function AdminSetup({ onBack }: DashboardProps) {
+export function AdminDashboard() {
   const { user } = useRootStore();
   const [activeSection, setActiveSection] = useState<Section>("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -156,9 +158,9 @@ export function AdminSetup({ onBack }: DashboardProps) {
               <Bell className="w-4 h-4" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full border-2 border-card"></span>
             </button>
-            
+
             <div className="relative">
-              <div 
+              <div
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 className="h-8 w-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-sm shadow-md shadow-primary/20 cursor-pointer hover:scale-105 transition-transform"
               >
@@ -167,8 +169,8 @@ export function AdminSetup({ onBack }: DashboardProps) {
 
               {showUserMenu && (
                 <>
-                  <div 
-                    className="fixed inset-0 z-40" 
+                  <div
+                    className="fixed inset-0 z-40"
                     onClick={() => setShowUserMenu(false)}
                   />
                   <div className="absolute right-0 mt-3 w-64 bg-card border border-border rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in duration-200">
@@ -200,7 +202,7 @@ export function AdminSetup({ onBack }: DashboardProps) {
                       </button>
                     </div>
                     <div className="p-2 border-t border-border bg-secondary/5">
-                      <button 
+                      <button
                         onClick={() => {
                           window.location.href = '/login';
                         }}
@@ -235,7 +237,7 @@ export function AdminSetup({ onBack }: DashboardProps) {
                     <p className="text-muted-foreground">Welcome back! Here's what's happening today.</p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Button variant="outline" className="gap-2 shadow-sm">
+                    <Button variant="outline" className="gap-2 shadow-sm font-bold">
                       <Clock className="w-4 h-4" />
                       Today
                     </Button>
@@ -362,7 +364,8 @@ export function AdminSetup({ onBack }: DashboardProps) {
                 <p className="text-muted-foreground max-w-lg text-lg">
                   We're currently perfecting the {activeSection} management tools. Stay tuned for advanced analytics and control features!
                 </p>
-                <Button className="mt-8 px-8 py-6 rounded-2xl text-lg shadow-xl shadow-primary/20" onClick={() => setActiveSection("overview")}>
+                <Button className="mt-8 px-8 py-6 rounded-2xl text-lg shadow-xl shadow-primary/20 font-bold gap-2" onClick={() => setActiveSection("overview")}>
+                  <LayoutDashboard className="w-5 h-5" />
                   Return to Dashboard
                 </Button>
               </div>
@@ -374,4 +377,4 @@ export function AdminSetup({ onBack }: DashboardProps) {
   );
 }
 
-export default AdminSetup;
+export default AdminDashboard;

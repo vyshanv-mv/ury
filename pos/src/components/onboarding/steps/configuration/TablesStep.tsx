@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Table2, Loader2, Plus, Info, Trash2, MapPin, Pencil, X, Check, ChevronDown } from 'lucide-react';
+import { Table2, Loader2, Plus, Info, Trash2, MapPin, Pencil, X, Check } from 'lucide-react';
 import { Button } from '../../../ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
 import { onboardingApi } from '../../../../lib/onboarding-api';
 import { showToast } from '../../../ui/toast';
+import { Input } from '../../../ui/input';
+import { Select, SelectItem } from '../../../ui/select';
 
 interface TableForm { name: string; seats: string; room: string; }
 const emptyTable = (defaultRoom = ''): TableForm => ({ name: '', seats: '', room: defaultRoom });
@@ -22,7 +24,7 @@ export const TablesStep: React.FC = () => {
     setLoading(true);
     onboardingApi.getTableContext()
       .then(res => { if (res?.tables?.length > 0) updateData('tables', res.tables); })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setLoading(false));
   }, [rooms]);
 
@@ -34,8 +36,8 @@ export const TablesStep: React.FC = () => {
   const cancelEdit = () => { setForm(emptyTable(defaultRoom)); setEditIndex(null); };
 
   const save = () => {
-    if (!form.name.trim() || !form.seats || !form.room) {
-      showToast.error('Fill in table name, seats, and select a room'); return;
+    if (!form.name.trim() || !form.seats || !form.room || form.room === 'none') {
+      showToast.error('Fill in table name, seats, and select a valid room'); return;
     }
     const next = [...tables];
     const entry = { name: form.name.trim(), seats: parseInt(form.seats), room: form.room };
@@ -70,19 +72,19 @@ export const TablesStep: React.FC = () => {
                 <Table2 className="w-6 h-6" />
               </div>
               <p className="font-bold text-foreground">{table.name}</p>
-              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{table.seats} Seats</p>
-              <div className="flex items-center justify-center gap-1 mt-1 text-[10px] text-primary/70 font-bold">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">{table.seats} Seats</p>
+              <div className="flex items-center justify-center gap-1 mt-1 text-xs text-primary/70 font-bold">
                 <MapPin className="w-2.5 h-2.5" />
-                <span className="truncate max-w-[80px]">{table.room}</span>
+                <span className="truncate max-w-20">{table.room}</span>
               </div>
               {/* Hover actions */}
               <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                <button onClick={() => openEdit(i)} className="p-1.5 hover:bg-primary/10 text-primary rounded-lg transition-all">
+                <Button variant="ghost" size="icon" onClick={() => openEdit(i)} className="text-primary hover:bg-primary/10 transition-colors">
                   <Pencil className="w-3.5 h-3.5" />
-                </button>
-                <button onClick={() => remove(i)} className="p-1.5 hover:bg-destructive/10 text-destructive rounded-lg transition-all">
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => remove(i)} className="text-destructive hover:bg-destructive/10 transition-colors">
                   <Trash2 className="w-3.5 h-3.5" />
-                </button>
+                </Button>
               </div>
             </motion.div>
           ))}
@@ -92,48 +94,45 @@ export const TablesStep: React.FC = () => {
       {/* Add / Edit form */}
       <div className="p-6 bg-secondary/20 rounded-2xl border border-border/50 flex flex-col lg:flex-row gap-4 items-end">
         <div className="flex-1 w-full">
-          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1 mb-1.5 block opacity-60">Table Name</label>
-          <input
+          <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1 mb-1.5 block opacity-60">Table Name</label>
+          <Input
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
             onKeyDown={(e) => e.key === 'Enter' && save()}
-            className="w-full px-5 py-3.5 bg-card border border-border rounded-xl outline-none focus:border-primary transition-all text-sm font-semibold shadow-sm"
+            className="w-full px-5 py-3.5 h-auto bg-card border border-border rounded-xl outline-none focus:border-primary focus:ring-0 transition-all text-sm font-semibold shadow-sm"
             placeholder="e.g. T-01"
           />
         </div>
         <div className="w-full lg:w-48">
-          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1 mb-1.5 block opacity-60">Room / Area</label>
-          <div className="relative">
-            <select
-              value={form.room}
-              onChange={(e) => setForm({ ...form, room: e.target.value })}
-              className="w-full px-5 py-3.5 bg-card border border-border rounded-xl outline-none focus:border-primary transition-all text-sm font-semibold shadow-sm appearance-none"
-            >
-              {rooms.map(r => <option key={r.name} value={r.name}>{r.name}</option>)}
-              {rooms.length === 0 && <option value="">No Rooms Created</option>}
-            </select>
-            <ChevronDown className="absolute right-3 top-4 w-4 h-4 text-muted-foreground pointer-events-none" />
-          </div>
+          <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1 mb-1.5 block opacity-60">Room / Area</label>
+          <Select
+            value={form.room}
+            onValueChange={(val) => setForm({ ...form, room: val })}
+            className="w-full px-5 py-3.5 h-auto bg-card border border-border rounded-xl outline-none focus:border-primary focus:ring-0 transition-all text-sm font-semibold shadow-sm"
+          >
+            {rooms.map(r => r.name && <SelectItem key={r.name} value={r.name}>{r.name}</SelectItem>)}
+            {rooms.length === 0 && <SelectItem value="none" disabled>No Rooms Created</SelectItem>}
+          </Select>
         </div>
         <div className="w-full lg:w-32">
-          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest ml-1 mb-1.5 block opacity-60">Capacity</label>
-          <input
+          <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1 mb-1.5 block opacity-60">Capacity</label>
+          <Input
             value={form.seats}
             onChange={(e) => setForm({ ...form, seats: e.target.value })}
             onKeyDown={(e) => e.key === 'Enter' && save()}
             type="number" min="1"
-            className="w-full px-5 py-3.5 bg-card border border-border rounded-xl outline-none focus:border-primary transition-all text-sm font-semibold shadow-sm"
+            className="w-full px-5 py-3.5 h-auto bg-card border border-border rounded-xl outline-none focus:border-primary focus:ring-0 transition-all text-sm font-semibold shadow-sm"
             placeholder="4"
           />
         </div>
         <div className="flex gap-2">
           {editIndex !== null && (
-            <Button variant="outline" onClick={cancelEdit} className="h-[52px] px-5 rounded-xl font-bold gap-2">
+            <Button variant="outline" size="lg" onClick={cancelEdit} className="font-bold gap-2 flex-1">
               <X className="w-4 h-4" /> Cancel
             </Button>
           )}
-          <Button onClick={save} className="h-[52px] px-8 rounded-xl bg-foreground hover:bg-foreground/90 text-background font-bold shadow-lg gap-2">
-            {editIndex !== null ? <><Check className="w-4 h-4" /> Update</> : <><Plus className="w-4 h-4" /> Add Table</>}
+          <Button size="lg" onClick={save} className="font-bold gap-2 flex-1 w-full lg:w-auto">
+            {editIndex !== null ? <><Check className="w-5 h-5" /> Update</> : <><Plus className="w-5 h-5" /> Add Table</>}
           </Button>
         </div>
       </div>

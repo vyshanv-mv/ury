@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Printer, Globe, Hash, ReceiptText, Loader2 } from 'lucide-react';
 import { FormField } from '../../shared/FormField';
+import { Button } from '../../../ui/button';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
 import { onboardingApi } from '../../../../lib/onboarding-api';
 
@@ -65,7 +66,7 @@ export const PrinterStep: React.FC = () => {
               onChange={(e) => handleChange('port', e.target.value)}
               required
             />
-            
+
             <div className="flex flex-col space-y-3 p-6 bg-secondary/20 rounded-2xl border border-border/50">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -77,18 +78,17 @@ export const PrinterStep: React.FC = () => {
                     <p className="text-xs text-muted-foreground">Enable automatic receipt printing</p>
                   </div>
                 </div>
-                <button
+                <Button
+                  variant="ghost"
                   onClick={() => handleChange('bill', !printer.bill)}
-                  className={`w-12 h-6 rounded-full transition-all duration-300 relative ${
-                    printer.bill ? 'bg-primary' : 'bg-muted'
-                  }`}
+                  className={`w-12 h-6 p-0 min-w-0 rounded-full transition-all duration-300 relative ${printer.bill ? 'bg-primary hover:bg-primary/90' : 'bg-muted hover:bg-muted/90'
+                    }`}
                 >
                   <div
-                    className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${
-                      printer.bill ? 'left-7' : 'left-1'
-                    }`}
+                    className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-300 ${printer.bill ? 'left-7' : 'left-1'
+                      }`}
                   />
-                </button>
+                </Button>
               </div>
             </div>
           </div>

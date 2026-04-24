@@ -13,7 +13,7 @@ import { RouteGuard } from './components/onboarding/RouteGuard';
 import { usePOSStore } from './store/pos-store';
 import { useEffect } from 'react';
 import { getActiveLanguage } from './i18n';
-import AdminSetup from './pages/AdminSetup';
+import AdminDashboard from './pages/AdminDashboard';
 
 /**
  * Main POS layout — only renders when onboarding is complete
@@ -58,7 +58,7 @@ function App() {
             <Routes>
               {/* 🔓 PUBLIC — No auth, no POS checks */}
               <Route path="/setup" element={<OnboardingFlow />} />
-              <Route path="/admin" element={<AdminSetup />} />
+              <Route path="/admin" element={<AdminDashboard />} />
 
               {/* 🔒 PROTECTED — Full auth + POS opening guard */}
               <Route

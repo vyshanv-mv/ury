@@ -8,7 +8,7 @@ import {
   CreditCard,
   Users,
   Printer,
-  ChevronRight,
+  ArrowRight,
   ArrowLeft,
   Loader2,
   CheckCircle2,
@@ -18,7 +18,8 @@ import { Button } from '../../ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOnboardingStore } from '../../../store/onboarding-store';
 import { showToast } from '../../ui/toast';
-import type { OnboardingStepProps } from '../../../pages/onboarding/steps';
+import { cn } from '../../../lib/utils';
+import type { OnboardingStepProps } from '../../../data/steps-data';
 
 // Sub-step components
 import { BranchStep } from './configuration/BranchStep';
@@ -104,72 +105,89 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
   };
 
   return (
-    <div className="h-screen w-screen flex bg-background text-foreground overflow-hidden font-inter">
+    <div className="h-screen w-screen flex bg-gray-50 text-gray-900 overflow-hidden font-inter">
       {/* Sidebar */}
-      <aside className="w-[260px] bg-card border-r border-border flex-shrink-0 flex flex-col z-30">
-        <div className="p-4 flex flex-col h-full overflow-hidden">
+      <aside className="w-64 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col z-30">
+        <div className="flex flex-col h-full overflow-hidden">
           {/* Logo */}
-          <div className="flex items-center mb-6 h-10 px-3">
+          <div className="flex items-center mt-6 mb-2 h-10 px-6">
             <img src="/assets/ury/pos/ury_pos.png" alt="URY POS" className="h-8 w-auto object-contain" />
           </div>
 
-          {/* Step list */}
-          <div className="flex-1 overflow-y-auto pr-2 -mr-2 space-y-1">
-            {CONFIG_STEPS.map((step, i) => {
-              const Icon = step.icon;
-              const isActive = subStepIndex === i;
-              const isCompleted = completedSteps.includes(step.id);
-              const isSkipped = skippedSteps.includes(step.id);
-              const isAccessible = i <= subStepIndex || isCompleted || isSkipped;
+          <nav className="flex-1 p-6 overflow-y-auto">
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <h2 className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-3 px-1">
+                Steps
+              </h2>
 
-              return (
-                <button
-                  key={step.id}
-                  disabled={!isAccessible}
-                  onClick={() => setSubStepIndex(i)}
-                  className={`w-full flex items-center rounded-xl text-sm transition-all duration-300 relative group gap-3 px-4 py-3 ${isActive
-                      ? 'bg-primary text-primary-foreground font-bold shadow-lg shadow-primary/25'
-                      : isAccessible
-                        ? 'text-muted-foreground hover:bg-secondary/80 hover:text-foreground'
-                        : 'text-muted-foreground/30 cursor-not-allowed'
-                    }`}
-                >
-                  <div className="flex-shrink-0 relative">
-                    {isCompleted && !isActive ? (
-                      <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                    ) : isSkipped && !isActive ? (
-                      <SkipForward className="w-5 h-5 text-primary/60" />
-                    ) : (
-                      <Icon className={`w-5 h-5 ${isActive ? 'scale-110' : ''} transition-transform`} />
-                    )}
-                  </div>
-                  <div className="flex flex-col items-start overflow-hidden">
-                    <span className="truncate">{step.title}</span>
-                    {isActive && <span className="text-[10px] opacity-70 font-medium">Currently Editing</span>}
-                    {isSkipped && !isActive && <span className="text-[10px] text-primary/60 font-bold">Skipped</span>}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+              <div className="space-y-1">
+                {CONFIG_STEPS.map((step, i) => {
+                  const Icon = step.icon;
+                  const isActive = subStepIndex === i;
+                  const isCompleted = completedSteps.includes(step.id);
+                  const isSkipped = skippedSteps.includes(step.id);
+                  const isAccessible = i <= subStepIndex || isCompleted || isSkipped;
+
+                  return (
+                    <Button
+                      key={step.id}
+                      variant="ghost"
+                      disabled={!isAccessible}
+                      onClick={() => setSubStepIndex(i)}
+                      className={cn(
+                        'w-full flex items-center justify-start px-3 py-2.5 text-sm font-medium transition-all duration-200 group relative',
+                        isActive
+                          ? 'bg-white text-gray-900 shadow-sm font-semibold'
+                          : isAccessible
+                            ? 'text-gray-700 hover:bg-white/60 hover:text-gray-900'
+                            : 'text-gray-400/50 cursor-not-allowed hover:bg-transparent'
+                      )}
+                    >
+                      {/* Active indicator bar */}
+                      {isActive && (
+                        <div className="absolute start-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-600 rounded-e-full" />
+                      )}
+
+                      <div className="flex items-center gap-3 ms-1 w-full overflow-hidden">
+                        <div className="flex-shrink-0">
+                          {isCompleted && !isActive ? (
+                            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                          ) : isSkipped && !isActive ? (
+                            <SkipForward className="w-4 h-4 text-gray-400" />
+                          ) : (
+                            <Icon className={cn("w-4 h-4 flex-shrink-0", isActive ? "text-gray-900" : "text-gray-500")} />
+                          )}
+                        </div>
+                        <div className="flex flex-col items-start overflow-hidden w-full text-start">
+                          <span className="truncate w-full">{step.title}</span>
+                        </div>
+                      </div>
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+          </nav>
 
           {/* Progress bar — bottom of sidebar */}
-          <div className="mt-4 px-3 pb-2">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">
-                Progress
-              </span>
-              <span className="text-[10px] font-bold text-primary">
-                {completedSteps.length}/{CONFIG_STEPS.length}
-              </span>
-            </div>
-            <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
-              <motion.div
-                className="h-full bg-primary rounded-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${progressPercent}%` }}
-                transition={{ duration: 0.5, ease: 'easeOut' }}
-              />
+          <div className="px-6 pb-6 pt-2">
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-2 px-1">
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  Progress
+                </span>
+                <span className="text-xs font-semibold text-gray-900">
+                  {completedSteps.length}/{CONFIG_STEPS.length}
+                </span>
+              </div>
+              <div className="w-full h-1.5 bg-gray-200/60 rounded-full overflow-hidden mx-1 w-auto">
+                <motion.div
+                  className="h-full bg-blue-600 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ width: `${progressPercent}%` }}
+                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -179,17 +197,17 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
       <div className="flex flex-col flex-1 overflow-hidden relative">
         <div className="flex-1 overflow-hidden flex flex-col">
           {/* Step Header */}
-          <div className="px-10 py-8 border-b border-border bg-card/50 backdrop-blur-md">
+          <div className="px-10 py-8 border-b border-gray-200 bg-white/50 backdrop-blur-md">
             <div className="max-w-5xl w-full mx-auto">
               <div className="flex items-center gap-2 mb-1">
-                <h2 className="text-2xl font-bold text-foreground tracking-tight">{currentStep.title}</h2>
+                <h2 className="text-2xl font-bold text-gray-900 tracking-tight">{currentStep.title}</h2>
                 {completedSteps.includes(currentStep.id) && (
-                  <span className="text-[10px] bg-emerald-50 text-emerald-600 font-bold px-2 py-0.5 rounded-full uppercase tracking-widest border border-emerald-100">
+                  <span className="text-xs bg-emerald-50 text-emerald-600 font-bold px-2 py-0.5 rounded-md uppercase tracking-widest border border-emerald-100">
                     Verified
                   </span>
                 )}
               </div>
-              <p className="text-muted-foreground text-sm font-medium opacity-80">{currentStep.desc}</p>
+              <p className="text-gray-500 text-sm font-medium opacity-80">{currentStep.desc}</p>
             </div>
           </div>
 
@@ -212,16 +230,16 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
           </div>
 
           {/* Action Footer */}
-          <footer className="px-10 py-6 border-t border-border bg-card/50 backdrop-blur-sm">
+          <footer className="px-10 py-6 border-t border-gray-200 bg-white/50 backdrop-blur-sm">
             <div className="max-w-5xl w-full mx-auto flex justify-between items-center">
               <Button
                 variant="ghost"
                 onClick={handleBack}
                 disabled={loading}
-                className="px-6 h-12 rounded-xl font-bold text-muted-foreground hover:bg-secondary gap-2 transition-all active:scale-95"
+                className="gap-2 font-bold"
               >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Back</span>
+                <ArrowLeft className="w-5 h-5" />
+                Back
               </Button>
 
               <div className="flex items-center gap-3">
@@ -230,28 +248,30 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
                   variant="outline"
                   onClick={handleSkip}
                   disabled={loading}
-                  className="px-5 h-12 rounded-xl font-bold border-primary text-primary hover:bg-primary hover:text-primary-foreground gap-2 transition-all active:scale-95"
+                  size="lg"
+                  className="gap-2 font-bold"
                 >
-                  <SkipForward className="w-4 h-4" />
-                  <span>Skip</span>
+                  <SkipForward className="w-5 h-5" />
+                  Skip
                 </Button>
 
                 {/* Save & Continue */}
                 <Button
                   onClick={handleNext}
                   disabled={loading}
-                  className="px-8 h-12 rounded-xl font-bold text-primary-foreground bg-primary hover:bg-primary/90 shadow-lg shadow-primary/25 min-w-[140px] transition-all active:scale-95"
+                  size="lg"
+                  className="gap-2 min-w-[200px] font-bold"
                 >
                   {loading ? (
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Processing...</span>
-                    </div>
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Processing...
+                    </>
                   ) : (
-                    <div className="flex items-center gap-2">
-                      <span>{isLastStep ? 'Complete Setup' : 'Save & Continue'}</span>
-                      <ChevronRight className="w-4 h-4" />
-                    </div>
+                    <>
+                      {isLastStep ? 'Complete Setup' : 'Save & Continue'}
+                      <ArrowRight className="w-5 h-5" />
+                    </>
                   )}
                 </Button>
               </div>

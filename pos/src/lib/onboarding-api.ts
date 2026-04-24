@@ -37,6 +37,15 @@ export const onboardingApi = {
     return mockSuccess();
   },
 
+  getPrinterContext: async (): Promise<any> => {
+    return {
+      printer_name: '',
+      server_ip: '127.0.0.1',
+      port: '9100',
+      bill: true
+    };
+  },
+
   // STEP 4: ROOM SETUP
   getRoomContext: async (): Promise<any> => {
     return [

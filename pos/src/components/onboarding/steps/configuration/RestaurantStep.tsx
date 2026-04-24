@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FormField } from '../../shared/FormField';
-import { UtensilsCrossed, Info, Building2, Image, Loader2 } from 'lucide-react';
+import { Info, Building2, Image, Loader2 } from 'lucide-react';
 import { Button } from '../../../ui/button';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
 import { onboardingApi } from '../../../../lib/onboarding-api';
@@ -41,13 +41,6 @@ export const RestaurantStep: React.FC = () => {
       ) : (
         <>
           <div className="max-w-2xl mx-auto space-y-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-amber-100 rounded-lg text-amber-600">
-                <UtensilsCrossed className="w-5 h-5" />
-              </div>
-              <h3 className="text-lg font-bold text-foreground">Restaurant Branding</h3>
-            </div>
-
             <div className="space-y-4">
               <FormField
                 label="Display Name"
@@ -110,10 +103,10 @@ export const RestaurantStep: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-foreground">Brand Logo</p>
-                    <p className="text-[10px] text-muted-foreground uppercase font-bold tracking-widest">PNG, JPG up to 2MB</p>
+                    <p className="text-xs text-muted-foreground uppercase font-bold tracking-widest">PNG, JPG up to 2MB</p>
                   </div>
                 </div>
-                <Button variant="outline" size="sm" className="rounded-lg h-8 px-3 font-bold text-[10px] uppercase">
+                <Button variant="outline" size="sm" className="font-bold text-xs uppercase">
                   Upload
                 </Button>
               </div>

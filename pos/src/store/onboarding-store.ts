@@ -5,7 +5,7 @@ interface OnboardingState {
   currentStepIndex: number;
   completedSteps: string[];
   skippedSteps: string[];
-  
+
   // Step Data
   organization: any;
   menu: {
@@ -40,7 +40,7 @@ export const useOnboardingStore = create<OnboardingState>()(
       currentStepIndex: 0,
       completedSteps: [],
       skippedSteps: [],
-      
+
       organization: {},
       menu: { items: [], tax_calculation: 'Inclusive', tax_rate: '5' },
       printer: { printer_name: '', server_ip: '', port: '9100', bill: true },

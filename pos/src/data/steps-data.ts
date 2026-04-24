@@ -5,11 +5,11 @@
  * Each step is a pure UI component that calls onNext(data?) / onBack().
  * All routing logic lives in OnboardingFlow.tsx — NOT in the steps.
  */
-import { WelcomeStep } from '../../components/onboarding/steps/WelcomeStep';
-import { OrganizationStep } from '../../components/onboarding/steps/OrganizationStep';
-import { LoadingStep } from '../../components/onboarding/steps/LoadingStep';
-import { ConfigurationStep } from '../../components/onboarding/steps/ConfigurationStep';
-import { SuccessStep } from '../../components/onboarding/steps/SuccessStep';
+import { WelcomeStep } from '../components/onboarding/steps/WelcomeStep';
+import { OrganizationStep } from '../components/onboarding/steps/OrganizationStep';
+import { LoadingStep } from '../components/onboarding/steps/LoadingStep';
+import { ConfigurationStep } from '../components/onboarding/steps/ConfigurationStep';
+import { SuccessStep } from '../components/onboarding/steps/SuccessStep';
 
 export interface OnboardingStepDef {
   /** Unique identifier — used as AnimatePresence key */

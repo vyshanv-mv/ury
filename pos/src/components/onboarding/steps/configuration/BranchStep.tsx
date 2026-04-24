@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FormField } from '../../shared/FormField';
-import { MapPin, Info, Building2, Phone, Mail, Navigation, Loader2 } from 'lucide-react';
+import { Info, Building2, Phone, Mail, Navigation, Loader2 } from 'lucide-react';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
 import { onboardingApi } from '../../../../lib/onboarding-api';
 
@@ -40,41 +40,34 @@ export const BranchStep: React.FC = () => {
       ) : (
         <>
           <div className="max-w-2xl mx-auto space-y-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-primary/10 rounded-lg text-primary">
-                <MapPin className="w-5 h-5" />
-              </div>
-              <h3 className="text-lg font-bold text-foreground">Branch Details</h3>
-            </div>
-            
             <div className="space-y-4">
-              <FormField 
-                label="Branch Name" 
-                placeholder="e.g. Downtown Outlet" 
+              <FormField
+                label="Branch Name"
+                placeholder="e.g. Downtown Outlet"
                 icon={<Building2 className="w-4 h-4" />}
-                value={branch.branch_name || ''} 
+                value={branch.branch_name || ''}
                 onChange={(e) => handleChange('branch_name', e.target.value)}
                 required
               />
-              <FormField 
-                label="Phone Number" 
-                placeholder="+91 98765 43210" 
+              <FormField
+                label="Phone Number"
+                placeholder="+91 98765 43210"
                 icon={<Phone className="w-4 h-4" />}
-                value={branch.branch_phone || ''} 
+                value={branch.branch_phone || ''}
                 onChange={(e) => handleChange('branch_phone', e.target.value)}
               />
-              <FormField 
-                label="Branch Email" 
-                placeholder="downtown@restaurant.com" 
+              <FormField
+                label="Branch Email"
+                placeholder="downtown@restaurant.com"
                 icon={<Mail className="w-4 h-4" />}
-                value={branch.branch_email || ''} 
+                value={branch.branch_email || ''}
                 onChange={(e) => handleChange('branch_email', e.target.value)}
               />
-              <FormField 
-                label="Full Address" 
-                placeholder="Street name, City, Pincode" 
+              <FormField
+                label="Full Address"
+                placeholder="Street name, City, Pincode"
                 icon={<Navigation className="w-4 h-4" />}
-                value={branch.branch_address || ''} 
+                value={branch.branch_address || ''}
                 onChange={(e) => handleChange('branch_address', e.target.value)}
                 required
               />

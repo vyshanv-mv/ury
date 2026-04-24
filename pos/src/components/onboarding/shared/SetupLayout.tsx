@@ -10,9 +10,9 @@ export const SetupLayout: React.FC<SetupLayoutProps> = ({ children }) => {
       {/* Header */}
       <header className="py-6 px-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <img 
-            src="/assets/ury/pos/ury_pos.png" 
-            alt="URY POS" 
+          <img
+            src="/assets/ury/pos/ury_pos.png"
+            alt="URY POS"
             className="h-10 w-auto object-contain"
           />
         </div>

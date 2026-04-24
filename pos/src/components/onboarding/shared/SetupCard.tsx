@@ -8,11 +8,11 @@ interface SetupCardProps {
   className?: string;
 }
 
-export const SetupCard: React.FC<SetupCardProps> = ({ 
-  children, 
-  title, 
+export const SetupCard: React.FC<SetupCardProps> = ({
+  children,
+  title,
   description,
-  className 
+  className
 }) => {
   return (
     <div

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePOSStore } from '../../store/pos-store';
 import { SetupLayout } from '../../components/onboarding/shared/SetupLayout';
-import { ONBOARDING_STEPS } from './steps';
+import { ONBOARDING_STEPS } from '../../data/steps-data';
 import { showToast } from '../../components/ui/toast';
 import { useOnboardingStore } from '../../store/onboarding-store';
 
