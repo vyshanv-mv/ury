@@ -7,7 +7,7 @@ import { cn } from '../../../lib/utils';
 import { StepIndicator } from '../shared/StepIndicator';
 import { showToast } from '../../ui/toast';
 import { useOnboardingStore } from '../../../store/onboarding-store';
-import { onboardingApi } from '../../../lib/onboarding-api';
+import { onboardsetupApi } from '../../../lib/onboardsetup-api';
 import { Input } from '../../ui/input';
 import { Select, SelectItem } from '../../ui/select';
 import { Button } from '../../ui/button';
@@ -109,7 +109,7 @@ export const OrganizationStep: React.FC<{ onNext: (data: any) => void; onBack: (
         generate_demo_data: formData.generateDemo,
       };
 
-      const result = await onboardingApi.setupOrganization(payload);
+      const result = await onboardsetupApi.setupOrganization(payload);
       if (result.success) {
         updateData('organization', {
           ...payload,

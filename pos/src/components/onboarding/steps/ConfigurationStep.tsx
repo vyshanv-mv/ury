@@ -17,7 +17,9 @@ import {
 import { Button } from '../../ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOnboardingStore } from '../../../store/onboarding-store';
+import { onboardsetupApi } from '../../../lib/onboardsetup-api';
 import { showToast } from '../../ui/toast';
+
 import { cn } from '../../../lib/utils';
 import type { OnboardingStepProps } from '../../../data/steps-data';
 
@@ -56,7 +58,58 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
   const handleNext = async () => {
     setLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const state = useOnboardingStore.getState();
+      
+      switch (currentStep.id) {
+        case 'branch':
+          if (state.branch && state.branch.length > 0) {
+            for (const b of state.branch) {
+              await onboardsetupApi.setupBranch(b);
+            }
+          }
+          break;
+        case 'restaurant':
+          if (state.restaurant && state.restaurant.length > 0) {
+            await onboardsetupApi.setupRestaurant(state.restaurant[0]);
+          }
+          break;
+        case 'rooms':
+          if (state.rooms && state.rooms.length > 0) {
+            await onboardsetupApi.setupRoom(state.rooms);
+          }
+          break;
+        case 'tables':
+          if (state.tables && state.tables.length > 0) {
+            await onboardsetupApi.setupTable({ tables: state.tables });
+          }
+          break;
+        case 'menu':
+          if (state.menu.items && state.menu.items.length > 0) {
+            await onboardsetupApi.setupMenu({
+              items: state.menu.items,
+              tax_calculation: state.menu.tax_calculation as any,
+              company_name: state.organization.company_name
+
+            });
+          }
+          break;
+        case 'printer':
+          if (state.printer && state.printer.length > 0) {
+            await onboardsetupApi.setupPrinter(state.printer[0]);
+          }
+          break;
+        case 'payments':
+          if (state.payments && state.payments.length > 0) {
+            await onboardsetupApi.setupMop({ payments: state.payments });
+          }
+          break;
+        case 'users':
+          if (state.users && state.users.length > 0) {
+            await onboardsetupApi.setupUserManagement({ users: state.users });
+          }
+          break;
+      }
+
       markStepComplete(currentStep.id);
       if (isLastStep) {
         onNext();
@@ -69,6 +122,7 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
       setLoading(false);
     }
   };
+
 
   const handleSkip = () => {
     markStepSkipped(currentStep.id);

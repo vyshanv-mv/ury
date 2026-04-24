@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { SetupCard, PrimaryButton, FormField, Input, Select } from './Shared';
 import { ArrowRight, ArrowLeft, Loader2 } from 'lucide-react';
-import { setupOrganization, SetupOrganizationPayload } from '../../lib/onboarding-api';
+import { setupOrganization, SetupOrganizationPayload } from '../../lib/onboardsetup-api';
 import { toast } from 'react-toastify';
 
 interface OrganizationFormData {

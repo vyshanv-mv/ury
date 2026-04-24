@@ -24,7 +24,16 @@ const OnboardingFlow: React.FC = () => {
     navigate('/admin');
   }, [completeOnboarding, navigate, resetStore]);
 
-  const handleNext = useCallback((_data?: any) => {
+  const handleNext = useCallback((data?: any) => {
+    // If Quick Setup was chosen and successful, jump to success
+    if (data?.mode === 'quick') {
+      const successStepIndex = ONBOARDING_STEPS.findIndex(s => s.id === 'success');
+      if (successStepIndex !== -1) {
+        setStepIndex(successStepIndex);
+        return;
+      }
+    }
+
     if (currentStepIndex >= ONBOARDING_STEPS.length - 1) {
       handleFinalComplete();
       return;
@@ -62,7 +71,7 @@ const OnboardingFlow: React.FC = () => {
       {showHeader && <Header hideSearch hideUserMenu />}
       
       <div className="flex-1 overflow-y-auto flex flex-col">
-        {currentStepDef.id === 'welcome' || currentStepDef.id === 'success' || currentStepDef.id === 'configuration' || currentStepDef.id === 'loading' ? (
+        {currentStepDef.id === 'welcome' || currentStepDef.id === 'success' || currentStepDef.id === 'configuration' || currentStepDef.id === 'loading' || currentStepDef.id === 'mode' ? (
           <StepComponent {...stepProps} key={currentStepDef.id} />
         ) : (
           <SetupLayout>

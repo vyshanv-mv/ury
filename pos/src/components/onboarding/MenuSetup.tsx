@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { SetupCard, PrimaryButton, Input } from './Shared';
 import { Plus, Trash2, ArrowRight, ArrowLeft, Upload, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { uploadMenuCSV, setupMenu } from '../../lib/onboarding-api';
+import { uploadMenuCSV, setupMenu } from '../../lib/onboardsetup-api';
 
 interface MenuItemRow {
   item_name: string;

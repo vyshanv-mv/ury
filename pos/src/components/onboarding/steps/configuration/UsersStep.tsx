@@ -6,7 +6,7 @@ import {
 import { Button } from '../../../ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
-import { onboardingApi } from '../../../../lib/onboarding-api';
+import { onboardsetupApi } from '../../../../lib/onboardsetup-api';
 import { showToast } from '../../../ui/toast';
 import { Input } from '../../../ui/input';
 import { Select, SelectItem } from '../../../ui/select';
@@ -41,7 +41,7 @@ export const UsersStep: React.FC = () => {
   useEffect(() => {
     if (storeUsers?.length > 0) return;
     setLoading(true);
-    onboardingApi.getUserManagementContext()
+    onboardsetupApi.getUserManagementContext()
       .then(res => { 
         if (res?.existing_users?.length > 0) {
           updateData('users', res.existing_users); 

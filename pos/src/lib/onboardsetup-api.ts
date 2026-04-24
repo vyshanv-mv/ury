@@ -56,6 +56,7 @@ const MAX_CSV_SIZE_MB = 5;
 /**
  * Extracts a human-readable message from Frappe's server error format.
  */
+// extracts a human-readable message from Frappe's server error format.
 function extractErrorMessage(error: any, fallback: string): string {
   if (error?._server_messages) {
     try {
@@ -71,16 +72,11 @@ function extractErrorMessage(error: any, fallback: string): string {
   return fallback;
 }
 
-// Helper to simulate API delay and success for mocks
-const mockSuccess = async (data: any = {}): Promise<SetupResult> => {
-  await new Promise(resolve => setTimeout(resolve, 800));
-  return { success: true, data };
-};
 
 // ─── API Implementation ───────────────────────────────────────────────
 
-export const onboardingApi = {
-  // REAL: Check setup status
+export const onboardsetupApi = {
+  // Check setup status
   checkSetupStatus: async (): Promise<{ needsOnboarding: boolean }> => {
     try {
       const response = await (window as any).frappe.call('ury.setup.api.check_setup_status');
@@ -90,7 +86,7 @@ export const onboardingApi = {
     }
   },
 
-  // REAL: Organization Setup
+  // Organization Setup
   setupOrganization: async (payload: SetupOrganizationPayload): Promise<SetupResult> => {
     try {
       const response = await call.post<SetupOrganizationResponse>(
@@ -103,7 +99,7 @@ export const onboardingApi = {
     }
   },
 
-  // REAL: Menu Upload
+  // Menu Upload
   uploadMenuCSV: async (file: File): Promise<any> => {
     if (!file.name.toLowerCase().endsWith('.csv')) {
       throw new Error('Only CSV files are supported.');
@@ -138,7 +134,7 @@ export const onboardingApi = {
     }
   },
 
-  // REAL: Menu Setup
+  // Menu Setup
   setupMenu: async (payload: SetupMenuPayload): Promise<SetupResult> => {
     try {
       const response = await call.post<SetupMenuResponse>(
@@ -151,80 +147,163 @@ export const onboardingApi = {
     }
   },
 
-  // MOCK: Printer Setup
-  setupPrinter: async (data: any): Promise<SetupResult> => {
-    console.log('Mock setupPrinter:', data);
-    return mockSuccess();
-  },
-
+  // Printer Setup
   getPrinterContext: async (): Promise<any> => {
-    return { printer_name: '', server_ip: '127.0.0.1', port: '9100', bill: true };
+    try {
+      const response = await call.post('ury.setup.api.get_printer_context', {});
+      return response.message;
+    } catch (error: any) {
+      return { printer_name: '', server_ip: '', port: '9100', bill: true };
+    }
   },
 
-  // MOCK: Room Setup
+  setupPrinter: async (data: any): Promise<SetupResult> => {
+    try {
+      const response = await call.post('ury.setup.api.setup_printer', data);
+      return { success: true, message: response.message };
+    } catch (error: any) {
+      throw new Error(extractErrorMessage(error, 'Printer setup failed.'));
+    }
+  },
+
+  // Room Setup
   getRoomContext: async (): Promise<any> => {
-    return [
-      { name: 'Main Hall', table_count: 10 },
-      { name: 'Terrace', table_count: 5 }
-    ];
+    try {
+      const response = await call.post('ury.setup.api.get_room_context', {});
+      return response.message;
+    } catch (error: any) {
+      return [];
+    }
   },
 
   setupRoom: async (data: any): Promise<SetupResult> => {
-    console.log('Mock setupRoom:', data);
-    return mockSuccess();
+    try {
+      const response = await call.post('ury.setup.api.setup_room', data);
+      return { success: true, message: response.message };
+    } catch (error: any) {
+      throw new Error(extractErrorMessage(error, 'Room setup failed.'));
+    }
   },
 
-  // MOCK: Table Setup
+  // Table Setup
   getTableContext: async (): Promise<any> => {
-    return { rooms: ['Main Hall', 'Terrace'], existing_tables: [] };
+    try {
+      const response = await call.post('ury.setup.api.get_table_context', {});
+      return response.message;
+    } catch (error: any) {
+      return { rooms: [], existing_tables: [] };
+    }
   },
 
   setupTable: async (data: any): Promise<SetupResult> => {
-    console.log('Mock setupTable:', data);
-    return mockSuccess();
+    try {
+      const response = await call.post('ury.setup.api.setup_table', data);
+      return { success: true, message: response.message };
+    } catch (error: any) {
+      throw new Error(extractErrorMessage(error, 'Table setup failed.'));
+    }
   },
 
-  // MOCK: Mode of Payment
+  // Mode of Payment
   getMopContext: async (): Promise<any> => {
-    return [
-      { name: 'Cash', type: 'Cash' },
-      { name: 'Card', type: 'Bank' },
-      { name: 'UPI', type: 'Bank' }
-    ];
+    try {
+      const response = await call.post('ury.setup.api.get_mop_context', {});
+      return response.message;
+    } catch (error: any) {
+      return [];
+    }
   },
 
   setupMop: async (data: any): Promise<SetupResult> => {
-    console.log('Mock setupMop:', data);
-    return mockSuccess();
+    try {
+      const response = await call.post('ury.setup.api.setup_mop', data);
+      return { success: true, message: response.message };
+    } catch (error: any) {
+      throw new Error(extractErrorMessage(error, 'Payment setup failed.'));
+    }
   },
 
-  // MOCK: Branch
+  // Branch Setup
   getBranchContext: async (): Promise<any> => {
-    return { branch_name: 'Main Branch', branch_phone: '', branch_email: '', branch_address: '' };
+    try {
+      const response = await call.post('ury.setup.api.get_branch_context', {});
+      return response.message;
+    } catch (error: any) {
+      return { branch_name: '', branch_phone: '', branch_email: '', branch_address: '' };
+    }
   },
 
   setupBranch: async (data: any): Promise<SetupResult> => {
-    console.log('Mock setupBranch:', data);
-    return mockSuccess();
+    try {
+      const response = await call.post('ury.setup.api.setup_branch', data);
+      return { success: true, message: response.message };
+    } catch (error: any) {
+      throw new Error(extractErrorMessage(error, 'Branch setup failed.'));
+    }
   },
 
-  // MOCK: Restaurant
+  // Restaurant Setup
   getRestaurantContext: async (): Promise<any> => {
-    return { restaurant_name: 'URY Kitchen', tagline: '' };
+    try {
+      const response = await call.post('ury.setup.api.get_restaurant_context', {});
+      return response.message;
+    } catch (error: any) {
+      return { restaurant_name: '', tagline: '' };
+    }
   },
 
   setupRestaurant: async (data: any): Promise<SetupResult> => {
-    console.log('Mock setupRestaurant:', data);
-    return mockSuccess();
+    try {
+      const response = await call.post('ury.setup.api.setup_restaurant', data);
+      return { success: true, message: response.message };
+    } catch (error: any) {
+      throw new Error(extractErrorMessage(error, 'Restaurant setup failed.'));
+    }
   },
 
-  // MOCK: User Management
+  // User Management
   getUserManagementContext: async (): Promise<any> => {
-    return { roles: ['Cashier', 'Manager', 'Admin'], existing_users: [] };
+    try {
+      const response = await call.post('ury.setup.api.get_user_management_context', {});
+      return response.message;
+    } catch (error: any) {
+      return { roles: [], existing_users: [] };
+    }
   },
 
   setupUserManagement: async (data: any): Promise<SetupResult> => {
-    console.log('Mock setupUserManagement:', data);
-    return mockSuccess();
+    try {
+      const response = await call.post('ury.setup.api.setup_user_management', data);
+      return { success: true, message: response.message };
+    } catch (error: any) {
+      throw new Error(extractErrorMessage(error, 'User setup failed.'));
+    }
+  },
+
+  // Automatic Demo Setup
+  setupUryDemo: async (): Promise<SetupResult> => {
+    try {
+      await (window as any).frappe.call({
+        method: 'ury.setup.setup_wizard.setup_ury_or_erpnext_demo',
+        args: {
+          setup_ury_demo: 1,
+          setup_demo: 0
+        }
+      });
+      return { success: true };
+    } catch (error: any) {
+      throw new Error(extractErrorMessage(error, 'Automatic setup failed.'));
+    }
+  },
+
+  // Finalize Onboarding
+  completeOnboarding: async (): Promise<SetupResult> => {
+    try {
+      await call.post('ury.setup.api.complete_onboarding', {});
+      return { success: true };
+    } catch (error: any) {
+      throw new Error(extractErrorMessage(error, 'Failed to complete onboarding.'));
+    }
   },
 };
+

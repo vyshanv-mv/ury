@@ -8,7 +8,9 @@ import { getCustomerGroups, getCustomerTerritories } from '../lib/customer-api';
 import { DEFAULT_ORDER_TYPE, OrderType } from '../data/order-types';
 import { getTableOrder, TableOrder } from '../lib/order-api';
 import { getPaymentModes } from '../lib/payment-api';
-import { onboardingApi } from '../lib/onboarding-api';
+import { onboardsetupApi } from '../lib/onboardsetup-api';
+
+
 
 // Constants
 const MAX_QUANTITY = 99;
@@ -216,12 +218,21 @@ export const usePOSStore = create<POSStore>((set, get) => ({
   setNeedsOnboarding: (val: boolean) => set({ needsOnboarding: val }),
   
   completeOnboarding: async () => {
-    localStorage.setItem('ury_onboarding_done', 'true');
-    // Clear resume data
-    localStorage.removeItem('ury_onboarding_step');
-    localStorage.removeItem('ury_onboarding_data');
-    set({ needsOnboarding: false, onboardingCompleted: true });
+    try {
+      await onboardsetupApi.completeOnboarding();
+      localStorage.setItem('ury_onboarding_done', 'true');
+      // Clear resume data
+      localStorage.removeItem('ury_onboarding_step');
+      localStorage.removeItem('ury_onboarding_data');
+      set({ needsOnboarding: false, onboardingCompleted: true });
+    } catch (error) {
+      console.error('Failed to complete onboarding on backend:', error);
+      // Still set local flag to allow user to proceed, but ideally backend should handle it
+      localStorage.setItem('ury_onboarding_done', 'true');
+      set({ needsOnboarding: false, onboardingCompleted: true });
+    }
   },
+
 
 
   initializeApp: async () => {

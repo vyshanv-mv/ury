@@ -6,7 +6,7 @@ import {
 import { Button } from '../../../ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
-import { onboardingApi } from '../../../../lib/onboarding-api';
+import { onboardsetupApi } from '../../../../lib/onboardsetup-api';
 import { showToast } from '../../../ui/toast';
 import { Input } from '../../../ui/input';
 import { Select, SelectItem } from '../../../ui/select';
@@ -44,7 +44,7 @@ export const PaymentStep: React.FC = () => {
   useEffect(() => {
     if (payments.length > 0) return;
     setLoading(true);
-    onboardingApi.getMopContext()
+    onboardsetupApi.getMopContext()
       .then(res => { if (res?.payment_methods?.length > 0) updateData('payments', res.payment_methods); })
       .catch(() => { })
       .finally(() => setLoading(false));

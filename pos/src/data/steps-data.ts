@@ -10,6 +10,7 @@ import { OrganizationStep } from '../components/onboarding/steps/OrganizationSte
 import { LoadingStep } from '../components/onboarding/steps/LoadingStep';
 import { ConfigurationStep } from '../components/onboarding/steps/ConfigurationStep';
 import { SuccessStep } from '../components/onboarding/steps/SuccessStep';
+import { SetupModeStep } from '../components/onboarding/steps/SetupModeStep';
 
 export interface OnboardingStepDef {
   /** Unique identifier — used as AnimatePresence key */
@@ -29,6 +30,7 @@ export interface OnboardingStepProps {
 
 export const ONBOARDING_STEPS: OnboardingStepDef[] = [
   { id: 'welcome', component: WelcomeStep, canGoBack: false },
+  { id: 'mode', component: SetupModeStep, canGoBack: true },
   { id: 'organization', component: OrganizationStep, canGoBack: true },
   { id: 'loading', component: LoadingStep, canGoBack: false },
   { id: 'configuration', component: ConfigurationStep, canGoBack: true },

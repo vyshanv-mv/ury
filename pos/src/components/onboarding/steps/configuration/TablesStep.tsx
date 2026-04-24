@@ -5,7 +5,7 @@ import {
 import { Button } from '../../../ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
-import { onboardingApi } from '../../../../lib/onboarding-api';
+import { onboardsetupApi } from '../../../../lib/onboardsetup-api';
 import { showToast } from '../../../ui/toast';
 import { Input } from '../../../ui/input';
 import { Select, SelectItem } from '../../../ui/select';
@@ -43,7 +43,7 @@ export const TablesStep: React.FC = () => {
     if (!form.room && defaultRoom) setForm(f => ({ ...f, room: defaultRoom }));
     if (tables.length > 0) return;
     setLoading(true);
-    onboardingApi.getTableContext()
+    onboardsetupApi.getTableContext()
       .then(res => { if (res?.tables?.length > 0) updateData('tables', res.tables); })
       .catch(() => { })
       .finally(() => setLoading(false));

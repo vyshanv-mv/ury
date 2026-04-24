@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../../../ui/button';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
-import { onboardingApi } from '../../../../lib/onboarding-api';
+import { onboardsetupApi } from '../../../../lib/onboardsetup-api';
 import { motion, AnimatePresence } from 'framer-motion';
 import { showToast } from '../../../ui/toast';
 import { Input } from '../../../ui/input';
@@ -47,7 +47,7 @@ export const RestaurantStep: React.FC = () => {
       if (restaurants.length > 0) return;
       setLoading(true);
       try {
-        const response = await onboardingApi.getRestaurantContext();
+        const response = await onboardsetupApi.getRestaurantContext();
         if (response && response.restaurant_name) {
           updateData('restaurant', [response]);
         }

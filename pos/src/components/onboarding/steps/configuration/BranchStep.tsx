@@ -4,7 +4,7 @@ import {
   Plus, Trash2, Pencil, Search, MoreVertical, Building
 } from 'lucide-react';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
-import { onboardingApi } from '../../../../lib/onboarding-api';
+import { onboardsetupApi } from '../../../../lib/onboardsetup-api';
 import { Button } from '../../../ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { showToast } from '../../../ui/toast';
@@ -44,7 +44,7 @@ export const BranchStep: React.FC = () => {
       if (branches.length > 0) return;
       setLoading(true);
       try {
-        const response = await onboardingApi.getBranchContext();
+        const response = await onboardsetupApi.getBranchContext();
         if (response && response.branch_name) {
           updateData('branch', [response]);
         }

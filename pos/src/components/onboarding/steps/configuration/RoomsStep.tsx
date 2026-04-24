@@ -5,7 +5,7 @@ import {
 import { Button } from '../../../ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
-import { onboardingApi } from '../../../../lib/onboarding-api';
+import { onboardsetupApi } from '../../../../lib/onboardsetup-api';
 import { showToast } from '../../../ui/toast';
 import { Input } from '../../../ui/input';
 import { Pagination } from '../../../ui/pagination';
@@ -34,7 +34,7 @@ export const RoomsStep: React.FC = () => {
   useEffect(() => {
     if (rooms.length > 0) return;
     setLoading(true);
-    onboardingApi
+    onboardsetupApi
       .getRoomContext()
       .then((res) => {
         if (res?.rooms?.length > 0) updateData('rooms', res.rooms);

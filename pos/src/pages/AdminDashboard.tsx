@@ -79,9 +79,15 @@ const popularItems = [
 ];
 
 export function AdminDashboard() {
-  const { user } = useRootStore();
+  const { user, checkAuth } = useRootStore();
   const [activeSection, setActiveSection] = useState<Section>("overview");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  React.useEffect(() => {
+    if (!user) {
+      checkAuth();
+    }
+  }, [user, checkAuth]);
 
   const groups = Array.from(new Set(NAV_ITEMS.map((item) => item.group)));
 
