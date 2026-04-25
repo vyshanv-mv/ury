@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Zap, Building2, Tag, Loader2,
-  User, Mail, CheckCircle2, Sliders, ArrowLeft, ArrowRight
+  User, Mail, CheckCircle2, ArrowLeft, ArrowRight
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { StepIndicator } from '../shared/StepIndicator';
@@ -118,6 +118,7 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
 
     setLoading(true);
     try {
+
       const payload = {
         company_name: formData.companyName,
         abbr: formData.abbreviation,
@@ -191,6 +192,8 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
               <span className="w-1.5 h-4 bg-blue-600 rounded-full" />
               Regional Preferences
             </h3>
+
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               <div className="space-y-2">
                 <label className={labelCls}>Language</label>
@@ -362,7 +365,7 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
                   "w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-colors",
                   formData.installationType === 'advanced' ? "bg-blue-600 text-white" : "bg-gray-50 text-gray-400 group-hover:bg-blue-50 group-hover:text-blue-600"
                 )}>
-                  <Sliders className="w-6 h-6" />
+                  <Zap className="w-6 h-6" />
                 </div>
                 <h3 className="text-sm font-bold text-gray-900 mb-1">Advanced Mode</h3>
                 <p className="text-[11px] text-gray-500 font-medium leading-relaxed">

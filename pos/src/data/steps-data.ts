@@ -31,7 +31,6 @@ export interface OnboardingStepProps {
 
 export const ONBOARDING_STEPS: OnboardingStepDef[] = [
   { id: 'welcome', component: WelcomeStep, canGoBack: false },
-  { id: 'mode', component: SetupModeStep, canGoBack: true },
   { id: 'organization', component: OrganizationStep, canGoBack: true },
   { id: 'loading', component: LoadingStep, canGoBack: false },
   { id: 'configuration', component: ConfigurationStep, canGoBack: true },

@@ -61,27 +61,48 @@ def complete_onboarding():
 def check_setup_status():
     """
     Checks if the initial onboarding setup is complete.
-    We check if a Company exists AND if URY Restaurant is configured.
+    1. Check if at least one Company exists.
+    2. Check the dedicated 'ury_onboarding_complete' flag.
     """
     company_exists = frappe.db.exists("Company")
-    restaurant_exists = frappe.db.exists("URY Restaurant")
-    setup_complete = bool(company_exists and restaurant_exists)
+    onboarding_done = frappe.utils.cint(frappe.db.get_default("ury_onboarding_complete"))
     
-    # Also check a dedicated flag
-    onboarding_done = frappe.db.get_default("ury_onboarding_complete")
+    # Setup is complete ONLY if both a Company exists AND the flag is set.
+    # This prevents edge cases where the flag might be set but data was deleted.
+    setup_complete = bool(company_exists and onboarding_done)
     
-    return {"setup_complete": bool(setup_complete or onboarding_done)}
+    return {"setup_complete": setup_complete}
+
+def ensure_erpnext_fixtures():
+    """
+    Ensures that mandatory ERPNext master data (Warehouse Types, etc.) exists.
+    This prevents LinkValidationErrors during Company creation.
+    """
+    warehouse_types = ["Transit", "All Warehouse Types", "Storage", "Work In Progress"]
+    for wt in warehouse_types:
+        if not frappe.db.exists("Warehouse Type", wt):
+            doc = frappe.new_doc("Warehouse Type")
+            doc.name = wt
+            doc.insert(ignore_permissions=True)
+    
+    frappe.db.commit()
 
 @frappe.whitelist(allow_guest=True)
 def setup_organization(company_name, abbr, country, timezone, currency, user_name, email, password=None, **kwargs):
     """
-    Creates the main Company and basic settings.
-    If called by a Guest, it attempts to authenticate the user first.
+    Creates the main Company and ensures an administrative user exists.
     """
-    # 1. Handle Authentication for Guests
-    if frappe.session.user == "Guest":
+    # 0. Ensure mandatory master data exists
+    ensure_erpnext_fixtures()
+
+    # 1. Handle Authentication / Authorization
+    # If no company exists, we allow guest access to setup the first organization.
+    # Otherwise, we require authentication.
+    company_exists = frappe.db.exists("Company")
+    
+    if frappe.session.user == "Guest" and company_exists:
         if not email or not password:
-            frappe.throw(_("Email and Password are required to setup the organization."))
+            frappe.throw(_("Email and Password are required to modify the organization."))
         
         try:
             from frappe.auth import LoginManager
@@ -91,22 +112,57 @@ def setup_organization(company_name, abbr, country, timezone, currency, user_nam
         except Exception as e:
             frappe.throw(_("Authentication failed: {0}").format(str(e)))
 
-    # 2. Create Company
+    # 2. Ensure current user or provided email has System Manager role
+    # If the provided email is different from current user, we create/update that user.
+    target_user = email or frappe.session.user
+    if target_user and target_user != "Guest":
+        if not frappe.db.exists("User", target_user):
+            user = frappe.new_doc("User")
+            user.email = target_user
+            user.first_name = user_name or "Administrator"
+            if password:
+                user.new_password = password
+            user.enabled = 1
+            user.send_welcome_email = 0
+            user.append("roles", {"role": "System Manager"})
+            user.append("roles", {"role": "Administrator"})
+            user.insert(ignore_permissions=True)
+        else:
+            # Update existing user if password provided
+            user = frappe.get_doc("User", target_user)
+            if user_name:
+                user.first_name = user_name
+            if password:
+                user.new_password = password
+            
+            # Ensure roles
+            roles = [r.role for r in user.roles]
+            if "System Manager" not in roles:
+                user.append("roles", {"role": "System Manager"})
+            if "Administrator" not in roles:
+                user.append("roles", {"role": "Administrator"})
+            user.save(ignore_permissions=True)
+
+    # 3. Create Company
     if frappe.db.exists("Company", company_name):
-        return {"status": "success", "message": _("Company already exists."), "user": frappe.session.user}
+        company = frappe.get_doc("Company", company_name)
+    else:
+        company = frappe.new_doc("Company")
+        company.company_name = company_name
+        company.abbr = abbr
+        company.default_currency = currency
+        company.country = country
+        company.insert(ignore_permissions=True)
     
-    company = frappe.new_doc("Company")
-    company.company_name = company_name
-    company.abbr = abbr
-    company.default_currency = currency
-    company.country = country
-    company.insert(ignore_permissions=True)
-    
-    # Set as global default if it's the first company
-    if frappe.db.count("Company") == 1:
+    # Set as global default if it's the first company or none is set
+    if frappe.db.count("Company") <= 1 or not frappe.db.get_single_value("Global Defaults", "default_company"):
         frappe.db.set_single_value("Global Defaults", "default_company", company.name)
         frappe.db.set_default("company", company.name)
-    
+        
+        # Also set default currency and country if not set
+        frappe.db.set_single_value("Global Defaults", "default_currency", currency)
+        frappe.db.set_single_value("Global Defaults", "country", country)
+
     frappe.db.commit()
     return {
         "status": "success", 

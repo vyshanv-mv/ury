@@ -209,7 +209,7 @@ export const usePOSStore = create<POSStore>((set, get) => ({
   currencySymbol: storage.getItem('currencySymbol') || null,
   tableOrder: null,
   isInitializing: true,
-  needsOnboarding: false,
+  needsOnboarding: true,
   isUpdatingOrder: false,
   orderId: null,
   orderComment: '',
@@ -240,14 +240,13 @@ export const usePOSStore = create<POSStore>((set, get) => ({
       set({ isInitializing: true, error: null });
 
       // 1. First, check if setup is complete via Backend
-      const setupResponse = await (window as any).frappe.call('ury.setup.setup_wizard.check_setup_status');
-      const setupComplete = setupResponse.message?.setup_complete;
+      const status = await onboardsetupApi.checkSetupStatus();
+      const shouldOnboard = status.needsOnboarding;
       
-      // Secondary check: local storage flag
-      const localCompleted = localStorage.getItem('ury_onboarding_done') === 'true';
-      
-      const shouldOnboard = !setupComplete && !localCompleted;
-      set({ needsOnboarding: shouldOnboard, onboardingCompleted: !shouldOnboard });
+      set({ 
+        needsOnboarding: shouldOnboard, 
+        onboardingCompleted: !shouldOnboard 
+      });
 
       if (shouldOnboard) {
         set({ isInitializing: false });
