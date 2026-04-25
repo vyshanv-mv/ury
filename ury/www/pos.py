@@ -13,6 +13,10 @@ CLOSING_SCRIPT_TAG_PATTERN = re.compile(r"</script\>")
 
 
 def get_context(context):
+	if frappe.session.user == "Administrator" and frappe.request.path.strip("/") == "pos":
+		frappe.local.flags.redirect_location = "/pos/admin"
+		raise frappe.Redirect
+
 	csrf_token = frappe.sessions.get_csrf_token()
 	# Manually commit the CSRF token here
 	frappe.db.commit()  # nosemgrep

@@ -66,9 +66,10 @@ website_route_rules = [
 home_page = "pos"
 
 # website user home page (by Role)
-# role_home_page = {
-# 	"Role": "home_page"
-# }
+role_home_page = {
+	"Administrator": "pos/admin",
+    "System Manager": "pos/admin"
+}
 
 # Generators
 # ----------
