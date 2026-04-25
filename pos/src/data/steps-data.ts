@@ -10,7 +10,6 @@ import { OrganizationStep } from '../components/onboarding/steps/OrganizationSte
 import { LoadingStep } from '../components/onboarding/steps/LoadingStep';
 import { ConfigurationStep } from '../components/onboarding/steps/ConfigurationStep';
 import { SuccessStep } from '../components/onboarding/steps/SuccessStep';
-import { SetupModeStep } from '../components/onboarding/steps/SetupModeStep';
 import type { OnboardingState } from '../store/onboarding-store';
 
 export interface OnboardingStepDef {

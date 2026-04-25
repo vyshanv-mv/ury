@@ -58,7 +58,6 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
     abbreviation: organization.abbr || "",
     taxNumber: organization.tax_number || "",
     installationType: (organization.installation_type as "minimal" | "advanced") || "minimal",
-    generateDemo: organization.generate_demo_data !== undefined ? !!organization.generate_demo_data : false,
   });
 
   useEffect(() => {
@@ -128,7 +127,6 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
         user_name: formData.userName,
         email: formData.email,
         password: formData.password,
-        generate_demo_data: formData.generateDemo,
       };
 
       const result = await onboardsetupApi.setupOrganization(payload);

@@ -1,10 +1,5 @@
-# Copyright (c) 2024
-# License: GNU General Public License v3
-
 import frappe
 from frappe import _
-import json
-import os
 from erpnext.setup.setup_wizard.operations.install_fixtures import create_bank_account
 
 @frappe.whitelist()
