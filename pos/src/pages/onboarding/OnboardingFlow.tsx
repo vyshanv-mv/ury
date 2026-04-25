@@ -26,8 +26,11 @@ const OnboardingFlow: React.FC = () => {
   }, [completeOnboarding, navigate, resetStore]);
 
   const handleNext = useCallback((data?: Parameters<OnboardingStepProps['onNext']>[0]) => {
-    // If Quick Setup was chosen and successful, jump to success
-    if (data?.mode === 'quick') {
+    // If Advanced Mode was chosen, skip configuration and jump to success
+    const state = useOnboardingStore.getState();
+    const isAdvanced = data?.organization?.installation_type === 'advanced' || state.organization.installation_type === 'advanced';
+    
+    if (isAdvanced && currentStepDef.id === 'organization') {
       const successStepIndex = ONBOARDING_STEPS.findIndex(s => s.id === 'success');
       if (successStepIndex !== -1) {
         setStepIndex(successStepIndex);
@@ -40,7 +43,7 @@ const OnboardingFlow: React.FC = () => {
       return;
     }
     setStepIndex(currentStepIndex + 1);
-  }, [currentStepIndex, handleFinalComplete, setStepIndex]);
+  }, [currentStepIndex, currentStepDef.id, handleFinalComplete, setStepIndex]);
 
   const handleBack = useCallback(() => {
     if (currentStepIndex <= 0) return;
