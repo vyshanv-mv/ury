@@ -1,5 +1,15 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { 
+  SetupOrganizationPayload, 
+  BranchData, 
+  RestaurantData, 
+  RoomData, 
+  TableData, 
+  PrinterData, 
+  PaymentData, 
+  UserData 
+} from '../lib/onboardsetup-api';
 
 interface OnboardingState {
   currentStepIndex: number;
@@ -7,27 +17,30 @@ interface OnboardingState {
   skippedSteps: string[];
 
   // Step Data
-  organization: any;
+  organization: Partial<SetupOrganizationPayload>;
   menu: {
-    items: any[];
-    tax_calculation: string;
+    items: Array<{ item_name: string; price: number }>;
+    tax_calculation: 'Inclusive' | 'Exclusive';
     tax_rate: string;
   };
-  printer: any[];
-  rooms: any[];
-  tables: any[];
-  payments: any[];
-    branch: any[];
-    restaurant: any[];
-    users: any[];
-    integrations: any[];
+  printer: PrinterData[];
+  rooms: RoomData[];
+  tables: TableData[];
+  payments: PaymentData[];
+  branch: BranchData[];
+  restaurant: RestaurantData[];
+  users: UserData[];
+  integrations: any[];
 
-    // Actions
-    setStepIndex: (index: number) => void;
-    markStepComplete: (stepId: string) => void;
-    markStepSkipped: (stepId: string) => void;
-    updateData: (step: keyof Omit<OnboardingState, 'currentStepIndex' | 'completedSteps' | 'skippedSteps' | 'setStepIndex' | 'markStepComplete' | 'markStepSkipped' | 'updateData' | 'resetStore'>, data: any) => void;
-    resetStore: () => void;
+  // Actions
+  setStepIndex: (index: number) => void;
+  markStepComplete: (stepId: string) => void;
+  markStepSkipped: (stepId: string) => void;
+  updateData: <K extends keyof Omit<OnboardingState, 'currentStepIndex' | 'completedSteps' | 'skippedSteps' | 'setStepIndex' | 'markStepComplete' | 'markStepSkipped' | 'updateData' | 'resetStore'>>(
+    step: K, 
+    data: OnboardingState[K] | Partial<OnboardingState[K]>
+  ) => void;
+  resetStore: () => void;
 }
 
 export const useOnboardingStore = create<OnboardingState>()(
@@ -63,9 +76,16 @@ export const useOnboardingStore = create<OnboardingState>()(
                 // Remove from completed if it was previously completed
                 completedSteps: state.completedSteps.filter(id => id !== stepId),
             })),
-            updateData: (step, data) => set((state) => ({
-                [step]: Array.isArray(data) ? data : (typeof data === 'object' && !Array.isArray(state[step]) ? { ...(state[step] as object), ...data } : data)
-            })),
+            updateData: (step, data) => set((state) => {
+                const currentVal = state[step];
+                if (Array.isArray(data)) {
+                    return { [step]: data };
+                }
+                if (typeof data === 'object' && data !== null && !Array.isArray(currentVal)) {
+                    return { [step]: { ...currentVal, ...data } };
+                }
+                return { [step]: data };
+            }),
             resetStore: () => set({
                 currentStepIndex: 0,
                 completedSteps: [],

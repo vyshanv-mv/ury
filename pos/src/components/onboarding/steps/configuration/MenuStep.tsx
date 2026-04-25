@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { 
-  Loader2, Upload, Trash2, Plus, Info, Percent, Receipt, Pencil, Search, MoreVertical 
+  Loader2, Upload, Trash2, Plus, Percent, Receipt, Search, MoreVertical 
 } from 'lucide-react';
 import { Button } from '../../../ui/button';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
@@ -15,10 +15,10 @@ import {
 
 interface MenuForm {
   item_name: string;
-  standard_rate: string;
+  price: number;
 }
 
-const emptyForm = (): MenuForm => ({ item_name: '', standard_rate: '' });
+const emptyForm = (): MenuForm => ({ item_name: '', price: 0 });
 
 export const MenuStep: React.FC = () => {
   const { menu, updateData } = useOnboardingStore();
@@ -31,9 +31,9 @@ export const MenuStep: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  const items = Array.isArray(menu.items) ? menu.items.map((it: any) => ({
-    item_name: it.item_name || it.name || '',
-    standard_rate: String(it.standard_rate || it.price || ''),
+  const items: MenuForm[] = Array.isArray(menu.items) ? menu.items.map((it) => ({
+    item_name: it.item_name || '',
+    price: it.price || 0,
   })) : [];
 
   const saveToStore = (newItems: MenuForm[]) => {
@@ -52,9 +52,9 @@ export const MenuStep: React.FC = () => {
 
   const handleSaveItem = () => {
     const trimmedName = form.item_name?.trim();
-    const rate = parseFloat(form.standard_rate);
+    const price = form.price;
 
-    if (!trimmedName || isNaN(rate)) {
+    if (!trimmedName || isNaN(price) || price <= 0) {
       showToast.error('Item name and a valid price are required');
       return;
     }
@@ -69,7 +69,7 @@ export const MenuStep: React.FC = () => {
     }
 
     const next = [...items];
-    const entry = { item_name: trimmedName, standard_rate: String(rate) };
+    const entry = { item_name: trimmedName, price };
     
     if (editIndex !== null && editIndex !== -1) {
       next[editIndex] = entry;
@@ -110,9 +110,10 @@ export const MenuStep: React.FC = () => {
         const imported: MenuForm[] = lines.slice(1)
           .map(line => {
             const cols = line.split(',').map(c => c.trim().replace(/^["']|["']$/g, ''));
+            const rawPrice = priceIdx !== -1 ? cols[priceIdx] : '0';
             return {
               item_name: cols[nameIdx] ?? '',
-              standard_rate: priceIdx !== -1 ? (cols[priceIdx] ?? '') : '',
+              price: parseFloat(rawPrice) || 0,
             };
           })
           .filter(r => r.item_name);
@@ -168,7 +169,7 @@ export const MenuStep: React.FC = () => {
             {['Inclusive', 'Exclusive'].map((type) => (
               <button
                 key={type}
-                onClick={() => updateData('menu', { ...menu, tax_calculation: type })}
+                onClick={() => updateData('menu', { ...menu, tax_calculation: type as 'Inclusive' | 'Exclusive' })}
                 className={`px-4 py-2 text-[10px] font-bold rounded-lg transition-all ${
                   (menu.tax_calculation || 'Inclusive') === type 
                   ? 'bg-white text-blue-600 shadow-sm' 
@@ -262,7 +263,7 @@ export const MenuStep: React.FC = () => {
                         </td>
                         <td className="px-6 py-4">
                           <div className="text-sm font-bold text-blue-600">
-                            ₹ {parseFloat(item.standard_rate).toFixed(2)}
+                            ₹ {item.price.toFixed(2)}
                           </div>
                         </td>
                         <td className="px-6 py-4 text-right">
@@ -343,8 +344,8 @@ export const MenuStep: React.FC = () => {
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">₹</span>
                   <Input 
                     type="number"
-                    value={form.standard_rate} 
-                    onChange={e => setForm({...form, standard_rate: e.target.value})}
+                    value={form.price} 
+                    onChange={e => setForm({...form, price: parseFloat(e.target.value) || 0})}
                     placeholder="250.00"
                     className="pl-10 rounded-xl border-gray-200 bg-white h-11 font-semibold" 
                   />

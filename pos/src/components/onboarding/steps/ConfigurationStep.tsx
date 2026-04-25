@@ -87,9 +87,8 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
           if (state.menu.items && state.menu.items.length > 0) {
             await onboardsetupApi.setupMenu({
               items: state.menu.items,
-              tax_calculation: state.menu.tax_calculation as any,
-              company_name: state.organization.company_name
-
+              tax_calculation: state.menu.tax_calculation as 'Inclusive' | 'Exclusive',
+              company_name: state.organization.company_name || ''
             });
           }
           break;

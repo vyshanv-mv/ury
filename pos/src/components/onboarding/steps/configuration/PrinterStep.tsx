@@ -57,7 +57,7 @@ export const PrinterStep: React.FC = () => {
     fetchContext();
   }, []);
 
-  const handleChange = (field: keyof PrinterForm, value: any) => {
+  const handleChange = <K extends keyof PrinterForm>(field: K, value: PrinterForm[K]) => {
     setForm(prev => ({ ...prev, [field]: value }));
   };
 

@@ -52,12 +52,31 @@ export const OrganizationStep: React.FC<{ onNext: (data: any) => void; onBack: (
     currency: organization.currency || "INR",
     userName: organization.user_name || "",
     email: organization.email || "",
+    password: "",
     companyName: organization.company_name || "",
     abbreviation: organization.abbr || "",
     taxNumber: organization.tax_number || "",
     installationType: (organization.installation_type as "minimal" | "advanced") || "minimal",
     generateDemo: organization.generate_demo_data !== undefined ? !!organization.generate_demo_data : false,
   });
+
+  useEffect(() => {
+    onboardsetupApi.getOrganizationContext()
+      .then(res => {
+        if (res) {
+          setFormData(prev => ({
+            ...prev,
+            companyName: res.company_name || prev.companyName,
+            abbreviation: res.abbr || prev.abbreviation,
+            country: (res.country as CountryKey) || prev.country,
+            currency: res.currency || prev.currency,
+            userName: res.user_name || prev.userName,
+            email: res.email || prev.email,
+          }));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const defaults = countryDefaults[formData.country as CountryKey];
@@ -91,8 +110,8 @@ export const OrganizationStep: React.FC<{ onNext: (data: any) => void; onBack: (
     e.preventDefault();
     if (loading) return;
 
-    if (!formData.companyName || !formData.email || !formData.userName) {
-      showToast.error("Please fill in all required fields");
+    if (!formData.companyName || !formData.email || !formData.userName || !formData.password) {
+      showToast.error("Please fill in all required fields including password");
       return;
     }
 
@@ -106,6 +125,7 @@ export const OrganizationStep: React.FC<{ onNext: (data: any) => void; onBack: (
         currency: formData.currency,
         user_name: formData.userName,
         email: formData.email,
+        password: formData.password,
         generate_demo_data: formData.generateDemo,
       };
 
@@ -244,6 +264,19 @@ export const OrganizationStep: React.FC<{ onNext: (data: any) => void; onBack: (
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className={cn(inputCls, "pl-11")}
                     placeholder="admin@restaurant.com"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className={labelCls}>Admin Password</label>
+                <div className="relative">
+                  <Tag className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className={cn(inputCls, "pl-11")}
+                    placeholder="Enter your password"
                   />
                 </div>
               </div>
