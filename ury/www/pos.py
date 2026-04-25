@@ -13,7 +13,9 @@ CLOSING_SCRIPT_TAG_PATTERN = re.compile(r"</script\>")
 
 
 def get_context(context):
-	if frappe.session.user == "Administrator" and frappe.request.path.strip("/") == "pos":
+	# Redirect Administrator to POS Admin page if they hit the main POS entry points
+	path = frappe.request.path.strip("/")
+	if frappe.session.user == "Administrator" and path in ["pos", "pos/setup", "pos/onboarding"]:
 		frappe.local.flags.redirect_location = "/pos/admin"
 		raise frappe.Redirect
 

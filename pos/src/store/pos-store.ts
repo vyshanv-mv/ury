@@ -240,7 +240,7 @@ export const usePOSStore = create<POSStore>((set, get) => ({
       set({ isInitializing: true, error: null });
 
       // 1. First, check if setup is complete via Backend
-      const setupResponse = await (window as any).frappe.call('ury.setup.api.check_setup_status');
+      const setupResponse = await (window as any).frappe.call('ury.setup.setup_wizard.check_setup_status');
       const setupComplete = setupResponse.message?.setup_complete;
       
       // Secondary check: local storage flag
