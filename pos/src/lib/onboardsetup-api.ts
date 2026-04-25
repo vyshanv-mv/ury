@@ -18,6 +18,9 @@ export interface SetupOrganizationPayload {
   email: string;
   password?: string;
   tax_system?: string;
+  tax_number?: string;
+  language?: string;
+  installation_type?: 'minimal' | 'advanced';
   generate_demo_data?: boolean | number;
 }
 
@@ -364,8 +367,9 @@ export const onboardsetupApi = {
     }
   },
 
-  getOrganizationContext: async (): Promise<{ message: SetupOrganizationPayload }> => {
-    return await call.post('ury.setup.api.get_organization_context', {});
+  getOrganizationContext: async (): Promise<SetupOrganizationPayload> => {
+    const res = await call.post<{ message: SetupOrganizationPayload }>('ury.setup.api.get_organization_context', {});
+    return res.message;
   },
 
   getMenuContext: async (): Promise<{ message: SetupMenuPayload }> => {

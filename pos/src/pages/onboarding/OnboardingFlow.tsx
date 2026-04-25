@@ -4,6 +4,7 @@ import { usePOSStore } from '../../store/pos-store';
 import { SetupLayout } from '../../components/onboarding/shared/SetupLayout';
 import { ONBOARDING_STEPS } from '../../data/steps-data';
 import { showToast } from '../../components/ui/toast';
+import type { OnboardingStepProps } from '../../data/steps-data';
 import { useOnboardingStore } from '../../store/onboarding-store';
 
 import Header from '../../components/Header';
@@ -24,7 +25,7 @@ const OnboardingFlow: React.FC = () => {
     navigate('/admin');
   }, [completeOnboarding, navigate, resetStore]);
 
-  const handleNext = useCallback((data?: any) => {
+  const handleNext = useCallback((data?: Parameters<OnboardingStepProps['onNext']>[0]) => {
     // If Quick Setup was chosen and successful, jump to success
     if (data?.mode === 'quick') {
       const successStepIndex = ONBOARDING_STEPS.findIndex(s => s.id === 'success');
@@ -58,10 +59,10 @@ const OnboardingFlow: React.FC = () => {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [currentStepDef.id]);
 
-  const stepProps = {
+  const stepProps: OnboardingStepProps = {
     onNext: handleNext,
     onBack: handleBack,
-    data: {} // Satisfy interface
+    data: {} 
   };
 
   const showHeader = currentStepDef.id !== 'welcome' && currentStepDef.id !== 'success';

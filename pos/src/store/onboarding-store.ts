@@ -11,7 +11,7 @@ import type {
   UserData 
 } from '../lib/onboardsetup-api';
 
-interface OnboardingState {
+export interface OnboardingState {
   currentStepIndex: number;
   completedSteps: string[];
   skippedSteps: string[];

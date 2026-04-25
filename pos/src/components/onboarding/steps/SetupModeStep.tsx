@@ -30,8 +30,9 @@ export const SetupModeStep: React.FC<OnboardingStepProps> = ({ onNext }) => {
       } else {
         throw new Error("Setup complete flag was not set. Please try again.");
       }
-    } catch (error: any) {
-      showToast.error(error.message || "Failed to finalize setup.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to finalize setup.";
+      showToast.error(message);
     } finally {
       setLoading(false);
     }

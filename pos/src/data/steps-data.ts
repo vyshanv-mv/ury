@@ -11,6 +11,7 @@ import { LoadingStep } from '../components/onboarding/steps/LoadingStep';
 import { ConfigurationStep } from '../components/onboarding/steps/ConfigurationStep';
 import { SuccessStep } from '../components/onboarding/steps/SuccessStep';
 import { SetupModeStep } from '../components/onboarding/steps/SetupModeStep';
+import type { OnboardingState } from '../store/onboarding-store';
 
 export interface OnboardingStepDef {
   /** Unique identifier — used as AnimatePresence key */
@@ -23,9 +24,9 @@ export interface OnboardingStepDef {
 
 /** Props every step component receives from the orchestrator */
 export interface OnboardingStepProps {
-  onNext: (data?: any) => void;
+  onNext: (data?: Partial<OnboardingState> & { mode?: string }) => void;
   onBack: () => void;
-  data: any;
+  data: Partial<OnboardingState>;
 }
 
 export const ONBOARDING_STEPS: OnboardingStepDef[] = [

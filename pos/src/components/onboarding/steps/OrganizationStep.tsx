@@ -6,6 +6,7 @@ import {
 import { cn } from '../../../lib/utils';
 import { StepIndicator } from '../shared/StepIndicator';
 import { showToast } from '../../ui/toast';
+import type { OnboardingStepProps } from '../../../data/steps-data';
 import { useOnboardingStore } from '../../../store/onboarding-store';
 import { onboardsetupApi } from '../../../lib/onboardsetup-api';
 import { Input } from '../../ui/input';
@@ -41,7 +42,7 @@ const CURRENCIES = [
   { value: "SGD", label: "S$  SGD — Singapore Dollar" },
 ];
 
-export const OrganizationStep: React.FC<{ onNext: (data: any) => void; onBack: () => void }> = ({ onNext, onBack }) => {
+export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack }) => {
   const { organization, updateData } = useOnboardingStore();
   const [loading, setLoading] = useState(false);
 
@@ -137,12 +138,21 @@ export const OrganizationStep: React.FC<{ onNext: (data: any) => void; onBack: (
           language: formData.language,
           tax_number: formData.taxNumber
         });
-        onNext({ ...formData, ...result.data });
+        onNext({ 
+          organization: {
+            ...payload,
+            installation_type: formData.installationType,
+            language: formData.language,
+            tax_number: formData.taxNumber
+          },
+          ...(result.data as Record<string, any>) 
+        });
       } else {
         showToast.error(result.message || 'Failed to setup organization');
       }
-    } catch (error: any) {
-      showToast.error(error.message || 'A connection error occurred. Please try again.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'A connection error occurred. Please try again.';
+      showToast.error(message);
     } finally {
       setLoading(false);
     }
