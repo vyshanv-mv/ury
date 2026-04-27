@@ -56,15 +56,15 @@ export const LoadingStep: React.FC<OnboardingStepProps> = ({ onNext, data }) => 
   return (
     <div className="h-screen flex flex-col bg-gray-50 font-inter">
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-xl bg-white rounded-[2rem] p-12 md:p-16 shadow-2xl shadow-blue-100/50 border border-gray-100 text-center relative overflow-hidden">
+        <div className="w-full max-w-xl bg-white rounded-2xl p-12 md:p-16 shadow-2xl shadow-blue-100/50 border border-gray-100 text-center relative overflow-hidden">
           {/* Subtle background decoration */}
           <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-50 rounded-full blur-3xl opacity-50" />
 
           <div className="relative z-10 mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 tracking-tight">
+            <h2 className="text-xl font-medium text-gray-900 mb-4 tracking-tight">
               Setting up your workspace
             </h2>
-            <p className="text-gray-500 font-bold text-lg opacity-60">
+            <p className="text-gray-500 font-medium text-sm opacity-60">
               This will only take a moment. Please don't close this window.
             </p>
           </div>

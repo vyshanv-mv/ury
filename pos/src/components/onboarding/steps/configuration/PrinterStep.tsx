@@ -6,7 +6,6 @@ import {
 import { Button } from '../../../ui/button';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
 import { onboardsetupApi } from '../../../../lib/onboardsetup-api';
-import { motion, AnimatePresence } from 'framer-motion';
 import { showToast } from '../../../ui/toast';
 import { Input } from '../../../ui/input';
 import { Pagination } from '../../../ui/pagination';
@@ -154,7 +153,7 @@ export const PrinterStep: React.FC = () => {
                   className="pl-9 h-11 text-xs font-semibold bg-gray-50 border-gray-200 focus:bg-white transition-all rounded-xl w-64"
                 />
               </div>
-              <Button onClick={() => setEditIndex(-1)} className="h-11 px-6 rounded-xl gap-2 font-bold shadow-lg shadow-blue-100 bg-blue-600">
+              <Button onClick={() => setEditIndex(-1)} className="h-11 px-6 rounded-md gap-2 font-medium shadow-lg shadow-blue-100 bg-blue-600">
                 <Plus className="w-4 h-4" />
                 Add Printer
               </Button>
@@ -175,16 +174,12 @@ export const PrinterStep: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  <AnimatePresence mode='popLayout'>
                     {paginatedPrinters.length > 0 ? (
                       paginatedPrinters.map((p, i) => {
                         const globalIndex = printers.findIndex(item => item === p);
                         return (
-                          <motion.tr 
+                          <tr 
                             key={p.printer_name + i}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
                             className="hover:bg-blue-50/30 transition-colors group"
                           >
                             <td className="px-6 py-4 text-xs font-bold text-gray-400 text-center">
@@ -235,7 +230,7 @@ export const PrinterStep: React.FC = () => {
                                 <MoreVertical className="w-4 h-4 text-gray-400" />
                               </Button>
                             </td>
-                          </motion.tr>
+                          </tr>
                         );
                       })
                     ) : (
@@ -246,14 +241,13 @@ export const PrinterStep: React.FC = () => {
                               <Printer className="w-8 h-8 text-gray-200" />
                             </div>
                             <div className="text-gray-400 text-sm font-bold">No printers configured</div>
-                            <Button variant="outline" onClick={() => setEditIndex(-1)} size="sm" className="mt-2 rounded-xl border-gray-200 font-bold">
+                            <Button variant="outline" onClick={() => setEditIndex(-1)} size="sm" className="mt-2 rounded-md border-gray-200 font-medium">
                               Add new printer
                             </Button>
                           </div>
                         </td>
                       </tr>
                     )}
-                  </AnimatePresence>
                 </tbody>
               </table>
             </div>
@@ -363,8 +357,8 @@ export const PrinterStep: React.FC = () => {
                     Remove Printer
                   </Button>
                 )}
-                <Button variant="ghost" onClick={cancelEdit} className="font-bold rounded-xl h-11 px-6">Cancel</Button>
-                <Button onClick={save} className="px-8 font-bold rounded-xl h-11 shadow-lg shadow-blue-100 bg-blue-600">
+                <Button variant="ghost" onClick={cancelEdit} className="font-medium rounded-md h-11 px-6">Cancel</Button>
+                <Button onClick={save} className="px-8 font-medium rounded-md h-11 shadow-lg shadow-blue-100 bg-blue-600">
                   {editIndex === -1 ? 'Add Printer' : 'Save Changes'}
                 </Button>
               </DialogFooter>

@@ -12,7 +12,6 @@ import { onboardsetupApi } from '../../../lib/onboardsetup-api';
 import { Input } from '../../ui/input';
 import { Select, SelectItem } from '../../ui/select';
 import { Button } from '../../ui/button';
-import { motion } from 'framer-motion';
 
 type CountryKey =
   | "India" | "United States" | "United Kingdom" | "Canada"
@@ -163,17 +162,15 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
     { id: 3, label: 'Ready' }
   ];
 
-  const labelCls = "text-xs font-bold text-gray-500 mb-2 flex items-center gap-2 px-1";
-  const inputCls = "w-full px-4 py-3 h-12 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 transition-all text-sm font-semibold text-gray-900 placeholder:text-gray-400 shadow-sm";
+  const labelCls = "text-xs font-medium text-gray-500 mb-2 flex items-center gap-2 px-1";
+  const inputCls = "w-full px-4 py-3 h-12 bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 transition-all text-sm font-medium text-gray-900 placeholder:text-gray-400 shadow-sm";
 
   return (
     <div className="flex flex-col items-center w-full max-w-3xl font-inter py-8">
       <StepIndicator steps={steps} currentStep={1} />
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-[2.5rem] shadow-xl shadow-gray-200/50 border border-gray-100 w-full overflow-hidden"
+      <div 
+        className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 w-full overflow-hidden"
       >
         <div className="bg-blue-600 px-12 py-10 text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
@@ -186,7 +183,7 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
         <form onSubmit={handleSubmit} className="p-12 space-y-10">
           {/* Section: Regional Settings */}
           <div className="space-y-6">
-            <h3 className="text-xs font-bold text-gray-500 flex items-center gap-2">
+            <h3 className="text-xs font-medium text-gray-500 flex items-center gap-2">
               <span className="w-1.5 h-4 bg-blue-600 rounded-full" />
               Regional Preferences
             </h3>
@@ -210,7 +207,7 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
                 <Select
                   value={formData.country}
                   onValueChange={(val) => setFormData({ ...formData, country: val as CountryKey })}
-                  className="h-12 rounded-xl"
+                  className="h-12 rounded-md"
                 >
                   {COUNTRIES.map((c) => (
                     <SelectItem key={c} value={c}>{countryDefaults[c].label}</SelectItem>
@@ -222,7 +219,7 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
                 <Select
                   value={formData.currency}
                   onValueChange={(val) => setFormData({ ...formData, currency: val })}
-                  className="h-12 rounded-xl"
+                  className="h-12 rounded-md"
                 >
                   {CURRENCIES.map((c) => (
                     <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
@@ -234,7 +231,7 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
                 <Select
                   value={formData.timezone}
                   onValueChange={(val) => setFormData({ ...formData, timezone: val })}
-                  className="h-12 rounded-xl"
+                  className="h-12 rounded-md"
                 >
                   {countryDefaults[formData.country as CountryKey] ? (
                     <SelectItem value={formData.timezone}>{formData.timezone}</SelectItem>
@@ -329,7 +326,7 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
               <div
                 onClick={() => setFormData({ ...formData, installationType: 'minimal' })}
                 className={cn(
-                  "relative cursor-pointer p-6 rounded-[2rem] border-2 transition-all duration-300 h-full flex flex-col group",
+                  "relative cursor-pointer p-6 rounded-2xl border-2 transition-all duration-300 h-full flex flex-col group",
                   formData.installationType === 'minimal'
                     ? "border-blue-600 bg-blue-50/30"
                     : "border-gray-100 bg-white hover:border-gray-200"
@@ -353,7 +350,7 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
               <div
                 onClick={() => setFormData({ ...formData, installationType: 'advanced' })}
                 className={cn(
-                  "relative cursor-pointer p-6 rounded-[2rem] border-2 transition-all duration-300 h-full flex flex-col group",
+                  "relative cursor-pointer p-6 rounded-2xl border-2 transition-all duration-300 h-full flex flex-col group",
                   formData.installationType === 'advanced'
                     ? "border-blue-600 bg-blue-50/30"
                     : "border-gray-100 bg-white hover:border-gray-200"
@@ -383,7 +380,7 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
               type="button"
               onClick={onBack}
               disabled={loading}
-              className="gap-2 font-bold text-gray-500 hover:text-gray-900 hover:bg-gray-50 h-12 px-6 rounded-xl"
+              className="rounded-md gap-2 font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-50 h-12 px-6"
             >
               <ArrowLeft className="w-4 h-4" />
               Back
@@ -391,7 +388,7 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
             <Button
               type="submit"
               disabled={loading}
-              className="gap-2 min-w-[240px] font-bold h-12 rounded-xl bg-blue-600 shadow-xl shadow-blue-100"
+              className="rounded-md gap-2 min-w-[240px] font-medium h-12 bg-blue-600 shadow-lg shadow-blue-100"
             >
               {loading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -404,7 +401,7 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
             </Button>
           </div>
         </form>
-      </motion.div>
+      </div>
     </div>
   );
 };

@@ -6,7 +6,6 @@ import {
 import { Button } from '../../../ui/button';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
 import { onboardsetupApi } from '../../../../lib/onboardsetup-api';
-import { motion, AnimatePresence } from 'framer-motion';
 import { showToast } from '../../../ui/toast';
 import { Input } from '../../../ui/input';
 import { Pagination } from '../../../ui/pagination';
@@ -151,7 +150,7 @@ export const RestaurantStep: React.FC = () => {
                   className="pl-9 h-11 text-xs font-semibold bg-gray-50 border-gray-200 focus:bg-white transition-all rounded-xl w-64"
                 />
               </div>
-              <Button onClick={() => setEditIndex(-1)} className="h-11 px-6 rounded-xl gap-2 font-bold shadow-lg shadow-blue-100 bg-blue-600">
+              <Button onClick={() => setEditIndex(-1)} className="h-11 px-6 rounded-md gap-2 font-medium shadow-lg shadow-blue-100 bg-blue-600">
                 <Plus className="w-4 h-4" />
                 Add Restaurant
               </Button>
@@ -171,16 +170,12 @@ export const RestaurantStep: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  <AnimatePresence mode='popLayout'>
                     {paginatedRestaurants.length > 0 ? (
                       paginatedRestaurants.map((restaurant, i) => {
                         const globalIndex = restaurants.findIndex(r => r === restaurant);
                         return (
-                          <motion.tr 
+                          <tr 
                             key={restaurant.restaurant_name + i}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
                             className="hover:bg-blue-50/30 transition-colors group"
                           >
                             <td className="px-6 py-4 text-xs font-bold text-gray-400 text-center">
@@ -223,7 +218,7 @@ export const RestaurantStep: React.FC = () => {
                                 <MoreVertical className="w-4 h-4 text-gray-400" />
                               </Button>
                             </td>
-                          </motion.tr>
+                          </tr>
                         );
                       })
                     ) : (
@@ -234,14 +229,13 @@ export const RestaurantStep: React.FC = () => {
                               <Utensils className="w-8 h-8 text-gray-200" />
                             </div>
                             <div className="text-gray-400 text-sm font-bold">No restaurants configured</div>
-                            <Button variant="outline" onClick={() => setEditIndex(-1)} size="sm" className="mt-2 rounded-xl border-gray-200 font-bold">
+                            <Button variant="outline" onClick={() => setEditIndex(-1)} size="sm" className="mt-2 rounded-md border-gray-200 font-medium">
                               Add your first restaurant
                             </Button>
                           </div>
                         </td>
                       </tr>
                     )}
-                  </AnimatePresence>
                 </tbody>
               </table>
             </div>
@@ -332,7 +326,7 @@ export const RestaurantStep: React.FC = () => {
                       <p className="text-[10px] text-gray-400 font-medium">PNG or JPG up to 2MB</p>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" className="rounded-xl border-gray-200 font-bold text-xs">
+                  <Button variant="outline" size="sm" className="rounded-md border-gray-200 font-medium text-xs">
                     Upload
                   </Button>
                 </div>
@@ -349,8 +343,8 @@ export const RestaurantStep: React.FC = () => {
                     Delete Restaurant
                   </Button>
                 )}
-                <Button variant="ghost" onClick={cancelEdit} className="font-bold rounded-xl h-11 px-6">Cancel</Button>
-                <Button onClick={save} className="px-8 font-bold rounded-xl h-11 shadow-lg shadow-blue-100 bg-blue-600">
+                <Button variant="ghost" onClick={cancelEdit} className="font-medium rounded-md h-11 px-6">Cancel</Button>
+                <Button onClick={save} className="px-8 font-medium rounded-md h-11 shadow-lg shadow-blue-100 bg-blue-600">
                   {editIndex === -1 ? 'Add Restaurant' : 'Save Changes'}
                 </Button>
               </DialogFooter>

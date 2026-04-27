@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Share2, Check, Loader2, Plus, ExternalLink, Shield, Info, Power, Settings2, Search } from 'lucide-react';
 import { Button } from '../../../ui/button';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useOnboardingStore } from '../../../../store/onboarding-store';
 import { showToast } from '../../../ui/toast';
 import { cn } from '../../../../lib/utils';
@@ -112,7 +111,7 @@ export const IntegrationsStep: React.FC = () => {
   );
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-8">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
           <div className="flex items-center gap-2">
@@ -134,19 +133,13 @@ export const IntegrationsStep: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 min-h-[200px]">
-          <AnimatePresence mode="popLayout">
             {filteredIntegrations.map((item) => {
               const isConnected = integrations.some(i => i.id === item.id);
               const isPending = loading === item.id;
 
               return (
-                <motion.div
+                <div
                   key={item.id}
-                  layout
-                  whileHover={{ y: -4 }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
                   className={cn(
                     "relative overflow-hidden p-6 rounded-3xl border-2 transition-all duration-300",
                     isConnected 
@@ -189,10 +182,10 @@ export const IntegrationsStep: React.FC = () => {
                           disabled={!!loading}
                           variant={isConnected ? "outline" : "default"}
                           className={cn(
-                            "h-10 px-6 rounded-xl font-bold transition-all gap-2",
+                            "h-10 px-6 rounded-md font-medium transition-all gap-2",
                             isConnected 
-                              ? "border-2 hover:bg-red-50 hover:text-red-600 hover:border-red-100" 
-                              : "shadow-lg shadow-gray-200"
+                              ? "border hover:bg-red-50 hover:text-red-600 hover:border-red-100" 
+                              : "shadow-lg shadow-gray-200 bg-blue-600"
                           )}
                         >
                           {isPending ? (
@@ -211,7 +204,7 @@ export const IntegrationsStep: React.FC = () => {
                         </Button>
                         
                         {isConnected && (
-                          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl bg-gray-50 text-gray-500 hover:text-blue-600 hover:bg-blue-50">
+                          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-md bg-gray-50 text-gray-500 hover:text-blue-600 hover:bg-blue-50">
                             <Settings2 className="w-4 h-4" />
                           </Button>
                         )}
@@ -230,10 +223,10 @@ export const IntegrationsStep: React.FC = () => {
                       <ExternalLink className="w-3 h-3" />
                     </button>
                   </div>
-                </motion.div>
+                </div>
               );
             })}
-          </AnimatePresence>
+          </div>
 
           {filteredIntegrations.length === 0 && (
             <div className="col-span-full py-20 flex flex-col items-center justify-center text-center bg-gray-50 rounded-[2rem] border border-dashed border-gray-200">
@@ -269,7 +262,6 @@ export const IntegrationsStep: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 };

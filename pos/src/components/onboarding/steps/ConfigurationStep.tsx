@@ -15,7 +15,6 @@ import {
   SkipForward,
 } from 'lucide-react';
 import { Button } from '../../ui/button';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useOnboardingStore } from '../../../store/onboarding-store';
 import { onboardsetupApi } from '../../../lib/onboardsetup-api';
 import { showToast } from '../../ui/toast';
@@ -180,17 +179,16 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
                         disabled={!isAccessible}
                         onClick={() => setSubStepIndex(i)}
                         className={cn(
-                          'w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-all duration-200 group relative rounded-xl h-auto',
+                          'w-full flex items-center gap-3 px-3 py-2.5 text-sm transition-all duration-200 group relative rounded-md h-auto',
                           isActive
-                            ? 'bg-white text-blue-600 shadow-sm border border-gray-200 font-bold'
+                            ? 'bg-white text-blue-600 shadow-sm border border-gray-200 font-medium'
                             : isAccessible
-                              ? 'text-gray-500 hover:bg-gray-100 hover:text-gray-900 font-semibold'
+                              ? 'text-gray-500 hover:bg-gray-100 hover:text-gray-900 font-medium'
                               : 'text-gray-300 cursor-not-allowed opacity-50'
                         )}
                       >
                         {isActive && (
-                          <motion.div 
-                            layoutId="setup-nav-indicator"
+                          <div 
                             className="absolute start-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-blue-600 rounded-e-full" 
                           />
                         )}
@@ -247,11 +245,9 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
                   </span>
                 </div>
                 <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                  <motion.div
+                  <div
                     className="h-full bg-blue-600"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progressPercent}%` }}
-                    transition={{ duration: 0.5, ease: 'easeOut' }}
+                    style={{ width: `${progressPercent}%` }}
                   />
                 </div>
               </div>
@@ -263,18 +259,9 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
         <main className="flex-1 flex flex-col overflow-hidden bg-gray-50/30">
           <div className="flex-1 overflow-y-auto p-12 custom-scrollbar">
             <div className="max-w-5xl w-full mx-auto pb-12">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentStep.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
-                  className="w-full"
-                >
-                  {renderStepContent()}
-                </motion.div>
-              </AnimatePresence>
+              <div className="w-full">
+                {renderStepContent()}
+              </div>
             </div>
           </div>
 
@@ -285,7 +272,7 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
                 variant="ghost"
                 onClick={handleBack}
                 disabled={loading}
-                className="gap-2 font-bold text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 px-6 h-12 rounded-xl"
+                className="rounded-md gap-2 font-medium text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-50 px-6 h-12"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back
@@ -296,7 +283,7 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
                   variant="outline"
                   onClick={handleSkip}
                   disabled={loading}
-                  className="gap-2 font-bold text-sm px-8 h-12 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300"
+                  className="rounded-md gap-2 font-medium text-sm px-8 h-12 border-gray-200 hover:bg-gray-50 hover:border-gray-300"
                 >
                   Skip Step
                   <SkipForward className="w-4 h-4" />
@@ -305,7 +292,7 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
                 <Button
                   onClick={handleNext}
                   disabled={loading}
-                  className="gap-2 min-w-[200px] font-bold text-sm h-12 rounded-xl shadow-lg shadow-blue-100 bg-blue-600"
+                  className="rounded-md gap-2 min-w-[200px] font-medium text-sm h-12 shadow-lg shadow-blue-100 bg-blue-600"
                 >
                   {loading ? (
                     <>
