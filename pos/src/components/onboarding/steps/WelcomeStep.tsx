@@ -63,58 +63,58 @@ export const WelcomeStep: React.FC<OnboardingStepProps> = ({ onNext }) => {
             ))}
           </div>
         </div>
+      </div>
 
+      {/* ─── Right Panel (light) ───────────────────────────────────────── */}
+      <div className="flex-1 flex items-center justify-center bg-gray-50 px-6 py-12 lg:px-16">
+        <div className="w-full max-w-md">
+          {/* Mobile logo */}
+          <div className="flex items-center gap-3 mb-10 lg:hidden">
+            <img
+              src="/assets/ury/pos/ury_pos.png"
+              alt="URY POS"
+              className="h-10 w-auto object-contain"
+            />
+          </div>
 
-        {/* ─── Right Panel (light) ───────────────────────────────────────── */}
-        <div className="flex-1 flex items-center justify-center bg-gray-50 px-6 py-12 lg:px-16">
-          <div className="w-full max-w-md">
-            {/* Mobile logo */}
-            <div className="flex items-center gap-3 mb-10 lg:hidden">
-              <img
-                src="/assets/ury/pos/ury_pos.png"
-                alt="URY POS"
-                className="h-10 w-auto object-contain"
-              />
+          <div>
+            {/* Badge */}
+            <div className="inline-flex items-center gap-1.5 bg-primary-50 text-primary-700 text-xs px-3 py-1.5 rounded-md border border-primary-100 mb-5 font-medium">
+              <Zap className="w-3 h-3" />
+              Setup takes less than 5 minutes
             </div>
 
-            <div>
-              {/* Badge */}
-              <div className="inline-flex items-center gap-1.5 bg-primary-50 text-primary-700 text-xs px-3 py-1.5 rounded-md border border-primary-100 mb-5 font-medium">
-                <Zap className="w-3 h-3" />
-                Setup takes less than 5 minutes
-              </div>
+            <h1 className="text-gray-900 mb-3 text-3xl font-bold leading-tight tracking-tight">
+              Welcome to URY
+            </h1>
+            <p className="text-gray-500 mb-9 text-base font-medium leading-relaxed opacity-60">
+              A complete Restaurant ERP platform — set up your workspace, configure your menu, and start taking orders today.
+            </p>
 
-              <h1 className="text-gray-900 mb-3 text-3xl font-bold leading-tight tracking-tight">
-                Welcome to URY
-              </h1>
-              <p className="text-gray-500 mb-9 text-base font-medium leading-relaxed opacity-60">
-                A complete Restaurant ERP platform — set up your workspace, configure your menu, and start taking orders today.
-              </p>
-
-              {/* Highlights */}
-              <div className="space-y-3 mb-10">
-                {highlights.map((h) => (
-                  <div key={h.text} className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-primary-50 border border-primary-100 flex items-center justify-center text-primary-600 flex-shrink-0">
-                      {h.icon}
-                    </div>
-                    <span className="text-gray-600 text-sm">{h.text}</span>
+            {/* Highlights */}
+            <div className="space-y-3 mb-10">
+              {highlights.map((h) => (
+                <div key={h.text} className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-primary-50 border border-primary-100 flex items-center justify-center text-primary-600 flex-shrink-0">
+                    {h.icon}
                   </div>
-                ))}
-              </div>
-
-              {/* CTA */}
-              <Button
-                onClick={() => onNext()}
-                size="lg"
-                className="w-full rounded-md gap-2 font-medium shadow-lg shadow-blue-100 bg-blue-600"
-              >
-                Go to Setup
-                <ArrowRight className="w-5 h-5" />
-              </Button>
+                  <span className="text-gray-600 text-sm">{h.text}</span>
+                </div>
+              ))}
             </div>
+
+            {/* CTA */}
+            <Button
+              onClick={() => onNext()}
+              size="lg"
+              className="w-full rounded-md gap-2 font-medium shadow-lg shadow-blue-100 bg-blue-600"
+            >
+              Go to Setup
+              <ArrowRight className="w-5 h-5" />
+            </Button>
           </div>
         </div>
       </div>
-      );
-}
+    </div>
+  );
+};
