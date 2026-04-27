@@ -20,7 +20,7 @@ const highlights = [
 
 export const WelcomeStep: React.FC<OnboardingStepProps> = ({ onNext }) => {
   return (
-    <div className="fixed inset-0 flex overflow-hidden bg-white z-50 font-inter">
+    <div className="fixed inset-0 flex overflow-hidden bg-white z-50">
       {/* ─── Left Panel (primary gradient) ─────────────────────────────── */}
       <div className="hidden lg:flex lg:w-1/2 bg-primary-900 relative overflow-hidden flex-col justify-between p-14">
         {/* Decorative blobs */}

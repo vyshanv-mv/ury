@@ -329,7 +329,7 @@ export function AdminDashboard() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50/50 font-inter text-gray-900 overflow-hidden selection:bg-blue-100 selection:text-blue-900">
+    <div className="flex flex-col h-screen bg-gray-50/50 text-gray-900 overflow-hidden selection:bg-blue-100 selection:text-blue-900">
       <Header hideSearch />
       <div className="flex flex-1 overflow-hidden">
         {/* Premium Sidebar */}
