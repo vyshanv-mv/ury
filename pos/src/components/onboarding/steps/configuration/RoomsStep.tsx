@@ -112,9 +112,9 @@ export const RoomsStep: React.FC = () => {
       ) : (
         <>
           {/* Header Area */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-md border border-gray-100 shadow-sm">
             <div>
-              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-3">
+              <h2 className="text-xl font-medium text-gray-900 flex items-center gap-3">
                 <DoorOpen className="w-7 h-7 text-blue-600" />
                 Dining Areas
               </h2>
@@ -131,7 +131,7 @@ export const RoomsStep: React.FC = () => {
                     setSearchTerm(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="pl-9 h-11 text-xs font-semibold bg-gray-50 border-gray-200 focus:bg-white transition-all rounded-xl w-64"
+                  className="pl-9 h-11 text-xs font-medium bg-gray-50 border-gray-200 focus:bg-white transition-all rounded-md w-64"
                 />
               </div>
               <Button onClick={() => setEditIndex(-1)} className="h-11 px-6 rounded-md gap-2 font-medium shadow-lg shadow-blue-100 bg-blue-600">
@@ -142,15 +142,15 @@ export const RoomsStep: React.FC = () => {
           </div>
 
           {/* Table Section */}
-          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-md border border-gray-100 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-gray-50/50 border-b border-gray-100">
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500 w-12 text-center">#</th>
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500">Area Name</th>
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500">Capacity</th>
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500 text-right">Actions</th>
+                    <th className="px-6 py-4 text-xs font-medium text-gray-500 w-12 text-center">#</th>
+                    <th className="px-6 py-4 text-xs font-medium text-gray-500">Area Name</th>
+                    <th className="px-6 py-4 text-xs font-medium text-gray-500">Capacity</th>
+                    <th className="px-6 py-4 text-xs font-medium text-gray-500 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
@@ -162,15 +162,15 @@ export const RoomsStep: React.FC = () => {
                             key={room.name + i}
                             className="hover:bg-blue-50/30 transition-colors group"
                           >
-                            <td className="px-6 py-4 text-xs font-bold text-gray-400 text-center">
+                            <td className="px-6 py-4 text-xs font-medium text-gray-400 text-center">
                               {(currentPage - 1) * itemsPerPage + i + 1}
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
+                                <div className="w-10 h-10 rounded-md bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
                                   <DoorOpen className="w-5 h-5" />
                                 </div>
-                                <div className="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                                <div className="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
                                   {room.name}
                                 </div>
                               </div>
@@ -227,10 +227,10 @@ export const RoomsStep: React.FC = () => {
           <Dialog open={editIndex !== null} onOpenChange={(open) => !open && cancelEdit()}>
             <DialogContent size="lg" onClose={cancelEdit}>
               <DialogHeader className="border-b border-gray-100 pb-4">
-                <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-blue-50 rounded-md flex items-center justify-center mb-4">
                   <DoorOpen className="w-6 h-6 text-blue-600" />
                 </div>
-                <DialogTitle className="text-lg font-bold text-gray-900">
+                <DialogTitle className="text-lg font-medium text-gray-900">
                   {editIndex === -1 ? 'Add New Dining Area' : 'Edit Area Details'}
                 </DialogTitle>
                 <DialogDescription className="text-gray-500 font-medium">
@@ -241,19 +241,19 @@ export const RoomsStep: React.FC = () => {
               <div className="p-6 space-y-6">
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-500 ml-1">Area Name</label>
+                    <label className="text-xs font-medium text-gray-500 ml-1">Area Name</label>
                     <div className="relative">
                       <DoorOpen className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                       <Input 
                         value={form.name} 
                         onChange={e => setForm({...form, name: e.target.value})}
                         placeholder="e.g. Main Dining Hall"
-                        className="pl-10 rounded-xl border-gray-200 bg-white h-11 font-semibold" 
+                        className="pl-10 rounded-md border-gray-200 bg-white h-11 font-medium" 
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-500 ml-1">Total Seats</label>
+                    <label className="text-xs font-medium text-gray-500 ml-1">Total Seats</label>
                     <div className="relative">
                       <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                       <Input 
@@ -261,7 +261,7 @@ export const RoomsStep: React.FC = () => {
                         value={form.seats} 
                         onChange={e => setForm({...form, seats: e.target.value})}
                         placeholder="40"
-                        className="pl-10 rounded-xl border-gray-200 bg-white h-11 font-semibold" 
+                        className="pl-10 rounded-md border-gray-200 bg-white h-11 font-medium" 
                       />
                     </div>
                   </div>

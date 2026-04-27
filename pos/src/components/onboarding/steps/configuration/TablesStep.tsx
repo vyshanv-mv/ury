@@ -122,9 +122,9 @@ export const TablesStep: React.FC = () => {
       ) : (
         <>
           {/* Header Area */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-md border border-gray-100 shadow-sm">
             <div>
-              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-3">
+              <h2 className="text-xl font-medium text-gray-900 flex items-center gap-3">
                 <Table2 className="w-7 h-7 text-blue-600" />
                 Table Layout
               </h2>
@@ -141,7 +141,7 @@ export const TablesStep: React.FC = () => {
                     setSearchTerm(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="pl-9 h-11 text-xs font-semibold bg-gray-50 border-gray-200 focus:bg-white transition-all rounded-xl w-64"
+                  className="pl-9 h-11 text-xs font-medium bg-gray-50 border-gray-200 focus:bg-white transition-all rounded-md w-64"
                 />
               </div>
               <Button onClick={() => setEditIndex(-1)} className="h-11 px-6 rounded-md gap-2 font-medium shadow-lg shadow-blue-100 bg-blue-600">
@@ -152,16 +152,16 @@ export const TablesStep: React.FC = () => {
           </div>
 
           {/* Table Section */}
-          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-md border border-gray-100 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-gray-50/50 border-b border-gray-100">
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500 w-12 text-center">#</th>
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500">Table Name</th>
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500">Area / Room</th>
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500">Capacity</th>
-                    <th className="px-6 py-4 text-xs font-bold text-gray-500 text-right">Actions</th>
+                    <th className="px-6 py-4 text-xs font-medium text-gray-500 w-12 text-center">#</th>
+                    <th className="px-6 py-4 text-xs font-medium text-gray-500">Table Name</th>
+                    <th className="px-6 py-4 text-xs font-medium text-gray-500">Area / Room</th>
+                    <th className="px-6 py-4 text-xs font-medium text-gray-500">Capacity</th>
+                    <th className="px-6 py-4 text-xs font-medium text-gray-500 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
@@ -173,27 +173,27 @@ export const TablesStep: React.FC = () => {
                             key={table.name + i}
                             className="hover:bg-blue-50/30 transition-colors group"
                           >
-                            <td className="px-6 py-4 text-xs font-bold text-gray-400 text-center">
+                            <td className="px-6 py-4 text-xs font-medium text-gray-400 text-center">
                               {(currentPage - 1) * itemsPerPage + i + 1}
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
+                                <div className="w-10 h-10 rounded-md bg-blue-50 flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
                                   <Table2 className="w-5 h-5" />
                                 </div>
-                                <div className="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                                <div className="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
                                   {table.name}
                                 </div>
                               </div>
                             </td>
                             <td className="px-6 py-4">
-                              <div className="flex items-center gap-2 text-[10px] font-bold text-blue-600 bg-blue-50/50 px-2.5 py-1 rounded-lg w-fit">
+                              <div className="flex items-center gap-2 text-[10px] font-medium text-blue-600 bg-blue-50/50 px-2.5 py-1 rounded-md w-fit">
                                 <MapPin className="w-3 h-3" />
                                 {table.room}
                               </div>
                             </td>
                             <td className="px-6 py-4">
-                              <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
+                              <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
                                 <Users className="w-3.5 h-3.5 text-blue-400" />
                                 {table.seats} Seats
                               </div>
@@ -242,14 +242,14 @@ export const TablesStep: React.FC = () => {
 
           {/* Warning for missing rooms */}
           {rooms.length === 0 && (
-            <div className="p-4 bg-amber-50 rounded-3xl border border-amber-100 flex gap-4 items-start shadow-sm">
-              <div className="w-10 h-10 bg-amber-100 rounded-2xl flex items-center justify-center flex-shrink-0 text-amber-600 border border-amber-200">
+            <div className="p-4 bg-amber-50 rounded-md border border-amber-100 flex gap-4 items-start shadow-sm">
+              <div className="w-10 h-10 bg-amber-100 rounded-md flex items-center justify-center flex-shrink-0 text-amber-600 border border-amber-200">
                 <Info className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="text-sm font-bold text-amber-900">Rooms Required</h4>
+                <h4 className="text-sm font-medium text-amber-900">Rooms Required</h4>
                 <p className="text-xs text-amber-700 leading-relaxed mt-0.5">
-                  You need to create at least one dining area (room) before you can add tables. Please go back to the <span className="font-bold">URY Rooms</span> step.
+                  You need to create at least one dining area (room) before you can add tables. Please go back to the <span className="font-medium">URY Rooms</span> step.
                 </p>
               </div>
             </div>
@@ -259,10 +259,10 @@ export const TablesStep: React.FC = () => {
           <Dialog open={editIndex !== null} onOpenChange={(open) => !open && cancelEdit()}>
             <DialogContent size="lg" onClose={cancelEdit}>
               <DialogHeader className="border-b border-gray-100 pb-4">
-                <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-4">
+                <div className="w-12 h-12 bg-blue-50 rounded-md flex items-center justify-center mb-4">
                   <Table2 className="w-6 h-6 text-blue-600" />
                 </div>
-                <DialogTitle className="text-lg font-bold text-gray-900">
+                <DialogTitle className="text-lg font-medium text-gray-900">
                   {editIndex === -1 ? 'Add New Table' : 'Edit Table Details'}
                 </DialogTitle>
                 <DialogDescription className="text-gray-500 font-medium">
@@ -273,19 +273,19 @@ export const TablesStep: React.FC = () => {
               <div className="p-6 space-y-6">
                 <div className="grid grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-500 ml-1">Table Name</label>
+                    <label className="text-xs font-medium text-gray-500 ml-1">Table Name</label>
                     <div className="relative">
                       <Table2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                       <Input 
                         value={form.name} 
                         onChange={e => setForm({...form, name: e.target.value})}
                         placeholder="e.g. T-01"
-                        className="pl-10 rounded-xl border-gray-200 bg-white h-11 font-semibold" 
+                        className="pl-10 rounded-md border-gray-200 bg-white h-11 font-medium" 
                       />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-gray-500 ml-1">Capacity (Seats)</label>
+                    <label className="text-xs font-medium text-gray-500 ml-1">Capacity (Seats)</label>
                     <div className="relative">
                       <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                       <Input 
@@ -293,13 +293,13 @@ export const TablesStep: React.FC = () => {
                         value={form.seats} 
                         onChange={e => setForm({...form, seats: e.target.value})}
                         placeholder="4"
-                        className="pl-10 rounded-xl border-gray-200 bg-white h-11 font-semibold" 
+                        className="pl-10 rounded-md border-gray-200 bg-white h-11 font-medium" 
                       />
                     </div>
                   </div>
                   <div className="space-y-2 col-span-2">
-                    <label className="text-xs font-bold text-gray-500 ml-1">Dining Area (Room)</label>
-                    <Select value={form.room} onValueChange={val => setForm({...form, room: val})} className="h-11 rounded-xl">
+                    <label className="text-xs font-medium text-gray-500 ml-1">Dining Area (Room)</label>
+                    <Select value={form.room} onValueChange={val => setForm({...form, room: val})} className="h-11 rounded-md">
                       {rooms.map(r => r.name && <SelectItem key={r.name} value={r.name}>{r.name}</SelectItem>)}
                       {rooms.length === 0 && <SelectItem value="none" disabled>No Rooms Available</SelectItem>}
                     </Select>
@@ -312,7 +312,7 @@ export const TablesStep: React.FC = () => {
                   <Button 
                     variant="ghost" 
                     onClick={() => remove(editIndex)} 
-                    className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-bold gap-2 mr-auto"
+                    className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-medium gap-2 mr-auto"
                   >
                     <Trash2 className="w-4 h-4" />
                     Delete Table

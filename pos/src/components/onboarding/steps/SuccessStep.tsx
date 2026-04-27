@@ -4,7 +4,7 @@ import { Button } from "../../ui/button";
 
 export function SuccessStep({ onNext }: OnboardingStepProps) {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 font-inter">
       <div className="max-w-lg w-full">
         <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-10 text-center">
           {/* Icon */}

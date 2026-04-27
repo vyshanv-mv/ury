@@ -20,7 +20,7 @@ const highlights = [
 
 export const WelcomeStep: React.FC<OnboardingStepProps> = ({ onNext }) => {
   return (
-    <div className="fixed inset-0 flex overflow-hidden bg-white z-50">
+    <div className="fixed inset-0 flex overflow-hidden bg-white z-50 font-inter">
       {/* ─── Left Panel (primary gradient) ─────────────────────────────── */}
       <div className="hidden lg:flex lg:w-1/2 bg-primary-900 relative overflow-hidden flex-col justify-between p-14">
         {/* Decorative blobs */}
@@ -47,7 +47,7 @@ export const WelcomeStep: React.FC<OnboardingStepProps> = ({ onNext }) => {
             <p className="text-primary-300 mb-3 text-xs font-medium opacity-80">
               All-in-one platform
             </p>
-            <h2 className="text-white mb-5 text-3xl font-bold leading-tight tracking-tight">
+            <h2 className="text-white mb-5 text-3xl font-medium leading-tight tracking-tight">
               The smarter way to<br />run your restaurant
             </h2>
             <p className="text-primary-100 mb-10 text-lg font-medium leading-relaxed max-w-md opacity-70">
@@ -86,7 +86,7 @@ export const WelcomeStep: React.FC<OnboardingStepProps> = ({ onNext }) => {
               Setup takes less than 5 minutes
             </div>
 
-            <h1 className="text-gray-900 mb-3 text-3xl font-bold leading-tight tracking-tight">
+            <h1 className="text-gray-900 mb-3 text-3xl font-medium leading-tight tracking-tight">
               Welcome to URY
             </h1>
             <p className="text-gray-500 mb-9 text-base font-medium leading-relaxed opacity-60">

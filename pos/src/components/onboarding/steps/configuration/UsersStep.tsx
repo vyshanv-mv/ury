@@ -125,9 +125,9 @@ export const UsersStep: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header Area */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-md border border-gray-100 shadow-sm">
         <div>
-          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-3">
+          <h2 className="text-xl font-medium text-gray-900 flex items-center gap-3">
             <UsersIcon className="w-7 h-7 text-blue-600" />
             Team Management
           </h2>
@@ -144,7 +144,7 @@ export const UsersStep: React.FC = () => {
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              className="pl-9 h-11 text-xs font-semibold bg-gray-50 border-gray-200 focus:bg-white transition-all rounded-xl w-64"
+              className="pl-9 h-11 text-xs font-medium bg-gray-50 border-gray-200 focus:bg-white transition-all rounded-md w-64"
             />
           </div>
           <Button onClick={() => setEditIndex(-1)} className="h-11 px-6 rounded-md gap-2 font-medium shadow-lg shadow-blue-100 bg-blue-600">
@@ -155,15 +155,15 @@ export const UsersStep: React.FC = () => {
       </div>
 
       {/* Table Section */}
-      <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-md border border-gray-100 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-gray-50/50 border-b border-gray-100">
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 w-12 text-center">#</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500">Member</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500">Role</th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 text-right">Actions</th>
+                <th className="px-6 py-4 text-xs font-medium text-gray-500 w-12 text-center">#</th>
+                <th className="px-6 py-4 text-xs font-medium text-gray-500">Member</th>
+                <th className="px-6 py-4 text-xs font-medium text-gray-500">Role</th>
+                <th className="px-6 py-4 text-xs font-medium text-gray-500 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -175,22 +175,22 @@ export const UsersStep: React.FC = () => {
                         key={user.name + i}
                         className="hover:bg-blue-50/30 transition-colors group"
                       >
-                        <td className="px-6 py-4 text-xs font-bold text-gray-400 text-center">
+                        <td className="px-6 py-4 text-xs font-medium text-gray-400 text-center">
                           {(currentPage - 1) * itemsPerPage + i + 1}
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-sm group-hover:scale-110 transition-transform">
+                            <div className="w-9 h-9 rounded-md bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-medium shadow-sm group-hover:scale-110 transition-transform">
                               {user.name?.charAt(0).toUpperCase()}
                             </div>
                             <div>
-                              <div className="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{user.name}</div>
+                              <div className="text-sm font-medium text-gray-900 group-hover:text-blue-600 transition-colors">{user.name}</div>
                               <div className="text-[10px] text-gray-400 font-medium">Active Member</div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`px-3 py-1 rounded-lg text-[10px] font-bold ${
+                          <span className={`px-3 py-1 rounded-md text-[10px] font-medium ${
                             user.role === 'Administrator' ? 'bg-purple-50 text-purple-600' :
                             user.role === 'Manager' ? 'bg-blue-50 text-blue-600' :
                             'bg-gray-100 text-gray-600'
@@ -218,7 +218,7 @@ export const UsersStep: React.FC = () => {
                         <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
                           <UsersIcon className="w-8 h-8 text-gray-200" />
                         </div>
-                        <div className="text-gray-400 text-sm font-bold">No team members found</div>
+                        <div className="text-gray-400 text-sm font-medium">No team members found</div>
                         <Button variant="outline" onClick={() => setEditIndex(-1)} size="sm" className="mt-2 rounded-md border-gray-200 font-medium">
                           Add your first member
                         </Button>
@@ -244,10 +244,10 @@ export const UsersStep: React.FC = () => {
       <Dialog open={editIndex !== null} onOpenChange={(open) => !open && cancelEdit()}>
         <DialogContent size="lg" onClose={cancelEdit}>
           <DialogHeader className="border-b border-gray-100 pb-4">
-            <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mb-4">
+            <div className="w-12 h-12 bg-blue-50 rounded-md flex items-center justify-center mb-4">
               <UserPlus className="w-6 h-6 text-blue-600" />
             </div>
-            <DialogTitle className="text-lg font-bold text-gray-900">
+            <DialogTitle className="text-lg font-medium text-gray-900">
               {editIndex === -1 ? 'Add New Member' : 'Edit Team Member'}
             </DialogTitle>
             <DialogDescription className="text-gray-500 font-medium">
@@ -258,18 +258,18 @@ export const UsersStep: React.FC = () => {
           <div className="p-6 space-y-6">
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-500 ml-1">Full Name</label>
+                <label className="text-xs font-medium text-gray-500 ml-1">Full Name</label>
                 <Input 
                   id="name"
                   value={form.name} 
                   onChange={e => setForm({...form, name: e.target.value})}
                   placeholder="e.g. John Doe"
-                  className="rounded-xl border-gray-200 bg-white h-11 font-semibold" 
+                  className="rounded-md border-gray-200 bg-white h-11 font-medium" 
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-bold text-gray-500 ml-1">Role</label>
-                <Select value={form.role} onValueChange={val => setForm({...form, role: val})} className="h-11 rounded-xl">
+                <label className="text-xs font-medium text-gray-500 ml-1">Role</label>
+                <Select value={form.role} onValueChange={val => setForm({...form, role: val})} className="h-11 rounded-md">
                   <SelectItem value="Administrator">Administrator</SelectItem>
                   <SelectItem value="Manager">Manager</SelectItem>
                   <SelectItem value="Cashier">Cashier</SelectItem>
@@ -284,7 +284,7 @@ export const UsersStep: React.FC = () => {
               <Button 
                 variant="ghost" 
                 onClick={() => remove(editIndex)} 
-                className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-bold gap-2 mr-auto"
+                className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-medium gap-2 mr-auto"
               >
                 <Trash2 className="w-4 h-4" />
                 Delete Member

@@ -123,10 +123,10 @@ export function AdminDashboard() {
       default:
         return (
           <div className="flex flex-col items-center justify-center h-96 text-center">
-            <div className="w-24 h-24 bg-blue-50 text-blue-600 rounded-3xl flex items-center justify-center mb-8 rotate-3 shadow-xl shadow-blue-100">
+            <div className="w-24 h-24 bg-blue-50 text-blue-600 rounded-md flex items-center justify-center mb-8 rotate-3 shadow-xl shadow-blue-100">
               <Layers className="w-10 h-10" />
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 capitalize mb-2">{activeSection} Module</h2>
+            <h2 className="text-2xl font-medium text-gray-900 capitalize mb-2">{activeSection} Module</h2>
             <p className="text-gray-500 max-w-lg text-sm font-medium">
               We're currently perfecting the {activeSection} management tools. Stay tuned for advanced analytics and control features!
             </p>
@@ -153,7 +153,7 @@ export function AdminDashboard() {
       <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 tracking-tight mb-0.5">Dashboard</h1>
+            <h1 className="text-2xl font-medium text-gray-900 tracking-tight mb-0.5">Dashboard</h1>
             <p className="text-sm text-gray-500 font-medium">Welcome back, {user?.full_name?.split(' ')[0] || 'Admin'}! Here's your restaurant's performance.</p>
           </div>
           <div className="flex items-center gap-3">
@@ -191,7 +191,7 @@ export function AdminDashboard() {
                   </span>
                 </div>
                 <p className="text-sm text-gray-500 font-medium mb-1 opacity-70">{stat.label}</p>
-                <h3 className="text-xl font-bold text-gray-900 tracking-tight">{stat.value}</h3>
+                <h3 className="text-xl font-medium text-gray-900 tracking-tight">{stat.value}</h3>
               </div>
             );
           })}
@@ -205,7 +205,7 @@ export function AdminDashboard() {
                 <div className="w-10 h-10 rounded-md bg-blue-50 flex items-center justify-center text-blue-600">
                   <TrendingUp className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900">Revenue Analytics</h3>
+                <h3 className="text-lg font-medium text-gray-900">Revenue Analytics</h3>
               </div>
               <button className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg transition-colors">
                 <MoreHorizontal className="w-5 h-5" />
@@ -244,7 +244,7 @@ export function AdminDashboard() {
               <div className="w-10 h-10 rounded-md bg-indigo-50 flex items-center justify-center text-indigo-600">
                 <ShoppingBag className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900">Order Sources</h3>
+              <h3 className="text-lg font-medium text-gray-900">Order Sources</h3>
             </div>
             <div className="flex-1 flex flex-col justify-center">
               <div className="h-56 mb-8">
@@ -288,7 +288,7 @@ export function AdminDashboard() {
               <div className="w-10 h-10 rounded-md bg-emerald-50 flex items-center justify-center text-emerald-600">
                 <UtensilsCrossed className="w-5 h-5" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900">Popular Items Today</h3>
+              <h3 className="text-lg font-medium text-gray-900">Popular Items Today</h3>
             </div>
             <Button variant="ghost" className="text-blue-600 font-medium hover:bg-blue-50">View Menu</Button>
           </div>
@@ -329,7 +329,7 @@ export function AdminDashboard() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50/50 text-gray-900 overflow-hidden selection:bg-blue-100 selection:text-blue-900">
+    <div className="flex flex-col h-screen bg-gray-50/50 font-inter text-gray-900 overflow-hidden selection:bg-blue-100 selection:text-blue-900">
       <Header hideSearch />
       <div className="flex flex-1 overflow-hidden">
         {/* Premium Sidebar */}
@@ -341,7 +341,7 @@ export function AdminDashboard() {
             <div className={cn("flex items-center mb-6", sidebarOpen ? "justify-end px-2" : "justify-center")}>
               <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+                className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all"
               >
                 {sidebarOpen ? <PanelRightOpen className="w-5 h-5 rotate-180" /> : <PanelRightOpen className="w-5 h-5" />}
               </button>
@@ -350,12 +350,12 @@ export function AdminDashboard() {
             <div className="flex-1 overflow-y-auto pr-2 -mr-2 space-y-4 custom-scrollbar">
               <div className={cn(
                 "transition-all duration-300",
-                sidebarOpen ? "bg-gray-50/50 border border-gray-100 rounded-2xl p-3" : ""
+                sidebarOpen ? "bg-gray-50/50 border border-gray-100 rounded-md p-3" : ""
               )}>
                 {groups.map((group) => (
                   <div key={group} className="mb-6 last:mb-0">
                     {sidebarOpen && (
-                      <p className="text-xs font-bold text-gray-500 mb-3 px-3">
+                      <p className="text-xs font-medium text-gray-500 mb-3 px-3">
                         {group}
                       </p>
                     )}
@@ -403,11 +403,11 @@ export function AdminDashboard() {
         {/* Modern Sub-header / Breadcrumbs */}
         <header className="h-16 border-b border-gray-200 bg-white/50 backdrop-blur-md flex items-center justify-between px-10 flex-shrink-0 z-20">
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
+            <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
               <ShieldCheck className="w-4 h-4 text-blue-600" />
               <span>Admin Control</span>
               <ChevronRight className="w-3 h-3" />
-              <span className="text-gray-900 font-bold">{activeSection}</span>
+              <span className="text-gray-900 font-medium">{activeSection}</span>
             </div>
           </div>
         </header>
@@ -421,11 +421,11 @@ export function AdminDashboard() {
                 {activeSection !== "overview" && (
                   <div className="mb-12">
                     <div className="flex items-center gap-4 mb-4">
-                      <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-100">
+                      <div className="p-3 bg-blue-600 text-white rounded-md shadow-lg shadow-blue-100">
                         {React.createElement(NAV_ITEMS.find(n => n.id === activeSection)?.icon || LayoutDashboard, { className: "w-6 h-6" })}
                       </div>
                       <div>
-                        <h2 className="text-2xl font-bold text-gray-900 tracking-tight capitalize">
+                        <h2 className="text-2xl font-medium text-gray-900 tracking-tight capitalize">
                           {NAV_ITEMS.find(n => n.id === activeSection)?.label} Settings
                         </h2>
                         <p className="text-sm text-gray-500 font-medium">
@@ -446,7 +446,7 @@ export function AdminDashboard() {
 
                 {/* Footer hint for non-overview sections */}
                 {activeSection !== "overview" && (
-                  <div className="mt-12 flex items-center justify-center gap-3 text-gray-500 font-bold text-xs">
+                  <div className="mt-12 flex items-center justify-center gap-3 text-gray-500 font-medium text-xs">
                     <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                     <span>Changes are saved automatically to your restaurant profile</span>
                   </div>
