@@ -22,8 +22,8 @@ const OnboardingFlow: React.FC = () => {
     await completeOnboarding();
     resetStore();
     showToast.success("Setup completed successfully!");
-    navigate('/admin');
-  }, [completeOnboarding, navigate, resetStore]);
+    window.location.href = '/app';
+  }, [completeOnboarding, resetStore]);
 
   const handleNext = useCallback((data?: Parameters<OnboardingStepProps['onNext']>[0]) => {
     // If Advanced Mode was chosen, skip configuration and jump to success

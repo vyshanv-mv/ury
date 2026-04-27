@@ -333,6 +333,7 @@ export const MenuStep: React.FC = () => {
                   <Input 
                     value={form.item_name} 
                     onChange={e => setForm({...form, item_name: e.target.value})}
+                    onKeyDown={e => e.key === 'Enter' && handleSaveItem()}
                     placeholder="e.g. Chicken Biryani Full"
                     className="pl-10 rounded-xl border-gray-200 bg-white h-11 font-semibold" 
                   />
@@ -346,6 +347,7 @@ export const MenuStep: React.FC = () => {
                     type="number"
                     value={form.price} 
                     onChange={e => setForm({...form, price: parseFloat(e.target.value) || 0})}
+                    onKeyDown={e => e.key === 'Enter' && handleSaveItem()}
                     placeholder="250.00"
                     className="pl-10 rounded-xl border-gray-200 bg-white h-11 font-semibold" 
                   />
