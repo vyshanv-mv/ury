@@ -42,25 +42,27 @@ export const WelcomeStep: React.FC<OnboardingStepProps> = ({ onNext }) => {
         </div>
 
         {/* Center content */}
-        <div className="relative z-10">
-          <p className="text-primary-300 mb-3 text-xs font-medium opacity-80">
-            All-in-one platform
-          </p>
-          <h2 className="text-white mb-5 text-3xl font-bold leading-tight tracking-tight">
-            The smarter way to<br />run your restaurant
-          </h2>
-          <p className="text-primary-100 mb-10 text-lg font-medium leading-relaxed max-w-md opacity-70">
-            From POS to kitchen management, billing to inventory — every tool your restaurant needs, unified in one place.
-          </p>
+        <div className="flex-1 flex flex-col justify-center relative z-10">
+          <div>
+            <p className="text-primary-300 mb-3 text-xs font-medium opacity-80">
+              All-in-one platform
+            </p>
+            <h2 className="text-white mb-5 text-3xl font-bold leading-tight tracking-tight">
+              The smarter way to<br />run your restaurant
+            </h2>
+            <p className="text-primary-100 mb-10 text-lg font-medium leading-relaxed max-w-md opacity-70">
+              From POS to kitchen management, billing to inventory — every tool your restaurant needs, unified in one place.
+            </p>
 
-          {/* Feature grid */}
-          <div className="grid grid-cols-2 gap-3 max-w-lg">
-            {features.map((f) => (
-              <div key={f.label} className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/10">
-                <div className="text-primary-300">{f.icon}</div>
-                <span className="text-white/90 text-sm font-medium">{f.label}</span>
-              </div>
-            ))}
+            {/* Feature grid */}
+            <div className="grid grid-cols-2 gap-3 max-w-lg">
+              {features.map((f) => (
+                <div key={f.label} className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-3 border border-white/10">
+                  <div className="text-primary-300">{f.icon}</div>
+                  <span className="text-white/90 text-sm font-medium">{f.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
