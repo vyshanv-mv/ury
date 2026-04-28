@@ -17,10 +17,9 @@ export function SuccessStep({ onNext }: OnboardingStepProps) {
           {/* Title */}
           <div>
             <div className="flex items-center justify-center gap-2 mb-2">
-              <h1 className="text-gray-900 text-3xl font-bold">
+              <h1 className="text-gray-900 text-3xl font-medium">
                 Setup Complete
               </h1>
-              <span className="text-3xl">🎉</span>
             </div>
             <p className="text-gray-500 mb-2 text-sm">
               Your <span className="font-semibold text-primary-600">URY</span> restaurant system is ready to use.

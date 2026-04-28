@@ -1,6 +1,7 @@
 import click
 import frappe
 
+from ury.setup import before_uninstall as remove_custom_fields
 
 
 def before_uninstall():

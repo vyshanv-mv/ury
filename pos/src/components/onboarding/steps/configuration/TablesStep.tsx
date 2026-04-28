@@ -117,7 +117,7 @@ export const TablesStep: React.FC = () => {
       {loading ? (
         <div className="py-20 flex flex-col items-center justify-center space-y-4">
           <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-          <p className="text-sm font-bold text-gray-500">Fetching table details...</p>
+          <p className="text-sm font-medium text-gray-500">Fetching table details...</p>
         </div>
       ) : (
         <>
@@ -218,7 +218,7 @@ export const TablesStep: React.FC = () => {
                             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
                               <Table2 className="w-8 h-8 text-gray-200" />
                             </div>
-                            <div className="text-gray-400 text-sm font-bold">No tables configured</div>
+                            <div className="text-gray-400 text-sm font-medium">No tables configured</div>
                             <Button variant="outline" onClick={() => setEditIndex(-1)} size="sm" className="mt-2 rounded-md border-gray-200 font-medium">
                               Add your first table
                             </Button>

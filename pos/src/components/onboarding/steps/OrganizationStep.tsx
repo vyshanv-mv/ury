@@ -63,18 +63,37 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
     onboardsetupApi.getOrganizationContext()
       .then(res => {
         if (res) {
+          const fetchedData = {
+            companyName: res.company_name || "",
+            abbreviation: res.abbr || "",
+            country: (res.country as CountryKey) || "India",
+            currency: res.currency || "INR",
+            userName: res.user_name || "",
+            email: res.email || "",
+          };
+
           setFormData(prev => ({
             ...prev,
-            companyName: res.company_name || prev.companyName,
-            abbreviation: res.abbr || prev.abbreviation,
-            country: (res.country as CountryKey) || prev.country,
-            currency: res.currency || prev.currency,
-            userName: res.user_name || prev.userName,
-            email: res.email || prev.email,
+            ...fetchedData
           }));
+
+          // Sync store with fetched data
+          updateData('organization', {
+            company_name: res.company_name,
+            abbr: res.abbr,
+            country: res.country,
+            currency: res.currency,
+            user_name: res.user_name,
+            email: res.email
+          });
+
+          // If company already exists, skip this step
+          if (res.has_company) {
+            onNext();
+          }
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   useEffect(() => {
@@ -126,24 +145,24 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
         user_name: formData.userName,
         email: formData.email,
         password: formData.password,
+        language: formData.language,
       };
 
       const result = await onboardsetupApi.setupOrganization(payload);
-      if (result.success) {
+      if (result.status === 'success') {
         updateData('organization', {
           ...payload,
           installation_type: formData.installationType,
           language: formData.language,
           tax_number: formData.taxNumber
         });
-        onNext({ 
+        onNext({
           organization: {
             ...payload,
             installation_type: formData.installationType,
             language: formData.language,
             tax_number: formData.taxNumber
-          },
-          ...(result.data as Record<string, any>) 
+          }
         });
       } else {
         showToast.error(result.message || 'Failed to setup organization');
@@ -169,12 +188,12 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
     <div className="flex flex-col items-center w-full max-w-3xl font-inter py-8">
       <StepIndicator steps={steps} currentStep={1} />
 
-      <div 
-        className="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 w-full overflow-hidden"
+      <div
+        className="bg-white rounded-md shadow-xl shadow-gray-200/50 border border-gray-100 w-full overflow-hidden"
       >
         <div className="bg-blue-600 px-12 py-10 text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
-          <h2 className="text-2xl font-bold mb-2 relative z-10">Welcome to URY</h2>
+          <h2 className="text-2xl font-medium mb-2 relative z-10">Welcome to URY</h2>
           <p className="text-blue-100 text-sm font-medium relative z-10">
             Let's start by setting up your organization profile and regional preferences.
           </p>
@@ -195,7 +214,7 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
                 <Select
                   value={formData.language}
                   onValueChange={(val) => setFormData({ ...formData, language: val })}
-                  className="h-12 rounded-xl"
+                  className="h-12 rounded-md"
                 >
                   {LANGUAGES.map((l) => (
                     <SelectItem key={l} value={l}>{l}</SelectItem>
@@ -245,7 +264,7 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
 
           {/* Section: Organization Details */}
           <div className="space-y-6">
-            <h3 className="text-xs font-bold text-gray-500 flex items-center gap-2">
+            <h3 className="text-xs font-medium text-gray-500 flex items-center gap-2">
               <span className="w-1.5 h-4 bg-blue-600 rounded-full" />
               Organization Details
             </h3>
@@ -318,7 +337,7 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
 
           {/* Installation Strategy */}
           <div className="space-y-6">
-            <h3 className="text-xs font-bold text-gray-500 flex items-center gap-2">
+            <h3 className="text-xs font-medium text-gray-500 flex items-center gap-2">
               <span className="w-1.5 h-4 bg-blue-600 rounded-full" />
               Installation Strategy
             </h3>
@@ -326,19 +345,19 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
               <div
                 onClick={() => setFormData({ ...formData, installationType: 'minimal' })}
                 className={cn(
-                  "relative cursor-pointer p-6 rounded-2xl border-2 transition-all duration-300 h-full flex flex-col group",
+                  "relative cursor-pointer p-6 rounded-md border-2 transition-all duration-300 h-full flex flex-col group",
                   formData.installationType === 'minimal'
                     ? "border-blue-600 bg-blue-50/30"
                     : "border-gray-100 bg-white hover:border-gray-200"
                 )}
               >
                 <div className={cn(
-                  "w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-colors",
+                  "w-12 h-12 rounded-md flex items-center justify-center mb-4 transition-colors",
                   formData.installationType === 'minimal' ? "bg-blue-600 text-white" : "bg-gray-50 text-gray-400 group-hover:bg-blue-50 group-hover:text-blue-600"
                 )}>
                   <Zap className="w-6 h-6" />
                 </div>
-                <h3 className="text-sm font-bold text-gray-900 mb-1">Guided Setup</h3>
+                <h3 className="text-sm font-medium text-gray-900 mb-1">Guided Setup</h3>
                 <p className="text-[11px] text-gray-500 font-medium leading-relaxed">
                   Best for new restaurants. We'll guide you through each configuration step.
                 </p>
@@ -350,19 +369,19 @@ export const OrganizationStep: React.FC<OnboardingStepProps> = ({ onNext, onBack
               <div
                 onClick={() => setFormData({ ...formData, installationType: 'advanced' })}
                 className={cn(
-                  "relative cursor-pointer p-6 rounded-2xl border-2 transition-all duration-300 h-full flex flex-col group",
+                  "relative cursor-pointer p-6 rounded-md border-2 transition-all duration-300 h-full flex flex-col group",
                   formData.installationType === 'advanced'
                     ? "border-blue-600 bg-blue-50/30"
                     : "border-gray-100 bg-white hover:border-gray-200"
                 )}
               >
                 <div className={cn(
-                  "w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-colors",
+                  "w-12 h-12 rounded-md flex items-center justify-center mb-4 transition-colors",
                   formData.installationType === 'advanced' ? "bg-blue-600 text-white" : "bg-gray-50 text-gray-400 group-hover:bg-blue-50 group-hover:text-blue-600"
                 )}>
                   <Zap className="w-6 h-6" />
                 </div>
-                <h3 className="text-sm font-bold text-gray-900 mb-1">Advanced Mode</h3>
+                <h3 className="text-sm font-medium text-gray-900 mb-1">Advanced Mode</h3>
                 <p className="text-[11px] text-gray-500 font-medium leading-relaxed">
                   For experienced users. Skip the wizard and configure everything from the dashboard.
                 </p>

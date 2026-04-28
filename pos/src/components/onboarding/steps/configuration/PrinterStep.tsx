@@ -182,7 +182,7 @@ export const PrinterStep: React.FC = () => {
                             key={p.printer_name + i}
                             className="hover:bg-blue-50/30 transition-colors group"
                           >
-                            <td className="px-6 py-4 text-xs font-bold text-gray-400 text-center">
+                            <td className="px-6 py-4 text-xs font-medium text-gray-400 text-center">
                               {(currentPage - 1) * itemsPerPage + i + 1}
                             </td>
                             <td className="px-6 py-4">
@@ -330,7 +330,7 @@ export const PrinterStep: React.FC = () => {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-medium text-gray-500 ml-1">Print Type</label>
-                    <div className="flex items-center justify-between p-3 border border-gray-100 rounded-xl bg-gray-50/50">
+                    <div className="flex items-center justify-between p-3 border border-gray-100 rounded-md bg-gray-50/50">
                       <div className="flex items-center gap-2">
                         <ReceiptText className="w-4 h-4 text-blue-600" />
                         <span className="text-xs font-medium text-gray-700">Bill Printer</span>

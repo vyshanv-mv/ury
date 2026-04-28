@@ -107,7 +107,7 @@ export const RoomsStep: React.FC = () => {
       {loading ? (
         <div className="py-20 flex flex-col items-center justify-center space-y-4">
           <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-          <p className="text-sm font-bold text-gray-500">Fetching room details...</p>
+          <p className="text-sm font-medium text-gray-500">Fetching room details...</p>
         </div>
       ) : (
         <>
@@ -176,7 +176,7 @@ export const RoomsStep: React.FC = () => {
                               </div>
                             </td>
                             <td className="px-6 py-4">
-                              <div className="flex items-center gap-2 text-xs font-bold text-gray-500">
+                              <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
                                 <Users className="w-3.5 h-3.5 text-blue-400" />
                                 {room.seats} Total Seats
                               </div>
@@ -201,7 +201,7 @@ export const RoomsStep: React.FC = () => {
                             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
                               <DoorOpen className="w-8 h-8 text-gray-200" />
                             </div>
-                            <div className="text-gray-400 text-sm font-bold">No areas configured</div>
+                            <div className="text-gray-400 text-sm font-medium">No areas configured</div>
                             <Button variant="outline" onClick={() => setEditIndex(-1)} size="sm" className="mt-2 rounded-md border-gray-200 font-medium">
                               Create first area
                             </Button>
@@ -273,7 +273,7 @@ export const RoomsStep: React.FC = () => {
                   <Button 
                     variant="ghost" 
                     onClick={() => remove(editIndex)} 
-                    className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-bold gap-2 mr-auto"
+                    className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-medium gap-2 mr-auto"
                   >
                     <Trash2 className="w-4 h-4" />
                     Delete Area

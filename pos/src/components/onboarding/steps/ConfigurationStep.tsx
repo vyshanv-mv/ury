@@ -235,12 +235,12 @@ export const ConfigurationStep: React.FC<OnboardingStepProps> = ({ onNext, onBac
 
             {/* Overall Progress */}
             <div className="p-6 border-t border-gray-50">
-              <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+              <div className="bg-gray-50 rounded-md p-4 border border-gray-100">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-bold text-gray-500">
+                  <span className="text-[10px] font-medium text-gray-500">
                     Completion
                   </span>
-                  <span className="text-xs font-bold text-blue-600">
+                  <span className="text-xs font-medium text-blue-600">
                     {progressPercent}%
                   </span>
                 </div>

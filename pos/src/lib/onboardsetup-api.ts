@@ -17,18 +17,17 @@ export interface SetupOrganizationPayload {
   user_name: string;
   email: string;
   password?: string;
+  language?: string;
   tax_system?: string;
   tax_number?: string;
-  language?: string;
   installation_type?: 'minimal' | 'advanced';
   generate_demo_data?: boolean | number;
 }
 
 export interface SetupOrganizationResponse {
-  message: {
-    status: 'success';
-    message: string;
-  };
+  status: 'success' | 'error';
+  message: string;
+  home_url?: string;
 }
 
 export interface UploadMenuCSVResponse {
@@ -138,7 +137,7 @@ export const onboardsetupApi = {
   checkSetupStatus: async (): Promise<{ needsOnboarding: boolean }> => {
     try {
       const frappe = (window as any).frappe;
-      const response = await frappe.call('ury.setup.setup_wizard.check_setup_status');
+      const response = await frappe.call('ury.setup.setup_organization.check_setup_status');
       return { needsOnboarding: !response.message?.setup_complete };
     } catch (e) {
       return { needsOnboarding: true };
@@ -146,13 +145,13 @@ export const onboardsetupApi = {
   },
 
   // Organization Setup
-  setupOrganization: async (payload: SetupOrganizationPayload): Promise<SetupResult> => {
+  setupOrganization: async (payload: SetupOrganizationPayload): Promise<SetupOrganizationResponse> => {
     try {
-      const response = await call.post<SetupOrganizationResponse>(
-        'ury.setup.setup_wizard.setup_organization',
+      const response = await call.post<{ message: SetupOrganizationResponse }>(
+        'ury.setup.setup_organization.setup_organization',
         payload
       );
-      return { success: true, message: response.message.message };
+      return response.message;
     } catch (error) {
       throw new Error(extractErrorMessage(error, 'Organization setup failed.'));
     }
@@ -172,10 +171,10 @@ export const onboardsetupApi = {
       formData.append('file', file);
 
       const frappe = (window as any).frappe;
-      const csrfToken = frappe?.csrf_token || 
-                       document.cookie.split('; ').find(row => row.startsWith('csrf_token='))?.split('=')[1] || '';
+      const csrfToken = frappe?.csrf_token ||
+        document.cookie.split('; ').find(row => row.startsWith('csrf_token='))?.split('=')[1] || '';
 
-      const res = await fetch('/api/method/ury.setup.setup_wizard.upload_menu_csv', {
+      const res = await fetch('/api/method/ury.setup.setup_organization.upload_menu_csv', {
         method: 'POST',
         headers: { 'X-Frappe-CSRF-Token': csrfToken },
         body: formData,
@@ -198,7 +197,7 @@ export const onboardsetupApi = {
   setupMenu: async (payload: SetupMenuPayload): Promise<SetupResult> => {
     try {
       const response = await call.post<SetupMenuResponse>(
-        'ury.setup.setup_wizard.setup_menu',
+        'ury.setup.setup_organization.setup_menu',
         payload
       );
       return { success: true, message: response.message.message };
@@ -210,7 +209,7 @@ export const onboardsetupApi = {
   // Printer Setup
   getPrinterContext: async (): Promise<PrinterData> => {
     try {
-      const response = await call.post<{ message: PrinterData }>('ury.setup.setup_wizard.get_printer_context', {});
+      const response = await call.post<{ message: PrinterData }>('ury.setup.setup_organization.get_printer_context', {});
       return response.message;
     } catch (error) {
       return { printer_name: '', server_ip: '', port: '9100', bill: true };
@@ -219,7 +218,7 @@ export const onboardsetupApi = {
 
   setupPrinter: async (data: PrinterData): Promise<SetupResult> => {
     try {
-      const response = await call.post<{ message: string }>('ury.setup.setup_wizard.setup_printer', data);
+      const response = await call.post<{ message: string }>('ury.setup.setup_organization.setup_printer', data);
       return { success: true, message: response.message };
     } catch (error) {
       throw new Error(extractErrorMessage(error, 'Printer setup failed.'));
@@ -229,7 +228,7 @@ export const onboardsetupApi = {
   // Room Setup
   getRoomContext: async (): Promise<{ rooms: RoomData[] }> => {
     try {
-      const response = await call.post<{ message: { rooms: RoomData[] } }>('ury.setup.setup_wizard.get_room_context', {});
+      const response = await call.post<{ message: { rooms: RoomData[] } }>('ury.setup.setup_organization.get_room_context', {});
       return response.message;
     } catch (error) {
       return { rooms: [] };
@@ -238,8 +237,13 @@ export const onboardsetupApi = {
 
   setupRoom: async (data: RoomData[]): Promise<SetupResult> => {
     try {
-      const response = await call.post<{ message: string }>('ury.setup.setup_wizard.setup_room', { rooms: data });
-      return { success: true, message: response.message };
+      await onboardsetupApi.updateBusinessSetup({
+        rooms: data.map(r => ({
+          name: r.name,
+          seats: r.seats
+        }))
+      });
+      return { success: true };
     } catch (error) {
       throw new Error(extractErrorMessage(error, 'Room setup failed.'));
     }
@@ -248,7 +252,7 @@ export const onboardsetupApi = {
   // Table Setup
   getTableContext: async (): Promise<{ rooms: string[]; tables: TableData[] }> => {
     try {
-      const response = await call.post<{ message: { rooms: string[]; tables: TableData[] } }>('ury.setup.setup_wizard.get_table_context', {});
+      const response = await call.post<{ message: { rooms: string[]; tables: TableData[] } }>('ury.setup.setup_organization.get_table_context', {});
       return response.message;
     } catch (error) {
       return { rooms: [], tables: [] };
@@ -257,8 +261,14 @@ export const onboardsetupApi = {
 
   setupTable: async (data: { tables: TableData[] }): Promise<SetupResult> => {
     try {
-      const response = await call.post<{ message: string }>('ury.setup.setup_wizard.setup_table', data);
-      return { success: true, message: response.message };
+      await onboardsetupApi.updateBusinessSetup({
+        tables: data.tables.map(t => ({
+          name: t.name,
+          seats: t.seats,
+          room: t.room
+        }))
+      });
+      return { success: true };
     } catch (error) {
       throw new Error(extractErrorMessage(error, 'Table setup failed.'));
     }
@@ -267,7 +277,7 @@ export const onboardsetupApi = {
   // Mode of Payment
   getMopContext: async (): Promise<{ payment_methods: PaymentData[] }> => {
     try {
-      const response = await call.post<{ message: { payment_methods: PaymentData[] } }>('ury.setup.setup_wizard.get_mop_context', {});
+      const response = await call.post<{ message: { payment_methods: PaymentData[] } }>('ury.setup.setup_organization.get_mop_context', {});
       return response.message;
     } catch (error) {
       return { payment_methods: [] };
@@ -276,7 +286,7 @@ export const onboardsetupApi = {
 
   setupMop: async (data: { payments: PaymentData[] }): Promise<SetupResult> => {
     try {
-      const response = await call.post<{ message: string }>('ury.setup.setup_wizard.setup_mop', data);
+      const response = await call.post<{ message: string }>('ury.setup.setup_organization.setup_mop', data);
       return { success: true, message: response.message };
     } catch (error) {
       throw new Error(extractErrorMessage(error, 'Payment setup failed.'));
@@ -286,8 +296,17 @@ export const onboardsetupApi = {
   // Branch Setup
   getBranchContext: async (): Promise<BranchData> => {
     try {
-      const response = await call.post<{ message: BranchData }>('ury.setup.setup_wizard.get_branch_context', {});
-      return response.message;
+      const response = await onboardsetupApi.getBusinessSetup();
+      if (response.data.branches.length > 0) {
+        const b = response.data.branches[0];
+        return {
+          branch_name: b.branch || '',
+          branch_phone: '',
+          branch_email: '',
+          branch_address: b.address || ''
+        };
+      }
+      return { branch_name: '', branch_phone: '', branch_email: '', branch_address: '' };
     } catch (error) {
       return { branch_name: '', branch_phone: '', branch_email: '', branch_address: '' };
     }
@@ -295,8 +314,13 @@ export const onboardsetupApi = {
 
   setupBranch: async (data: BranchData): Promise<SetupResult> => {
     try {
-      const response = await call.post<{ message: string }>('ury.setup.setup_wizard.setup_branch', data);
-      return { success: true, message: response.message };
+      await onboardsetupApi.updateBusinessSetup({
+        branches: [{
+          branch: data.branch_name,
+          address: data.branch_address
+        }]
+      });
+      return { success: true };
     } catch (error) {
       throw new Error(extractErrorMessage(error, 'Branch setup failed.'));
     }
@@ -305,8 +329,15 @@ export const onboardsetupApi = {
   // Restaurant Setup
   getRestaurantContext: async (): Promise<RestaurantData> => {
     try {
-      const response = await call.post<{ message: RestaurantData }>('ury.setup.setup_wizard.get_restaurant_context', {});
-      return response.message;
+      const response = await onboardsetupApi.getBusinessSetup();
+      const r = response.data.restaurant;
+      return {
+        restaurant_name: r.restaurant_name || '',
+        tagline: r.tagline || '',
+        type: r.type || 'casual_dining',
+        opening_time: r.opening_time || '09:00',
+        closing_time: r.closing_time || '23:00'
+      };
     } catch (error) {
       return { restaurant_name: '', tagline: '', type: 'casual_dining', opening_time: '09:00', closing_time: '23:00' };
     }
@@ -314,17 +345,36 @@ export const onboardsetupApi = {
 
   setupRestaurant: async (data: RestaurantData): Promise<SetupResult> => {
     try {
-      const response = await call.post<{ message: string }>('ury.setup.setup_wizard.setup_restaurant', data);
-      return { success: true, message: response.message };
+      await onboardsetupApi.updateBusinessSetup({
+        restaurant: {
+          restaurant_name: data.restaurant_name,
+          tagline: data.tagline,
+          type: data.type,
+          opening_time: data.opening_time,
+          closing_time: data.closing_time
+        }
+      });
+      return { success: true };
     } catch (error) {
       throw new Error(extractErrorMessage(error, 'Restaurant setup failed.'));
     }
   },
 
+  // Business Setup Unified
+  getBusinessSetup: async (): Promise<{ status: string; data: any }> => {
+    const res = await call.post<{ message: any }>('ury.setup.setup_organization.get_business_setup', {});
+    return res.message;
+  },
+
+  updateBusinessSetup: async (data: any): Promise<{ status: string }> => {
+    const res = await call.post<{ message: any }>('ury.setup.setup_organization.update_business_setup', data);
+    return res.message;
+  },
+
   // User Management
   getUserManagementContext: async (): Promise<{ roles: string[]; existing_users: UserData[] }> => {
     try {
-      const response = await call.post<{ message: { roles: string[]; existing_users: UserData[] } }>('ury.setup.setup_wizard.get_user_management_context', {});
+      const response = await call.post<{ message: { roles: string[]; existing_users: UserData[] } }>('ury.setup.setup_organization.get_user_management_context', {});
       return response.message;
     } catch (error) {
       return { roles: [], existing_users: [] };
@@ -333,7 +383,7 @@ export const onboardsetupApi = {
 
   setupUserManagement: async (data: { users: UserData[] }): Promise<SetupResult> => {
     try {
-      const response = await call.post<{ message: string }>('ury.setup.setup_wizard.setup_user_management', data);
+      const response = await call.post<{ message: string }>('ury.setup.setup_organization.setup_user_management', data);
       return { success: true, message: response.message };
     } catch (error) {
       throw new Error(extractErrorMessage(error, 'User setup failed.'));
@@ -360,35 +410,36 @@ export const onboardsetupApi = {
   // Get Admin Dashboard Stats
   getAdminStats: async (): Promise<AdminStats> => {
     try {
-      const response = await call.post<{ message: AdminStats }>('ury.setup.setup_wizard.get_admin_stats', {});
+      const response = await call.post<{ message: AdminStats }>('ury.setup.setup_organization.get_admin_stats', {});
       return response.message;
     } catch (error) {
       throw new Error(extractErrorMessage(error, 'Failed to fetch dashboard stats.'));
     }
   },
 
-  getOrganizationContext: async (): Promise<SetupOrganizationPayload> => {
-    const res = await call.post<{ message: SetupOrganizationPayload }>('ury.setup.setup_wizard.get_organization_context', {});
+  getOrganizationContext: async (): Promise<SetupOrganizationPayload & { has_company?: boolean }> => {
+    const res = await call.post<{ message: SetupOrganizationPayload & { has_company?: boolean } }>('ury.setup.setup_organization.get_organization_context', {});
     return res.message;
   },
 
   getMenuContext: async (): Promise<{ message: SetupMenuPayload }> => {
-    return await call.post('ury.setup.setup_wizard.get_menu_context', {});
+    return await call.post('ury.setup.setup_organization.get_menu_context', {});
   },
 
   getUserContext: async (): Promise<{ message: UserData }> => {
-    return await call.post('ury.setup.setup_wizard.get_user_context', {});
+    return await call.post('ury.setup.setup_organization.get_user_context', {});
   },
 
   // Finalize Onboarding
   completeOnboarding: async (): Promise<SetupResult> => {
     try {
-      await call.post('ury.setup.setup_wizard.complete_onboarding', {});
+      await call.post('ury.setup.setup_organization.complete_onboarding', {});
       return { success: true };
     } catch (error) {
       throw new Error(extractErrorMessage(error, 'Failed to complete onboarding.'));
     }
   },
+
 };
 
 

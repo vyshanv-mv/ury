@@ -13,16 +13,6 @@ CLOSING_SCRIPT_TAG_PATTERN = re.compile(r"</script\>")
 
 
 def get_context(context):
-	# Redirect Administrator to POS Admin page ONLY IF onboarding is fully complete
-	# Otherwise, let them see the onboarding/setup flow
-	setup_complete = frappe.utils.cint(frappe.db.get_default("ury_onboarding_complete"))
-	path = frappe.request.path.strip("/")
-	
-	if frappe.session.user in ["Administrator", "System Manager"] and setup_complete:
-		if path in ["pos", "pos/setup", "pos/onboarding"]:
-			frappe.local.flags.redirect_location = "/pos/admin"
-			raise frappe.Redirect
-
 	csrf_token = frappe.sessions.get_csrf_token()
 	# Manually commit the CSRF token here
 	frappe.db.commit()  # nosemgrep

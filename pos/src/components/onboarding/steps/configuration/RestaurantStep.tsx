@@ -228,7 +228,7 @@ export const RestaurantStep: React.FC = () => {
                             <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
                               <Utensils className="w-8 h-8 text-gray-200" />
                             </div>
-                            <div className="text-gray-400 text-sm font-bold">No restaurants configured</div>
+                            <div className="text-gray-400 text-sm font-medium">No restaurants configured</div>
                             <Button variant="outline" onClick={() => setEditIndex(-1)} size="sm" className="mt-2 rounded-md border-gray-200 font-medium">
                               Add your first restaurant
                             </Button>
@@ -337,7 +337,7 @@ export const RestaurantStep: React.FC = () => {
                   <Button 
                     variant="ghost" 
                     onClick={() => remove(editIndex)} 
-                    className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-bold gap-2 mr-auto"
+                    className="text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-medium gap-2 mr-auto"
                   >
                     <Trash2 className="w-4 h-4" />
                     Delete Restaurant

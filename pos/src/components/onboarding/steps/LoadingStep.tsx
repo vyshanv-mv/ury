@@ -56,7 +56,7 @@ export const LoadingStep: React.FC<OnboardingStepProps> = ({ onNext, data }) => 
   return (
     <div className="h-screen flex flex-col bg-gray-50 font-inter">
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-xl bg-white rounded-2xl p-12 md:p-16 shadow-2xl shadow-blue-100/50 border border-gray-100 text-center relative overflow-hidden">
+        <div className="w-full max-w-xl bg-white rounded-md p-12 md:p-16 shadow-2xl shadow-blue-100/50 border border-gray-100 text-center relative overflow-hidden">
           {/* Subtle background decoration */}
           <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-50 rounded-full blur-3xl opacity-50" />
 

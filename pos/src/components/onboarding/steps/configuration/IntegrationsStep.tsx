@@ -118,7 +118,7 @@ export const IntegrationsStep: React.FC = () => {
             <div className="p-1.5 bg-blue-50 text-blue-600 rounded-md">
               <Share2 className="w-4 h-4" />
             </div>
-            <h4 className="text-sm font-bold text-gray-900">Available Integrations</h4>
+            <h4 className="text-sm font-medium text-gray-900">Available Integrations</h4>
           </div>
 
           <div className="relative w-full sm:w-64 group">
@@ -127,7 +127,7 @@ export const IntegrationsStep: React.FC = () => {
               placeholder="Search integrations..." 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 h-9 text-xs font-semibold bg-white border-gray-200 focus:bg-white transition-all"
+              className="pl-9 h-9 text-xs font-medium bg-white border-gray-200 focus:bg-white transition-all rounded-md"
             />
           </div>
         </div>
@@ -141,7 +141,7 @@ export const IntegrationsStep: React.FC = () => {
                 <div
                   key={item.id}
                   className={cn(
-                    "relative overflow-hidden p-6 rounded-3xl border-2 transition-all duration-300",
+                    "relative overflow-hidden p-6 rounded-md border-2 transition-all duration-300",
                     isConnected 
                       ? "bg-white border-blue-500 shadow-xl shadow-blue-50" 
                       : "bg-white border-gray-100 hover:border-gray-200 shadow-sm"
@@ -150,12 +150,12 @@ export const IntegrationsStep: React.FC = () => {
                   {/* Status Badge */}
                   <div className="absolute top-4 right-4">
                     {isConnected ? (
-                      <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-100">
+                      <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-600 px-3 py-1 rounded-full text-[10px] font-medium border border-emerald-100">
                         <Check className="w-3 h-3" />
                         Connected
                       </div>
                     ) : (
-                      <div className="flex items-center gap-1.5 bg-gray-50 text-gray-400 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-gray-100">
+                      <div className="flex items-center gap-1.5 bg-gray-50 text-gray-400 px-3 py-1 rounded-full text-[10px] font-medium border border-gray-100">
                         Available
                       </div>
                     )}
@@ -164,14 +164,14 @@ export const IntegrationsStep: React.FC = () => {
                   <div className="flex items-start gap-5">
                     {/* Logo Placeholder */}
                     <div className={cn(
-                      "w-16 h-16 rounded-2xl flex items-center justify-center text-white text-2xl font-black shadow-lg",
+                      "w-16 h-16 rounded-md flex items-center justify-center text-white text-2xl font-medium shadow-lg",
                       item.color
                     )}>
                       {item.name[0]}
                     </div>
 
                     <div className="flex-1 min-w-0 pr-12">
-                      <h3 className="text-xl font-black text-gray-900 mb-1">{item.name}</h3>
+                      <h3 className="text-xl font-medium text-gray-900 mb-1">{item.name}</h3>
                       <p className="text-sm font-medium text-gray-500 leading-relaxed mb-4">
                         {item.description}
                       </p>
@@ -214,11 +214,11 @@ export const IntegrationsStep: React.FC = () => {
 
                   {/* Footer decorations */}
                   <div className="mt-6 pt-6 border-t border-gray-50 flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    <div className="flex items-center gap-2 text-[10px] font-medium text-gray-400">
                       <Shield className="w-3.5 h-3.5 text-blue-500" />
                       <span>Official Integration</span>
                     </div>
-                    <button className="text-[10px] font-bold text-blue-600 hover:underline flex items-center gap-1">
+                    <button className="text-[10px] font-medium text-blue-600 hover:underline flex items-center gap-1">
                       Documentation
                       <ExternalLink className="w-3 h-3" />
                     </button>
@@ -229,34 +229,34 @@ export const IntegrationsStep: React.FC = () => {
           </div>
 
           {filteredIntegrations.length === 0 && (
-            <div className="col-span-full py-20 flex flex-col items-center justify-center text-center bg-gray-50 rounded-[2rem] border border-dashed border-gray-200">
-              <div className="w-16 h-16 rounded-2xl bg-white shadow-sm flex items-center justify-center text-gray-400 mb-4">
+            <div className="col-span-full py-20 flex flex-col items-center justify-center text-center bg-gray-50 rounded-md border border-dashed border-gray-200">
+              <div className="w-16 h-16 rounded-md bg-white shadow-sm flex items-center justify-center text-gray-400 mb-4">
                 <Search className="w-8 h-8" />
               </div>
-              <h5 className="text-sm font-bold text-gray-900">No integrations found</h5>
+              <h5 className="text-sm font-medium text-gray-900">No integrations found</h5>
               <p className="text-xs text-gray-500 mt-1">Try searching for a different aggregator or category.</p>
             </div>
           )}
         </div>
 
-        <div className="bg-indigo-50/50 rounded-[2rem] p-8 border border-indigo-100 flex flex-col md:flex-row gap-6 items-center text-center md:text-left">
-          <div className="w-16 h-16 rounded-2xl bg-indigo-100 flex items-center justify-center flex-shrink-0 text-indigo-600 shadow-inner">
+        <div className="bg-indigo-50/50 rounded-md p-8 border border-indigo-100 flex flex-col md:flex-row gap-6 items-center text-center md:text-left">
+          <div className="w-16 h-16 rounded-md bg-indigo-100 flex items-center justify-center flex-shrink-0 text-indigo-600 shadow-inner">
             <Share2 className="w-8 h-8" />
           </div>
           <div className="flex-1">
-            <h4 className="text-xl font-black text-indigo-900 mb-2">Unified Dashboard Sync</h4>
+            <h4 className="text-xl font-medium text-indigo-900 mb-2">Unified Dashboard Sync</h4>
             <p className="text-sm font-medium text-indigo-700/70 leading-relaxed">
               When you connect an aggregator, orders will automatically appear in your POS Live View. 
               Stock levels and menu changes are synced in real-time across all platforms.
             </p>
           </div>
           <div className="flex-shrink-0">
-            <div className="bg-white/50 backdrop-blur-sm border border-indigo-200 px-5 py-3 rounded-2xl">
+            <div className="bg-white/50 backdrop-blur-sm border border-indigo-200 px-5 py-3 rounded-md">
               <div className="flex items-center gap-2 mb-1">
                 <Info className="w-4 h-4 text-indigo-500" />
-                <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Setup Status</span>
+                <span className="text-[10px] font-medium text-indigo-400">Setup Status</span>
               </div>
-              <p className="text-xs font-bold text-indigo-900">
+              <p className="text-xs font-medium text-indigo-900">
                 {integrations.length} of {AVAILABLE_INTEGRATIONS.length} active
               </p>
             </div>
